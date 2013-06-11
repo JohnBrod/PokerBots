@@ -1,0 +1,1 @@
+tdaemon.py --custom-args "--with-nosegrowlnotify"
