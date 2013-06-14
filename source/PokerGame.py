@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from theHouse import Dealer
+from theHouse import Doorman
 from Xmpp import XmppMessenger
 
 def write(text):
@@ -19,7 +19,11 @@ def onFinished(sender, args):
 
 write('Game started, waiting for players')
 
-dealer = Dealer(2, XmppMessenger('dealer@localhost', 'password'))
-dealer.evt_playerJoined += onPlayerJoined
-dealer.evt_finished += onFinished
-dealer.start()
+jeeves = Doorman(2, XmppMessenger('dealer@localhost', 'password'))
+jeeves.evt_playerJoined += onPlayerJoined
+players = jeeves.greetPlayers()
+
+if players:
+	write('Not enough players for a game so quitting')
+else:
+	write('No players joined so quitting')
