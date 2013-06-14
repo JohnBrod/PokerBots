@@ -19,7 +19,7 @@ class Doorman(object):
         return self.players
 
     def on_messageReceived(self, sender, msg):
-        self.players.append(msg)
-        self.evt_playerJoined.fire(self, msg)
         if msg['type'] in ('normal', 'chat'):
-            msg.reply("hi").send()
+            self.players.append(msg['body'])
+            self.evt_playerJoined.fire(self, msg)
+            self.messenger.sendMessage(msg['body'], 'welcome')

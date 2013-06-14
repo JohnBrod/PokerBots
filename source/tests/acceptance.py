@@ -18,10 +18,11 @@ class testPokerGame(unittest.TestCase):
         logging.disable(logging.ERROR)
 
     def setUp(self):
-        self.player1Id = 'Player1@localhost'
+        self.player1Jid = 'Player1@pokerchat'
+        self.player1Name = 'Player1@localhost'
         self.player1Password = 'password'
         self.theGame = PokerGameRunner(10, self)
-        self.thePlayer = FakePlayer(self.player1Id, self.player1Password, 10, self)
+        self.thePlayer = FakePlayer(self.player1Jid, self.player1Name, self.player1Password, 10, self)
         self.theGame.start()
 
     def tearDown(self):

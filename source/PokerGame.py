@@ -14,9 +14,6 @@ logging.disable(logging.ERROR)
 def onPlayerJoined(sender, args):
     write('Player1 has joined the game')
 
-def onFinished(sender, args):
-    write(args)
-
 write('Game started, waiting for players')
 
 jeeves = Doorman(2, XmppMessenger('dealer@localhost', 'password'))

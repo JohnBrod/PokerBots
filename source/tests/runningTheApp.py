@@ -27,16 +27,17 @@ class PokerGameRunner():
         self.testCase.assertEqual(onScreen, expectedScreen)
 
 class FakePlayer():
-    def __init__(self, jid, password, pollPeriod, testCase):
+    def __init__(self, jid, name, password, pollPeriod, testCase):
         self.testCase = testCase
         self.q = Queue.Queue()
         self.pollPeriod = pollPeriod
-        self.messenger = XmppMessenger(jid, password)
+        self.jid = jid
+        self.messenger = XmppMessenger(name, password)
         self.messenger.evt_messageReceived += self.on_messageReceived
 
     def asksToJoinTheGame(self):
         self.messenger.listen('localhost', 5222)
-        self.messenger.sendMessage('dealer@pokerchat', 'Can I join the game?')
+        self.messenger.sendMessage('dealer@pokerchat', self.jid)
 
     def shouldReceiveAcknowledgementFromGame(self):
         end = time.time() + self.pollPeriod
