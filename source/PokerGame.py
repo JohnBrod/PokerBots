@@ -11,8 +11,8 @@ def write(text):
 logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(message)s')
 logging.disable(logging.ERROR)
 
-def onPlayerJoined(sender, args):
-    write('Player1 has joined the game')
+def onPlayerJoined(sender, playerId):
+    write(playerId + ' has joined the game')
 
 write('Game started, waiting for players')
 

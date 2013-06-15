@@ -21,5 +21,5 @@ class Doorman(object):
     def on_messageReceived(self, sender, msg):
         if msg['type'] in ('normal', 'chat'):
             self.players.append(msg['body'])
-            self.evt_playerJoined.fire(self, msg)
+            self.evt_playerJoined.fire(self, msg['body'])
             self.messenger.sendMessage(msg['body'], 'welcome')
