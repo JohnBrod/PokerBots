@@ -16,6 +16,7 @@ class ConsoleQueue():
     def readConsole(self, q, pythonFilename):
         process = subprocess.Popen([sys.executable, pythonFilename], stdout=subprocess.PIPE)
 
+        line = ''
         while True:
 
             out = process.stdout.readline(1)
@@ -24,6 +25,12 @@ class ConsoleQueue():
 
             q.put(out)
 
+            if out == '\n':
+                print line
+                line = ''
+            else:
+                line += out
+            
     def get_nowait(self):
         return self.screen.get_nowait()
 
