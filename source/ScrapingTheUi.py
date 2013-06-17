@@ -45,6 +45,7 @@ class QueueScraper():
 
         found = ''
         textQ = Queue.Queue()
+        actual = ''
 
         for char in text: textQ.put(char)
 
@@ -55,10 +56,14 @@ class QueueScraper():
 
                 while True:
                     char = self.screen.get_nowait()
-                    if char == textQ.get_nowait():
+                    actual += char
+                    if char and char == textQ.get_nowait():
                         found += char
+
+                    if found == text:
+                        return found
 
             except Queue.Empty:
                 pass
 
-        return found
+        return actual
