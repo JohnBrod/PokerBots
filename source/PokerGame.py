@@ -30,5 +30,15 @@ elif len(players) == 1:
 else:
     messenger.sendMessage('Player1@pokerchat', 'Private Cards')
     messenger.sendMessage('Player2@pokerchat', 'Private Cards')
+    messenger.sendMessage('Player1@pokerchat', 'Community Cards')
+    messenger.sendMessage('Player2@pokerchat', 'Community Cards')
+    messenger.sendMessage('Player1@pokerchat', 'Flop')
+    messenger.sendMessage('Player2@pokerchat', 'Flop')
+    messenger.sendMessage('Player1@pokerchat', 'Turn')
+    messenger.sendMessage('Player2@pokerchat', 'Turn')
+    messenger.sendMessage('Player1@pokerchat', 'River')
+    messenger.sendMessage('Player2@pokerchat', 'River')
+    messenger.sendMessage('Player1@pokerchat', 'You lost')
+    messenger.sendMessage('Player2@pokerchat', 'You won')
 
 messenger.finish()

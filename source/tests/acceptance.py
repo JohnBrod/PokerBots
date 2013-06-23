@@ -32,25 +32,28 @@ class testPokerGame(unittest.TestCase):
     def tearDown(self):
         self.aPlayer.stop()
         self.anotherPlayer.stop()
+        self.swallowDealerMessages()
+
+    def swallowDealerMessages(self):
         m = XmppMessenger('dealer@localhost', 'password')
         m.listen('localhost', 5222)
         time.sleep(2)
         m.finish()
 
-    # def testQuittingGameThatNoPlayersHaveJoined(self):
+    def testQuittingGameThatNoPlayersHaveJoined(self):
 
-    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-    #     self.theGame.shouldDisplay('No players joined so quitting\r\n')
+        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.theGame.shouldDisplay('No players joined so quitting\r\n')
 
-    # def testQuittingGameThatOnlyOnePlayerJoins(self):
+    def testQuittingGameThatOnlyOnePlayerJoins(self):
         
-    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
         
-    #     self.aPlayer.says('Player1@pokerchat')
-    #     self.aPlayer.hears('Cash 1000')
+        self.aPlayer.says('Player1@pokerchat')
+        self.aPlayer.hears('Cash 1000')
 
-    #     self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
-    #     self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
+        self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
+        self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
     def testPlayerGoesAllIn(self):
         
@@ -68,21 +71,30 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.says('Bet Max')        
 
         self.anotherPlayer.hears('Private Cards...')        
-        # self.anotherPlayer.says('Call')
+        self.anotherPlayer.says('Call')
 
-        # self.aPlayer.hears('Community Cards...')        
-        # self.anotherPlayer.hears('Community Cards...')        
+        self.aPlayer.hears('Community Cards...')        
+        self.anotherPlayer.hears('Community Cards...')        
 
-        # self.aPlayer.hears('Flop...')        
-        # self.anotherPlayer.hears('Flop...')        
+        self.aPlayer.hears('Flop...')        
+        self.anotherPlayer.hears('Flop...')        
 
-        # self.aPlayer.hears('Turn...')        
-        # self.anotherPlayer.hears('Turn...')        
+        self.aPlayer.hears('Turn...')        
+        self.anotherPlayer.hears('Turn...')        
 
-        # self.aPlayer.hears('River...')        
-        # self.anotherPlayer.hears('River...')        
+        self.aPlayer.hears('River...')        
+        self.anotherPlayer.hears('River...')        
 
-        # self.assertTrue(self.aPlayer.won() ^ self.anotherPlayer.won())
+        self.someoneShouldWin()
+
+    def someoneShouldWin(self):
+        p1Won = self.aPlayer.won()
+        p2Won = self.anotherPlayer.won()
+
+        if not p1Won and not p2Won:
+            self.assertTrue(False, 'Expected one winner, no-one won')
+        elif p1Won and p2Won:
+            self.assertTrue(False, 'Expected one winner, two players were told they won')
 
 if __name__=="__main__":
     unittest.main()

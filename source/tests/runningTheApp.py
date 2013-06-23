@@ -82,7 +82,15 @@ class FakePlayer():
                 pass
                 
     def won(self):
-        if self.hears('You won'):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and not message:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+        if message['body'] == 'You won':
             return True
         
         return False
