@@ -1,3 +1,4 @@
+import time
 import unittest
 import os
 import sys
@@ -6,6 +7,7 @@ import logging
 parpath = os.path.join(os.path.dirname(sys.argv[0]), os.pardir)
 sys.path.insert(0, os.path.abspath(parpath))
 
+from Xmpp import XmppMessenger
 from runningTheApp import PokerGameRunner
 from runningTheApp import FakePlayer
 
@@ -30,21 +32,25 @@ class testPokerGame(unittest.TestCase):
     def tearDown(self):
         self.aPlayer.stop()
         self.anotherPlayer.stop()
+        m = XmppMessenger('dealer@localhost', 'password')
+        m.listen('localhost', 5222)
+        time.sleep(2)
+        m.finish()
 
-    def testQuittingGameThatNoPlayersHaveJoined(self):
+    # def testQuittingGameThatNoPlayersHaveJoined(self):
 
-        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-        self.theGame.shouldDisplay('No players joined so quitting\r\n')
+    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+    #     self.theGame.shouldDisplay('No players joined so quitting\r\n')
 
-    def testQuittingGameThatOnlyOnePlayerJoins(self):
+    # def testQuittingGameThatOnlyOnePlayerJoins(self):
         
-        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
         
-        self.aPlayer.says('Player1@pokerchat')
-        self.aPlayer.hears('Cash 1000')
+    #     self.aPlayer.says('Player1@pokerchat')
+    #     self.aPlayer.hears('Cash 1000')
 
-        self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
-        self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
+    #     self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
+    #     self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
     def testPlayerGoesAllIn(self):
         
@@ -59,9 +65,9 @@ class testPokerGame(unittest.TestCase):
         self.theGame.shouldDisplay('Player2@pokerchat has joined the game\r\n')
 
         self.aPlayer.hears('Private Cards...')        
-        # self.aPlayer.says('Bet Max')        
+        self.aPlayer.says('Bet Max')        
 
-        # self.anotherPlayer.hears('Private Cards...')        
+        self.anotherPlayer.hears('Private Cards...')        
         # self.anotherPlayer.says('Call')
 
         # self.aPlayer.hears('Community Cards...')        

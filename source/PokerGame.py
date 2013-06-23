@@ -1,6 +1,6 @@
 import sys
 import logging
-
+import time
 from theHouse import Doorman
 from Xmpp import XmppMessenger
 
@@ -27,8 +27,8 @@ if not players:
     write('No players joined so quitting')
 elif len(players) == 1:
 	write('Not enough players for a game so quitting')
-# else:
-    # messenger.sendMessage('Player1@pokerchat', 'Private Cards')
+else:
+    messenger.sendMessage('Player1@pokerchat', 'Private Cards')
+    messenger.sendMessage('Player2@pokerchat', 'Private Cards')
 
 messenger.finish()
-    
