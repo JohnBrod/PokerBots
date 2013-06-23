@@ -16,11 +16,19 @@ def onPlayerJoined(sender, playerId):
 
 write('Game started, waiting for players')
 
-jeeves = Doorman(2, XmppMessenger('dealer@localhost', 'password'))
+messenger = XmppMessenger('dealer@localhost', 'password')
+messenger.listen('localhost', 5222)
+
+jeeves = Doorman(5, messenger)
 jeeves.evt_playerJoined += onPlayerJoined
 players = jeeves.greetPlayers()
 
-if players:
+if not players:
+    write('No players joined so quitting')
+elif len(players) == 1:
 	write('Not enough players for a game so quitting')
-else:
-	write('No players joined so quitting')
+# else:
+    # messenger.sendMessage('Player1@pokerchat', 'Private Cards')
+
+messenger.finish()
+    

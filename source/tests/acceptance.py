@@ -1,5 +1,4 @@
 import unittest
-import time
 import os
 import sys
 import logging
@@ -16,7 +15,7 @@ class testPokerGame(unittest.TestCase):
 # throwing an exception, need to implement some handling, they are just being swallowed without notification
 # player being logged in through pidgin, it seems to intercept the message
 # some failing tests print messages with e instead of the @ character
-
+# message queue not being cleared out between tests. i.e. assert stops test but game keeps going and sends messages. These messages are pickedup when the next test starts
     @classmethod
     def setUpClass(cls):
         logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(message)s')
@@ -41,12 +40,43 @@ class testPokerGame(unittest.TestCase):
         
         self.theGame.shouldDisplay('Game started, waiting for players\r\n')
         
-        self.aPlayer.asksToJoinTheGame()
-
-        self.aPlayer.shouldReceiveAcknowledgementFromGame()
+        self.aPlayer.says('Player1@pokerchat')
+        self.aPlayer.hears('Cash 1000')
 
         self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
         self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
+
+    def testPlayerGoesAllIn(self):
+        
+        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        
+        self.aPlayer.says('Player1@pokerchat')
+        self.aPlayer.hears('Cash 1000')
+        self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
+
+        self.anotherPlayer.says('Player2@pokerchat')
+        self.anotherPlayer.hears('Cash 1000')
+        self.theGame.shouldDisplay('Player2@pokerchat has joined the game\r\n')
+
+        self.aPlayer.hears('Private Cards...')        
+        # self.aPlayer.says('Bet Max')        
+
+        # self.anotherPlayer.hears('Private Cards...')        
+        # self.anotherPlayer.says('Call')
+
+        # self.aPlayer.hears('Community Cards...')        
+        # self.anotherPlayer.hears('Community Cards...')        
+
+        # self.aPlayer.hears('Flop...')        
+        # self.anotherPlayer.hears('Flop...')        
+
+        # self.aPlayer.hears('Turn...')        
+        # self.anotherPlayer.hears('Turn...')        
+
+        # self.aPlayer.hears('River...')        
+        # self.anotherPlayer.hears('River...')        
+
+        # self.assertTrue(self.aPlayer.won() ^ self.anotherPlayer.won())
 
 if __name__=="__main__":
     unittest.main()

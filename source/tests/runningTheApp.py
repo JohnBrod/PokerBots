@@ -34,9 +34,9 @@ class FakePlayer():
         self.jid = jid
         self.messenger = XmppMessenger(name, password)
         self.messenger.evt_messageReceived += self.on_messageReceived
+        self.messenger.listen('localhost', 5222)
 
     def asksToJoinTheGame(self):
-        self.messenger.listen('localhost', 5222)
         self.messenger.sendMessage('dealer@pokerchat', self.jid)
 
     def shouldReceiveAcknowledgementFromGame(self):
@@ -50,6 +50,42 @@ class FakePlayer():
                 pass
 
         self.testCase.assertTrue(message)
+
+    def says(self, said):
+        self.messenger.sendMessage('dealer@pokerchat', said)
+        
+    def hears(self, shouldHear):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and not message:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+
+        if not message:
+            self.testCase.assertFalse(True, self.jid + " did not hear '" + shouldHear + "'")
+        elif shouldHear.endswith('...'):
+            self.testCase.assertTrue(shouldHear.startswith(message['body']), self.jid + " expected '" + shouldHear + "' but heard '" + message['body'] + "'")
+        else:
+            self.testCase.assertEqual(message['body'], shouldHear, self.jid + " expected '" + shouldHear + "' but heard '" + message['body'] + "'")
+        
+    def discardMessages(self):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and not message:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+                
+    def won(self):
+        if self.hears('You won'):
+            return True
+        
+        return False
 
     def on_messageReceived(self, sender, earg):
         self.q.put(earg)

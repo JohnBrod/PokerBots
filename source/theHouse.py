@@ -11,10 +11,7 @@ class Doorman(object):
         self.evt_playerJoined = Event()
 
     def greetPlayers(self):
-        self.messenger.listen('localhost', 5222)
         time.sleep(self.waitFor)
-
-        self.messenger.finish()
 
         return self.players
 
@@ -22,4 +19,4 @@ class Doorman(object):
         if msg['type'] in ('normal', 'chat'):
             self.players.append(msg['body'])
             self.evt_playerJoined.fire(self, msg['body'])
-            self.messenger.sendMessage(msg['body'], 'welcome')
+            self.messenger.sendMessage(msg['body'], 'Cash 1000')
