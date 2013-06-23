@@ -70,30 +70,6 @@ class FakePlayer():
             self.testCase.assertTrue(message['body'].startswith(shouldHear[:-3]), self.jid + " expected '" + shouldHear + "' but heard '" + message['body'] + "'")
         else:
             self.testCase.assertEqual(message['body'], shouldHear, self.jid + " expected '" + shouldHear + "' but heard '" + message['body'] + "'")
-        
-    def discardMessages(self):
-        end = time.time() + self.pollPeriod
-
-        message = None
-        while time.time() <= end and not message:
-            try:
-                message = self.q.get_nowait()
-            except Queue.Empty:
-                pass
-                
-    def won(self):
-        end = time.time() + self.pollPeriod
-
-        message = None
-        while time.time() <= end and not message:
-            try:
-                message = self.q.get_nowait()
-            except Queue.Empty:
-                pass
-        if message and message['body'] == 'You won':
-            return True
-        
-        return False
 
     def on_messageReceived(self, sender, earg):
         self.q.put(earg)

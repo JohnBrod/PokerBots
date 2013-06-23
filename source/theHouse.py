@@ -43,8 +43,8 @@ class Player(object):
     def river(self, card):
         self.messenger.sendMessage(self.jid, 'River ' + card)
 
-    def youWon(self):
-        self.messenger.sendMessage(self.jid, 'You won')
+    def result(self, gameResult):
+        self.messenger.sendMessage(self.jid, 'Result ' + gameResult)
 
 class Dealer(object):
     """deals a hand to players"""
@@ -67,5 +67,5 @@ class Dealer(object):
         for player in table:
             player.river('anything')
 
-        table[0].youWon()
-        
+        for player in table:
+            player.result('anything')

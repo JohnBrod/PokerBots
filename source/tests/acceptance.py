@@ -41,20 +41,20 @@ class testPokerGame(unittest.TestCase):
         time.sleep(2)
         m.finish()
 
-    # def testQuittingGameThatNoPlayersHaveJoined(self):
+    def testQuittingGameThatNoPlayersHaveJoined(self):
 
-    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-    #     self.theGame.shouldDisplay('No players joined so quitting\r\n')
+        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.theGame.shouldDisplay('No players joined so quitting\r\n')
 
-    # def testQuittingGameThatOnlyOnePlayerJoins(self):
+    def testQuittingGameThatOnlyOnePlayerJoins(self):
         
-    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
         
-    #     self.aPlayer.says('Player1@pokerchat')
-    #     self.aPlayer.hears('Cash 1000')
+        self.aPlayer.says('Player1@pokerchat')
+        self.aPlayer.hears('Cash 1000')
 
-    #     self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
-    #     self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
+        self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
+        self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
     def testPlayerGoesAllIn(self):
         
@@ -86,16 +86,8 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('River...')        
         self.anotherPlayer.hears('River...')        
 
-        self.someoneShouldWin()
-
-    def someoneShouldWin(self):
-        p1Won = self.aPlayer.won()
-        p2Won = self.anotherPlayer.won()
-
-        if not p1Won and not p2Won:
-            self.assertTrue(False, 'Expected one winner, no-one won')
-        elif p1Won and p2Won:
-            self.assertTrue(False, 'Expected one winner, two players were told they won')
+        self.aPlayer.hears('Result...')        
+        self.anotherPlayer.hears('Result...')        
 
 if __name__=="__main__":
     unittest.main()
