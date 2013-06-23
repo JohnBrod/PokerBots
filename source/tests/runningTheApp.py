@@ -67,7 +67,7 @@ class FakePlayer():
         if not message:
             self.testCase.assertFalse(True, self.jid + " did not hear '" + shouldHear + "'")
         elif shouldHear.endswith('...'):
-            self.testCase.assertTrue(shouldHear.startswith(message['body']), self.jid + " expected '" + shouldHear + "' but heard '" + message['body'] + "'")
+            self.testCase.assertTrue(message['body'].startswith(shouldHear[:-3]), self.jid + " expected '" + shouldHear + "' but heard '" + message['body'] + "'")
         else:
             self.testCase.assertEqual(message['body'], shouldHear, self.jid + " expected '" + shouldHear + "' but heard '" + message['body'] + "'")
         
@@ -90,7 +90,7 @@ class FakePlayer():
                 message = self.q.get_nowait()
             except Queue.Empty:
                 pass
-        if message['body'] == 'You won':
+        if message and message['body'] == 'You won':
             return True
         
         return False

@@ -1,9 +1,9 @@
 import sys
 import logging
-import time
 from theHouse import Doorman
+from theHouse import Dealer
 from Xmpp import XmppMessenger
-
+        
 def write(text):
     print text
     sys.stdout.flush()
@@ -19,7 +19,7 @@ write('Game started, waiting for players')
 messenger = XmppMessenger('dealer@localhost', 'password')
 messenger.listen('localhost', 5222)
 
-jeeves = Doorman(5, messenger)
+jeeves = Doorman(5, messenger, 1000)
 jeeves.evt_playerJoined += onPlayerJoined
 players = jeeves.greetPlayers()
 
@@ -28,17 +28,7 @@ if not players:
 elif len(players) == 1:
 	write('Not enough players for a game so quitting')
 else:
-    messenger.sendMessage('Player1@pokerchat', 'Private Cards')
-    messenger.sendMessage('Player2@pokerchat', 'Private Cards')
-    messenger.sendMessage('Player1@pokerchat', 'Community Cards')
-    messenger.sendMessage('Player2@pokerchat', 'Community Cards')
-    messenger.sendMessage('Player1@pokerchat', 'Flop')
-    messenger.sendMessage('Player2@pokerchat', 'Flop')
-    messenger.sendMessage('Player1@pokerchat', 'Turn')
-    messenger.sendMessage('Player2@pokerchat', 'Turn')
-    messenger.sendMessage('Player1@pokerchat', 'River')
-    messenger.sendMessage('Player2@pokerchat', 'River')
-    messenger.sendMessage('Player1@pokerchat', 'You lost')
-    messenger.sendMessage('Player2@pokerchat', 'You won')
+    dealer = Dealer()
+    dealer.playHand(players)
 
 messenger.finish()
