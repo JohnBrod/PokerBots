@@ -17,7 +17,7 @@ class Doorman(object):
         return self.players
 
     def on_messageReceived(self, sender, msg):
-        if msg['type'] in ('normal', 'chat'):
+        if msg['type'] in ('normal', 'chat') and msg['body'].startswith('Player'):
             self.players.append(Player(msg['body'], self.messenger))
             self.evt_playerJoined.fire(self, msg['body'])
             self.messenger.sendMessage(msg['body'], 'Cash ' + str(self.cash))
@@ -30,6 +30,7 @@ class Player(object):
 
     def privateCards(self, cards):
         self.messenger.sendMessage(self.jid, 'Private Cards ' + cards)
+        # wait for response - response is to a public group that contains the dealer and players
 
     def communityCards(self, cards):
         self.messenger.sendMessage(self.jid, 'Community Cards ' + cards)
@@ -43,17 +44,31 @@ class Player(object):
     def river(self, card):
         self.messenger.sendMessage(self.jid, 'River ' + card)
 
-    def result(self, gameResult):
-        self.messenger.sendMessage(self.jid, 'Result ' + gameResult)
+    def handResult(self, result):
+        self.messenger.sendMessage(self.jid, 'Hand Result ' + result)
+
+    def gameResult(self, result):
+        self.messenger.sendMessage(self.jid, 'Game Result ' + result)
 
 class Dealer(object):
     """deals a hand to players"""
     def __init__(self):
         pass
 
+# rotation of deal
+
+# order of cards
+
+# invalid responses
+
+
     def playHand(self, table):
         for player in table:
             player.privateCards('anything')
+            # fold - remove from table
+            # call - pot.call(player)
+            # bet - pot.bet(player, amount)
+            # invalid - kick player out
 
         for player in table:
             player.communityCards('anything')
@@ -68,4 +83,18 @@ class Dealer(object):
             player.river('anything')
 
         for player in table:
-            player.result('anything')
+            player.handResult('anything')
+
+class PokerGame(object):
+    """Controls the flow of a game of poker"""
+    def __init__(self, dealer, players):
+        self.dealer = dealer
+        self.players = players
+
+    def play(self):
+        self.dealer.playHand(self.players)
+
+        for player in self.players:
+            player.gameResult('anything')
+
+        
