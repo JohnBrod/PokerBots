@@ -55,20 +55,9 @@ class Dealer(object):
     def __init__(self):
         pass
 
-# rotation of deal
-
-# order of cards
-
-# invalid responses
-
-
     def playHand(self, table):
         for player in table:
             player.privateCards('anything')
-            # fold - remove from table
-            # call - pot.call(player)
-            # bet - pot.bet(player, amount)
-            # invalid - kick player out
 
         for player in table:
             player.communityCards('anything')
@@ -96,5 +85,3 @@ class PokerGame(object):
 
         for player in self.players:
             player.gameResult('anything')
-
-        

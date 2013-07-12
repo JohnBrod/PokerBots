@@ -30,7 +30,10 @@ elif len(players) == 1:
 	write('Not enough players for a game so quitting')
 else:
 
-    game = PokerGame(Dealer(), players)
-    game.play()
+	try:
+	    game = PokerGame(Dealer(), players)
+	    game.play()
+	except Exception, e:
+		write(e)
 
 messenger.finish()
