@@ -74,7 +74,7 @@ class Dealer(object):
         for player in table:
             player.handResult('anything')
 
-class PokerGame(object):
+class Casino(object):
     """Controls the flow of a game of poker"""
     def __init__(self, dealer, players):
         self.dealer = dealer

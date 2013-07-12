@@ -1,7 +1,7 @@
 import sys
 import logging
 from theHouse import Doorman
-from theHouse import PokerGame
+from theHouse import Casino
 from theHouse import Dealer
 from Xmpp import XmppMessenger
         
@@ -31,8 +31,8 @@ elif len(players) == 1:
 else:
 
 	try:
-	    game = PokerGame(Dealer(), players)
-	    game.play()
+	    casino = Casino(Dealer(), players)
+	    casino.play()
 	except Exception, e:
 		write(e)
 
