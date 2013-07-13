@@ -27,6 +27,10 @@ class Player(object):
     def __init__(self, jid, messenger):
         self.jid = jid
         self.messenger = messenger
+        self.cash = 0
+
+    def bet(self, amount):
+        self.cash = 0
 
     def privateCards(self, cards):
         self.messenger.sendMessage(self.jid, 'Private Cards ' + cards)
@@ -55,7 +59,7 @@ class Dealer(object):
     def __init__(self):
         pass
 
-    def playHand(self, table):
+    def deal(self, table):
         for player in table:
             player.privateCards('anything')
 
@@ -81,7 +85,11 @@ class Casino(object):
         self.players = players
 
     def play(self):
-        self.dealer.playHand(self.players)
+        
+        self.dealer.deal(filter(lambda x: x.cash > 0, self.players))
 
         for player in self.players:
-            player.gameResult('anything')
+            if player.cash == 0:
+                player.gameResult('You lost')
+            else:
+                player.gameResult('You won')
