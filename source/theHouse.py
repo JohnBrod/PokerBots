@@ -86,7 +86,7 @@ class Casino(object):
 
     def play(self):
         
-        self.dealer.deal(filter(lambda x: x.cash > 0, self.players))
+        self.dealer.deal(self.players)
 
         for player in self.players:
             if player.cash == 0:
