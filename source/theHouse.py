@@ -86,10 +86,17 @@ class Casino(object):
 
     def play(self):
         
-        self.dealer.deal(self.players)
+        table = list(self.players)
+
+        while len(table) > 1:
+            self.dealer.deal(table)
+            table = self.playersWithCash()
 
         for player in self.players:
             if player.cash == 0:
                 player.gameResult('You lost')
             else:
                 player.gameResult('You won')
+
+    def playersWithCash(self):
+        return filter(lambda x: x.cash > 0, self.players)
