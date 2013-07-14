@@ -2,18 +2,20 @@ import unittest
 from mock import MagicMock
 
 from theHouse import Casino
-from texasHoldEm import Player
+from texasHoldEm import PlayerProxy
 from texasHoldEm import Dealer
+
+def CreatePlayer(cash):
+    player = PlayerProxy(None, None)
+    player.cash = cash
+    player.gameResult = MagicMock()
+    return player
 
 class testPlayingGamesInTheCasino(unittest.TestCase):
 
     def testShouldTellTheDealerToDealToPlayers(self):
-        player1 = Player(None, None)
-        player1.cash = 1
-        player1.gameResult = MagicMock()
-        player2 = Player(None, None)
-        player2.cash = 1
-        player2.gameResult = MagicMock()
+        player1 = CreatePlayer(cash = 1)
+        player2 = CreatePlayer(cash = 1)
 
         dealer = RiggedDealer()
         c = Casino(dealer, [player1, player2])
@@ -23,13 +25,9 @@ class testPlayingGamesInTheCasino(unittest.TestCase):
         self.assertEqual(1, dealer.handsPlayed)
     
     def testTheWinnerIsThePlayerWithAllTheCash(self):
-        player1 = Player(None, None)
-        player1.gameResult = MagicMock()
-        player1.cash = 1
-        player2 = Player(None, None)
-        player2.gameResult = MagicMock()
-        player3 = Player(None, None)
-        player3.gameResult = MagicMock()
+        player1 = CreatePlayer(cash = 1)
+        player2 = CreatePlayer(cash = 0)
+        player3 = CreatePlayer(cash = 0)
         dealer = Dealer()
         dealer.deal = MagicMock()
         c = Casino(dealer, [player1, player2, player3])
@@ -41,15 +39,9 @@ class testPlayingGamesInTheCasino(unittest.TestCase):
         player3.gameResult.assert_called_once_with('You lost')
 
     def testTellsTheDealerToDealUntilOnePlayerHasAllTheCash(self):
-        player1 = Player(None, None)
-        player1.gameResult = MagicMock()
-        player1.cash = 1
-        player2 = Player(None, None)
-        player2.gameResult = MagicMock()
-        player2.cash = 1
-        player3 = Player(None, None)
-        player3.gameResult = MagicMock()
-        player3.cash = 1
+        player1 = CreatePlayer(cash = 1)
+        player2 = CreatePlayer(cash = 1)
+        player3 = CreatePlayer(cash = 1)
         dealer = RiggedDealer()
         c = Casino(dealer, [player1, player2, player3])
 
