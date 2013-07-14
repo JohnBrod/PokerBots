@@ -2,8 +2,8 @@ import unittest
 from mock import MagicMock
 
 from theHouse import Casino
-from theHouse import Player
-from theHouse import Dealer
+from texasHoldEm import Player
+from texasHoldEm import Dealer
 
 class testPlayingGamesInTheCasino(unittest.TestCase):
 

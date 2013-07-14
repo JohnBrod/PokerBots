@@ -2,7 +2,7 @@ import sys
 import logging
 from theHouse import Doorman
 from theHouse import Casino
-from theHouse import Dealer
+import texasHoldEm
 from Xmpp import XmppMessenger
         
 def write(text):
@@ -31,7 +31,7 @@ elif len(players) == 1:
 else:
 
 	try:
-	    casino = Casino(Dealer(), players)
+	    casino = Casino(texasHoldEm.Dealer(), map(lambda x: texasHoldEm.Player(x[0], x[1]), players))
 	    casino.play()
 	except Exception, e:
 		write(e)
