@@ -2,7 +2,7 @@ import unittest
 from mock import MagicMock
 
 from theHouse import Casino
-from texasHoldEm import PlayerProxy
+from theHouse import PlayerProxy
 from texasHoldEm import Dealer
 
 def CreatePlayer(cash):

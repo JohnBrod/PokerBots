@@ -70,27 +70,6 @@ class testPokerGame(unittest.TestCase):
         self.anotherPlayer.hears('Cash 1000')
         self.theGame.shouldDisplay('Player2@pokerchat has joined the game\r\n')
 
-        self.aPlayer.hears('Private Cards...')        
-        self.aPlayer.says('Bet Max')        
-
-        self.anotherPlayer.hears('Private Cards...')        
-        self.anotherPlayer.says('Call')
-
-        self.aPlayer.hears('Community Cards...')        
-        self.anotherPlayer.hears('Community Cards...')        
-
-        self.aPlayer.hears('Flop...')        
-        self.anotherPlayer.hears('Flop...')        
-
-        self.aPlayer.hears('Turn...')        
-        self.anotherPlayer.hears('Turn...')        
-
-        self.aPlayer.hears('River...')        
-        self.anotherPlayer.hears('River...')        
-
-        self.aPlayer.hears('Hand Result...')        
-        self.anotherPlayer.hears('Hand Result...')        
-
         self.aPlayer.hears('Game Result...')        
         self.anotherPlayer.hears('Game Result...')        
 

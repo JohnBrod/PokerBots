@@ -18,7 +18,7 @@ class Doorman(object):
 
     def on_messageReceived(self, sender, msg):
         if msg['type'] in ('normal', 'chat') and msg['body'].startswith('Player'):
-            self.players.append((msg['body'], self.messenger))
+            self.players.append(msg['body'])
             self.evt_playerJoined.fire(self, msg['body'])
             self.messenger.sendMessage(msg['body'], 'Cash ' + str(self.cash))
 
@@ -29,7 +29,7 @@ class Casino(object):
         self.players = players
 
     def play(self):
-        
+
         table = list(self.players)
 
         while len(table) > 1:
@@ -44,3 +44,20 @@ class Casino(object):
 
     def playersWithCash(self):
         return filter(lambda x: x.cash > 0, self.players)
+
+class PlayerProxy(object):
+    """allows the game to interact with the player messages as if they were from an object"""
+    def __init__(self, name, messenger):
+        self.cash = 0
+        self.name = name
+        self.response = Event()
+        self.messenger = messenger
+
+    def yourGo(self):
+        pass
+
+    def outOfGame(self):
+        pass
+
+    def gameResult(self, result):
+        self.messenger.sendMessage(self.name, 'Game Result')

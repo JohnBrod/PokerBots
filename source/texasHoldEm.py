@@ -1,56 +1,37 @@
 
-class Player(object):
-    """acts as a proxy to the real player"""
-    def __init__(self, jid, messenger):
-        self.jid = jid
-        self.messenger = messenger
-        self.cash = 0
-
-    def bet(self, amount):
-        self.cash = 0
-
-    def privateCards(self, cards):
-        self.messenger.sendMessage(self.jid, 'Private Cards ' + cards)
-        # wait for response - response is to a public group that contains the dealer and players
-
-    def communityCards(self, cards):
-        self.messenger.sendMessage(self.jid, 'Community Cards ' + cards)
-
-    def flop(self, card):
-        self.messenger.sendMessage(self.jid, 'Flop ' + card)
-        
-    def turn(self, card):
-        self.messenger.sendMessage(self.jid, 'Turn ' + card)
-        
-    def river(self, card):
-        self.messenger.sendMessage(self.jid, 'River ' + card)
-
-    def handResult(self, result):
-        self.messenger.sendMessage(self.jid, 'Hand Result ' + result)
-
-    def gameResult(self, result):
-        self.messenger.sendMessage(self.jid, 'Game Result ' + result)
-
 class Dealer(object):
     """deals a hand to players"""
     def __init__(self):
         pass
 
-    def deal(self, table):
-        for player in table:
-            player.privateCards('anything')
+    def deal(self, players):
+        for player in players:
+            player.response += self.onPlayerResponse
 
-        for player in table:
-            player.communityCards('anything')
+        self.table = Table(players)
 
-        for player in table:
-            player.flop('anything')
+        self.table.dealingTo.yourGo()
 
-        for player in table:
-            player.turn('anything')
+    def onPlayerResponse(self, sender, message):
+        
+        if sender != self.table.dealingTo:
+            sender.outOfGame()
+            self.table.players = filter(lambda player: player != sender, self.table.players)
 
-        for player in table:
-            player.river('anything')
+        self.table.nextPlayer()
+        self.table.dealingTo.yourGo()
 
-        for player in table:
-            player.handResult('anything')
+class Table(object):
+    """players sit around this and get dealt to in order"""
+    def __init__(self, players):
+        self.players = players
+        self.dealingToPosition = 0
+        self.dealingTo = self.players[self.dealingToPosition]
+
+    def nextPlayer(self):
+        self.dealingToPosition += 1
+
+        if self.dealingToPosition == len(self.players):
+            self.dealingToPosition = 0
+
+        self.dealingTo = self.players[self.dealingToPosition]
