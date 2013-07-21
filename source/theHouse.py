@@ -53,7 +53,7 @@ class PlayerProxy(object):
         self.response = Event()
         self.messenger = messenger
 
-    def yourGo(self):
+    def yourGo(self, pot, contribution):
         pass
 
     def outOfGame(self):
