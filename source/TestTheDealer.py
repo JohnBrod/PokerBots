@@ -51,22 +51,13 @@ class testTheRotationOfTheDeal(unittest.TestCase):
         player = createPlayer('p1')
         nextPlayer = createPlayer('p2')
         nextPlayer.outOfGame = MagicMock()
-
-        Dealer().deal([player, nextPlayer])
-
-        nextPlayer.response.fire(nextPlayer, 0)
-
-        nextPlayer.outOfGame.assert_called_once_with()
-
-    def testDoesNotDealToRemovedPlayer(self):
-        player = createPlayer('p1')
-        nextPlayer = createPlayer('p2')
         nextPlayer.yourGo = MagicMock()
 
         Dealer().deal([player, nextPlayer])
 
         nextPlayer.response.fire(nextPlayer, 0)
 
+        nextPlayer.outOfGame.assert_called_once_with()
         self.assertEqual(0, len(nextPlayer.yourGo.mock_calls))
                
 class testRoundOfCalling(unittest.TestCase):
