@@ -45,7 +45,7 @@ class testTheRotationOfTheDeal(unittest.TestCase):
         player.response.fire(player, 0)
         nextPlayer.response.fire(nextPlayer, 0)
 
-    	self.assertEqual(2, len(player.yourGo.mock_calls))
+    	self.assertEqual(1, len(player.yourGo.mock_calls))
 
     def testTellsPlayerThatTheyAreOutIfTheyRespondOutOfTurn(self):
         player = createPlayer('p1')
@@ -64,22 +64,20 @@ class testRoundOfCalling(unittest.TestCase):
     
     def testSmallBlindFirst(self):
         player = createPlayer('p1')
-        player.yourGo = MagicMock()
+        player.smallBlind = MagicMock()
 
         Dealer().deal([player])
 
-        player.yourGo.assert_called_once_with(0, 5)
+        player.smallBlind.assert_called_once_with(5)
     
     def testBigBlindSecond(self):
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
-        p2.yourGo = MagicMock()
+        p2.bigBlind = MagicMock()
 
         Dealer().deal([p1, p2])
 
-        p1.response.fire(p1, 5)
-
-        p2.yourGo.assert_called_once_with(5, 10)
+        p2.bigBlind.assert_called_once_with(10)
     
     def testThirdIsFirstToBet(self):
         p1 = createPlayer('p1')
@@ -89,12 +87,9 @@ class testRoundOfCalling(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3])
 
-        p1.response.fire(p1, 5)
-        p2.response.fire(p2, 10)
-
-        p3.yourGo.assert_called_once_with(15, 10)
+        p3.yourGo.assert_called_once_with(10)
     
-    def testSmallBlindShouldBetTheDifference(self):
+    def testFirstShouldBetTheDifference(self):
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
         p3 = createPlayer('p3')
@@ -102,11 +97,21 @@ class testRoundOfCalling(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3])
 
-        p1.response.fire(p1, 5)
-        p2.response.fire(p2, 10)
         p3.response.fire(p3, 10)
 
-        p1.yourGo.assert_called_with(25, 5)
+        p1.yourGo.assert_called_with(5)
+    
+    def testPlayerKickedOutForBettingLessThanMinimum(self):
+        p1 = createPlayer('p1')
+        p2 = createPlayer('p2')
+        p3 = createPlayer('p3')
+        p3.outOfGame = MagicMock()
+
+        Dealer().deal([p1, p2, p3])
+
+        p3.response.fire(p3, 9)
+
+        p3.outOfGame.assert_called_once_with()
 
 if __name__=="__main__":
     unittest.main()

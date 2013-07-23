@@ -53,7 +53,7 @@ class PlayerProxy(object):
         self.response = Event()
         self.messenger = messenger
 
-    def yourGo(self, pot, contribution):
+    def yourGo(self, contribution):
         pass
 
     def outOfGame(self):
@@ -61,3 +61,9 @@ class PlayerProxy(object):
 
     def gameResult(self, result):
         self.messenger.sendMessage(self.name, 'Game Result')
+
+    def smallBlind(self, amount):
+        pass
+
+    def bigBlind(self, amount):
+        pass
