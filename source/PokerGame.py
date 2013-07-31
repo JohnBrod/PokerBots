@@ -1,3 +1,4 @@
+import time
 import sys
 import logging
 from theHouse import Doorman
@@ -18,11 +19,11 @@ def onPlayerJoined(sender, playerId):
 
 write('Game started, waiting for players')
 
-messenger = XmppMessenger('dealer@localhost', 'password')
-messenger.listen('localhost', 5222)
+dealerMessenger = XmppMessenger('dealer@localhost', 'password')
+dealerMessenger.listen('localhost', 5222)
 
 try:
-	frank = Doorman(5, messenger, 1000)
+	frank = Doorman(5, dealerMessenger, 1000)
 	frank.evt_playerJoined += onPlayerJoined
 	players = frank.greetPlayers()
 except Exception, e:
@@ -35,10 +36,12 @@ elif len(players) == 1:
 else:
 
 	try:
-		players = map(lambda x: PlayerProxy(x, messenger), players)
+		players = map(lambda x: PlayerProxy(x, dealerMessenger), players)
 		casino = Casino(texasHoldEm.Dealer(), players)
+		# need to start this on a thread and wait for it to finish
 		casino.play()
+		while casino.playing: pass # could do screen updates here
 	except Exception, e:
 		write(e)
 
-messenger.finish()
+dealerMessenger.finish()

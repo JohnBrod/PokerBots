@@ -30,7 +30,7 @@ class testTheRotationOfTheDeal(unittest.TestCase):
 
         Dealer().deal([player, nextPlayer])
 
-        player.response.fire(player, 0)
+        player.evt_response.fire(player, 0)
 
         self.assertTrue(nextPlayer.yourGo.called)
 
@@ -42,10 +42,10 @@ class testTheRotationOfTheDeal(unittest.TestCase):
 
     	Dealer().deal([player, nextPlayer])
 
-        player.response.fire(player, 0)
-        nextPlayer.response.fire(nextPlayer, 0)
+        player.evt_response.fire(player, 0)
+        nextPlayer.evt_response.fire(nextPlayer, 0)
 
-    	self.assertEqual(1, len(player.yourGo.mock_calls))
+    	self.assertEqual(2, len(player.yourGo.mock_calls))
 
     def testTellsPlayerThatTheyAreOutIfTheyRespondOutOfTurn(self):
         player = createPlayer('p1')
@@ -55,29 +55,26 @@ class testTheRotationOfTheDeal(unittest.TestCase):
 
         Dealer().deal([player, nextPlayer])
 
-        nextPlayer.response.fire(nextPlayer, 0)
+        nextPlayer.evt_response.fire(nextPlayer, 0)
 
         nextPlayer.outOfGame.assert_called_once_with()
-        self.assertEqual(0, len(nextPlayer.yourGo.mock_calls))
+        self.assertEqual(1, len(nextPlayer.yourGo.mock_calls))
                
 class testRoundOfCalling(unittest.TestCase):
     
-    def testSmallBlindFirst(self):
-        player = createPlayer('p1')
-        player.smallBlind = MagicMock()
-
-        Dealer().deal([player])
-
-        player.smallBlind.assert_called_once_with(5)
-    
-    def testBigBlindSecond(self):
+    def testBlindsAndThenBetting(self):
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
-        p2.bigBlind = MagicMock()
+        p3 = createPlayer('p3')
+        p1.yourGo = MagicMock()
+        p2.yourGo = MagicMock()
+        p3.yourGo = MagicMock()
 
-        Dealer().deal([p1, p2])
+        Dealer().deal([p1, p2, p3])
 
-        p2.bigBlind.assert_called_once_with(10)
+        p1.yourGo.assert_called_once_with([('p1', 5)])
+        p2.yourGo.assert_called_once_with([('p1', 5), ('p2', 10)])
+        p3.yourGo.assert_called_once_with([('p1', 5), ('p2', 10)])
     
     def testThirdIsFirstToBet(self):
         p1 = createPlayer('p1')
@@ -87,7 +84,7 @@ class testRoundOfCalling(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3])
 
-        p3.yourGo.assert_called_once_with(10)
+        p3.yourGo.assert_called_once_with([('p1', 5), ('p2', 10)])
     
     def testFirstShouldBetTheDifference(self):
         p1 = createPlayer('p1')
@@ -97,9 +94,9 @@ class testRoundOfCalling(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3])
 
-        p3.response.fire(p3, 10)
+        p3.evt_response.fire(p3, 10)
 
-        p1.yourGo.assert_called_with(5)
+        p1.yourGo.assert_called_with([('p1', 5), ('p2', 10), ('p3', 10)])
     
     def testPlayerKickedOutForBettingLessThanMinimum(self):
         p1 = createPlayer('p1')
@@ -109,7 +106,7 @@ class testRoundOfCalling(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3])
 
-        p3.response.fire(p3, 9)
+        p3.evt_response.fire(p3, 9)
 
         p3.outOfGame.assert_called_once_with()
 

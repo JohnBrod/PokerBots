@@ -1,29 +1,30 @@
+from EventHandling import Event
 
 class Dealer(object):
     """deals a hand to players"""
     def __init__(self):
-        pass
+        self.evt_handFinished = Event()
 
     def deal(self, players):
         for player in players:
-            player.response += self.onPlayerResponse
+            player.evt_response += self.__on_PlayerResponse
 
         self.table = Table(players)
         self.pot = Pot(5, 10)
 
-        self.table.dealingTo.smallBlind(self.table.smallBlind)
         self.pot.add(self.table.dealingTo, self.table.smallBlind)
+        self.table.dealingTo.yourGo(list(self.pot.transactions))
 
         self.table.nextPlayer()
 
-        self.table.dealingTo.bigBlind(self.table.bigBlind)
         self.pot.add(self.table.dealingTo, self.table.bigBlind)
+        self.table.dealingTo.yourGo(list(self.pot.transactions))
 
         self.table.nextPlayer()
 
-        self.table.dealingTo.yourGo(self.pot.getMinimumBet(self.table.dealingTo))
+        self.table.dealingTo.yourGo(list(self.pot.transactions))
 
-    def onPlayerResponse(self, sender, bet):
+    def __on_PlayerResponse(self, sender, bet):
         
         if self.__outOfTurn(sender):
             self.__kickOut(sender)
@@ -33,7 +34,9 @@ class Dealer(object):
 
         self.pot.add(sender, bet)
         self.table.nextPlayer()
-        self.table.dealingTo.yourGo(self.pot.getMinimumBet(self.table.dealingTo))
+        self.table.dealingTo.yourGo(self.pot.transactions)
+
+        self.evt_handFinished.fire(self, None)
 
     def __outOfTurn(self, sender):
         return sender != self.table.dealingTo
@@ -66,31 +69,20 @@ class Pot(object):
 
     def __init__(self, smallBlind, bigBlind):
         self.minimumBet = 0
-        self.contributions = {}
         self.smallBlind = smallBlind 
         self.bigBlind = bigBlind 
+        self.transactions = []
 
     def add(self, player, amount):
-        if player not in self.contributions:
-            self.contributions[player.name] = []
-
         self.minimumBet = amount
         
-        self.contributions[player.name].append(amount)
+        self.transactions.append((player.name, amount))
 
     def getTotal(self, player = None):
 
-        if player:
-            if player.name in self.contributions:
-                return sum(self.contributions[player.name])
-            else:
-                return 0
+        txns = filter(lambda x: x[0] == player.name, self.transactions) if player else self.transactions
 
-        total = 0
-        for v in self.contributions.iterkeys():
-            total += sum(self.contributions[v])
-                
-        return total
+        return sum(map(lambda x: x[1], txns))
 
     def getMinimumBet(self, player):
         return self.minimumBet - self.getTotal(player)

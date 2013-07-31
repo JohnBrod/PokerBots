@@ -1,6 +1,9 @@
 import time
 from EventHandling import Event
 
+def getName(x):
+    return str(x)[:str(x).find('/')]
+
 class Doorman(object):
     """greets players and passes their details onto the its boss"""
     def __init__(self, waitFor, messenger, cash):
@@ -13,12 +16,12 @@ class Doorman(object):
 
     def greetPlayers(self):
         time.sleep(self.waitFor)
-
         return self.players
 
     def on_messageReceived(self, sender, msg):
-        if msg['type'] in ('normal', 'chat') and msg['body'].startswith('Player'):
-            self.players.append(msg['body'])
+        
+        if msg['type'] in ('normal', 'chat') and msg['body'].startswith('player'):
+            self.players.append(getName(msg['from']))
             self.evt_playerJoined.fire(self, msg['body'])
             self.messenger.sendMessage(msg['body'], 'Cash ' + str(self.cash))
 
@@ -27,43 +30,54 @@ class Casino(object):
     def __init__(self, dealer, players):
         self.dealer = dealer
         self.players = players
+        self.playing = False
 
     def play(self):
 
+        self.playing = True
+        self.dealer.evt_handFinished += self.on_handFinished
+
         table = list(self.players)
 
-        while len(table) > 1:
-            self.dealer.deal(table)
-            table = self.playersWithCash()
+        self.dealer.deal(table)
 
-        for player in self.players:
-            if player.cash == 0:
-                player.gameResult('You lost')
-            else:
-                player.gameResult('You won')
+    def on_handFinished(self, sender, args):
+        table = self.playersWithCash()
+
+        if len(table) > 1:
+            self.dealer.deal(table)
+        else:
+            for player in self.players:
+                if player.cash == 0:
+                    player.gameResult('You lost')
+                else:
+                    player.gameResult('You won')
+            self.playing = False
 
     def playersWithCash(self):
         return filter(lambda x: x.cash > 0, self.players)
 
 class PlayerProxy(object):
     """allows the game to interact with the player messages as if they were from an object"""
-    def __init__(self, name, messenger):
+    def __init__(self, name, dealer):
         self.cash = 0
         self.name = name
-        self.response = Event()
-        self.messenger = messenger
+        self.evt_response = Event()
+        self.dealer = dealer
+        self.dealer.evt_messageReceived += self.on_messageReceived
 
-    def yourGo(self, contribution):
-        pass
+    def yourGo(self, transactions):
+        self.dealer.sendMessage(self.name, ','.join(map(lambda x: '%s %s' % (x[0], x[1]), transactions)))
 
     def outOfGame(self):
         pass
 
     def gameResult(self, result):
-        self.messenger.sendMessage(self.name, 'Game Result')
+        self.dealer.sendMessage(self.name, 'Game Result')
 
-    def smallBlind(self, amount):
-        pass
+    def on_messageReceived(self, sender, msg):
+        if msg['type'] in ('normal', 'chat') and self.fromMe(msg):
+            self.evt_response.fire(self, msg['body'])
 
-    def bigBlind(self, amount):
-        pass
+    def fromMe(self, msg):
+        return getName(msg['from']) == self.name

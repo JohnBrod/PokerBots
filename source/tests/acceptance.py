@@ -52,26 +52,32 @@ class testPokerGame(unittest.TestCase):
         
         self.theGame.shouldDisplay('Game started, waiting for players\r\n')
         
-        self.aPlayer.says('Player1@pokerchat')
+        self.aPlayer.says('player1@pokerchat')
         self.aPlayer.hears('Cash 1000')
 
-        self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
+        self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
         self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
     def testTwoPlayersFullGame(self):
         
         self.theGame.shouldDisplay('Game started, waiting for players\r\n')
         
-        self.aPlayer.says('Player1@pokerchat')
+        self.aPlayer.says('player1@pokerchat')
         self.aPlayer.hears('Cash 1000')
-        self.theGame.shouldDisplay('Player1@pokerchat has joined the game\r\n')
+        self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
 
-        self.anotherPlayer.says('Player2@pokerchat')
+        self.anotherPlayer.says('player2@pokerchat')
         self.anotherPlayer.hears('Cash 1000')
-        self.theGame.shouldDisplay('Player2@pokerchat has joined the game\r\n')
+        self.theGame.shouldDisplay('player2@pokerchat has joined the game\r\n')
+
+        self.aPlayer.hears('player1@pokerchat 5')
+        self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10')
+        self.aPlayer.hears('player1@pokerchat 5,player2@pokerchat 10')
+        self.aPlayer.says('5')
+        self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10,player1@pokerchat 5')
 
         self.aPlayer.hears('Game Result...')        
-        self.anotherPlayer.hears('Game Result...')        
+        self.anotherPlayer.hears('Game Result...')
 
 if __name__=="__main__":
     unittest.main()
