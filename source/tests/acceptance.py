@@ -75,6 +75,7 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('player1@pokerchat 5,player2@pokerchat 10')
         self.aPlayer.says('5')
         self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10,player1@pokerchat 5')
+        self.anotherPlayer.says('0')
 
         self.aPlayer.hears('Game Result...')        
         self.anotherPlayer.hears('Game Result...')

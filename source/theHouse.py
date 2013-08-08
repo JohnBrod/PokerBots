@@ -76,8 +76,11 @@ class PlayerProxy(object):
         self.dealer.sendMessage(self.name, 'Game Result')
 
     def on_messageReceived(self, sender, msg):
-        if msg['type'] in ('normal', 'chat') and self.fromMe(msg):
-            self.evt_response.fire(self, msg['body'])
+        if self.fromMe(msg):
+            self.evt_response.fire(self, self.parse(msg))
+
+    def parse(self, msg):
+        return msg['body']
 
     def fromMe(self, msg):
-        return getName(msg['from']) == self.name
+        return msg['type'] in ('normal', 'chat') and getName(msg['from']) == self.name

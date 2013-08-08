@@ -16,16 +16,14 @@ class Dealer(object):
         self.table.dealingTo.yourGo(list(self.pot.transactions))
 
         self.table.nextPlayer()
-
         self.pot.add(self.table.dealingTo, self.table.bigBlind)
         self.table.dealingTo.yourGo(list(self.pot.transactions))
 
         self.table.nextPlayer()
-
         self.table.dealingTo.yourGo(list(self.pot.transactions))
 
     def __on_PlayerResponse(self, sender, bet):
-        
+
         if self.__outOfTurn(sender):
             self.__kickOut(sender)
         
@@ -34,6 +32,7 @@ class Dealer(object):
 
         self.pot.add(sender, bet)
         self.table.nextPlayer()
+
         self.table.dealingTo.yourGo(self.pot.transactions)
 
         self.evt_handFinished.fire(self, None)

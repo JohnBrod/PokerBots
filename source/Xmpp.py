@@ -17,16 +17,7 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
 
     def __init__(self, jid, password):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
-
-        self.add_event_handler("session_start", self.on_start)
-        self.add_event_handler("message", self.on_message)
-
         self.evt_messageReceived = Event()
-
-        self.register_plugin('xep_0030') # Service Discovery
-        self.register_plugin('xep_0004') # Data Forms
-        self.register_plugin('xep_0060') # PubSub
-        self.register_plugin('xep_0199') # XMPP Ping
 
     def on_start(self, event):
         self.send_presence()
@@ -36,6 +27,15 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
         self.evt_messageReceived.fire(self, msg)
 
     def listen(self, domain, port):
+
+        self.add_event_handler("session_start", self.on_start)
+        self.add_event_handler("message", self.on_message)
+
+        self.register_plugin('xep_0030') # Service Discovery
+        self.register_plugin('xep_0004') # Data Forms
+        self.register_plugin('xep_0060') # PubSub
+        self.register_plugin('xep_0199') # XMPP Ping
+
         if self.connect((domain, port)):
             self.process(block=False)
         else:
