@@ -1,4 +1,3 @@
-import time
 import sys
 import logging
 from theHouse import Doorman
@@ -11,8 +10,7 @@ def write(text):
 	print text
 	sys.stdout.flush()
 
-logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(message)s')
-logging.disable(logging.ERROR)
+logging.basicConfig(filename='poker.log',level=logging.DEBUG)
 
 def onPlayerJoined(sender, playerId):
 	write(playerId + ' has joined the game')

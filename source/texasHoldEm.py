@@ -1,88 +1,79 @@
+from theHouse import Pot
 from EventHandling import Event
+import logging
+
+def fold(bet):
+    return bet == 0
 
 class Dealer(object):
     """deals a hand to players"""
     def __init__(self):
+
+        self.bigBlind = 10
+        self.smallBlind = 5
         self.evt_handFinished = Event()
 
     def deal(self, players):
-        for player in players:
-            player.evt_response += self.__on_PlayerResponse
 
         self.table = Table(players)
-        self.pot = Pot(5, 10)
+        self.pot = Pot()
 
-        self.pot.add(self.table.dealingTo, self.table.smallBlind)
-        self.table.dealingTo.yourGo(list(self.pot.transactions))
+        for player in self.table.players:
+            player.evt_response += self.__on_PlayerResponse
+
+        self.pot.add(self.table.dealingTo(), self.smallBlind)
+        self.table.dealingTo().yourGo(list(self.pot.transactions))
 
         self.table.nextPlayer()
-        self.pot.add(self.table.dealingTo, self.table.bigBlind)
-        self.table.dealingTo.yourGo(list(self.pot.transactions))
+        self.pot.add(self.table.dealingTo(), self.bigBlind)
+        self.table.dealingTo().yourGo(list(self.pot.transactions))
 
         self.table.nextPlayer()
-        self.table.dealingTo.yourGo(list(self.pot.transactions))
+        self.table.dealingTo().yourGo(list(self.pot.transactions))
 
     def __on_PlayerResponse(self, sender, bet):
 
-        if self.__outOfTurn(sender):
-            self.__kickOut(sender)
-        
-        if bet < self.pot.getMinimumBet(sender):
-            self.__kickOut(sender)
+        if (bet < self.pot.getMinimumBet(sender)) or (bet > sender.cash):
+            sender.outOfGame()
+            self.table.removeCurrent()
+            if self.table.lastPlayer():
+                self.table.lastPlayer().handResult('You Win')
+                self.evt_handFinished.fire(self)
+            else:
+                self.table.dealingTo().yourGo(list(self.pot.transactions))
+            return
 
         self.pot.add(sender, bet)
+
+        if self.table.allIn():
+            for player in self.table.players: player.handResult('xxx')                
+            self.evt_handFinished.fire(self)
+            return
+        
         self.table.nextPlayer()
-
-        self.table.dealingTo.yourGo(self.pot.transactions)
-
-        self.evt_handFinished.fire(self, None)
-
-    def __outOfTurn(self, sender):
-        return sender != self.table.dealingTo
-
-    def __kickOut(self, sender):
-        sender.outOfGame()
-        self.table.remove(sender)
+        self.table.dealingTo().yourGo(list(self.pot.transactions))
 
 class Table(object):
     """players sit around this and get dealt to in order"""
     def __init__(self, players):
-        self.bigBlind = 10
-        self.smallBlind = 5
         self.players = players
         self.dealingToPosition = 0
-        self.dealingTo = self.players[self.dealingToPosition]
 
     def nextPlayer(self):
         self.dealingToPosition += 1
-
         if self.dealingToPosition >= len(self.players):
             self.dealingToPosition = 0
 
-        self.dealingTo = self.players[self.dealingToPosition]
+    def dealingTo(self):
+        return self.players[self.dealingToPosition]
 
-    def remove(self, player):
-        self.players = filter(lambda x: x != player, self.players)
+    def removeCurrent(self):
+        self.players = filter(lambda x: x != self.dealingTo(), self.players)
+        if self.dealingToPosition >= len(self.players):
+            self.dealingToPosition = 0
 
-class Pot(object):
+    def lastPlayer(self):
+        if len(self.players) == 1: return self.players[0]
 
-    def __init__(self, smallBlind, bigBlind):
-        self.minimumBet = 0
-        self.smallBlind = smallBlind 
-        self.bigBlind = bigBlind 
-        self.transactions = []
-
-    def add(self, player, amount):
-        self.minimumBet = amount
-        
-        self.transactions.append((player.name, amount))
-
-    def getTotal(self, player = None):
-
-        txns = filter(lambda x: x[0] == player.name, self.transactions) if player else self.transactions
-
-        return sum(map(lambda x: x[1], txns))
-
-    def getMinimumBet(self, player):
-        return self.minimumBet - self.getTotal(player)
-
+    def allIn(self):
+        return len(filter(lambda x: x.cash == 0, self.players)) == len(self.players)

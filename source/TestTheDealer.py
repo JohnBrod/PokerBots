@@ -1,4 +1,5 @@
 import unittest
+from Queue import Queue
 from theHouse import PlayerProxy
 from texasHoldEm import Dealer
 from EventHandling import Event
@@ -9,100 +10,13 @@ def createPlayer(name, messenger):
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player
-
-class testTheRotationOfTheDeal(unittest.TestCase):
-
-    def testSmallBlindFirst(self):
-        player = createPlayer('p1', NoReplyMessenger())
-        player.yourGo = MagicMock()
-
-        Dealer().deal([player])
-
-        self.assertTrue(player.yourGo.called)
-
-# # i think the badness in this test is firing the event...
-
-    def testThenTheBigBlind(self):
-        player = createPlayer('p1', NoReplyMessenger())
-        nextPlayer = createPlayer('p2', NoReplyMessenger())
-        nextPlayer.yourGo = MagicMock()
-
-        Dealer().deal([player, nextPlayer])
-
-        self.assertTrue(nextPlayer.yourGo.called)
-
-    def testThenFirstToBet(self):
-        p1 = createPlayer('p1', NoReplyMessenger())
-        p2 = createPlayer('p2', NoReplyMessenger())
-        p3 = createPlayer('p3', NoReplyMessenger())
-        p3.yourGo = MagicMock()
-
-        Dealer().deal([p1, p2, p3])
-
-        self.assertTrue(p3.yourGo.called)
-
-# this is really testing interaction between the dealer and the player proxy
-
-    def testShouldMovetoNextPlayerAfterResponse(self):
-        p1 = createPlayer('p1', NoReplyMessenger())
-        p2 = createPlayer('p2', NoReplyMessenger())
-        p3 = createPlayer('p3', SingleReplyMessenger(10))
-        p4 = createPlayer('p4', NoReplyMessenger())
-        p4.yourGo = MagicMock()
-
-        Dealer().deal([p1, p2, p3, p4])
-
-        self.assertTrue(p4.yourGo.called)
-
-#don't think this was testing correctly. trying to test the table class from the public interface of the dealer is difficult
-#maybe this testing should be done against the table
-    def testDealsToFirstPlayerWhenLastPlayerResponds(self):
-        player = createPlayer('p1', NoReplyMessenger())
-        player.yourGo = MagicMock()
-
-        nextPlayer = createPlayer('p2', NoReplyMessenger())
-
-    	Dealer().deal([player, nextPlayer])
-
-    	self.assertEqual(2, len(player.yourGo.mock_calls))
-
-# can't figure out how to implement this test
-
-    def testTellsPlayerThatTheyAreOutIfTheyRespondOutOfTurn(self):
-        pass
-
-    # def testStopsDealingWhenThereIsaWInner(self):
-    #     player = createPlayer('p1')
-    #     nextPlayer = createPlayer('p2')
-    #     player.yourGo = MagicMock()
-    #     nextPlayer.yourGo = MagicMock()
-
-    #     dealer = Dealer()
-    #     handFinished = False
-    #     def onHandFinished(sender, flag) : handFinished = True
-
-    #     dealer.evt_handFinished += onHandFinished
-    #     dealer.deal([player, nextPlayer])
-
-    #     player.evt_response.fire(nextPlayer, 5)
-    #     # nextPlayer.evt_response.fire(nextPlayer, 5)
-
-    #     # player.evt_response.fire(nextPlayer, 5)
-    #     # nextPlayer.evt_response.fire(nextPlayer, 5)
-
-    #     # player.evt_response.fire(nextPlayer, 5)
-    #     # nextPlayer.evt_response.fire(nextPlayer, 0)
-
-    #     self.assertEqual(4, len(player.yourGo.mock_calls))
-    #     self.assertEqual(4, len(nextPlayer.yourGo.mock_calls))
-    #     self.assertTrue(handFinished)
                
-class testRoundOfCalling(unittest.TestCase):
+class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
     
-    def testBlindsAndThenBetting(self):
-        p1 = createPlayer('p1', NoReplyMessenger())
-        p2 = createPlayer('p2', NoReplyMessenger())
-        p3 = createPlayer('p3', NoReplyMessenger())
+    def testMoveLeftToRightAtTheTable(self):
+        p1 = createPlayer('p1', ObedientMessenger().skip())
+        p2 = createPlayer('p2', ObedientMessenger().skip())
+        p3 = createPlayer('p3', ObedientMessenger())
 
         p1.yourGo = MagicMock()
         p2.yourGo = MagicMock()
@@ -110,46 +24,164 @@ class testRoundOfCalling(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3])
 
-        p1.yourGo.assert_called_once_with([('p1', 5)])
-        p2.yourGo.assert_called_once_with([('p1', 5), ('p2', 10)])
-        p3.yourGo.assert_called_once_with([('p1', 5), ('p2', 10)])
+        p1.yourGo.assert_called_with([(p1, 5)])
+        p2.yourGo.assert_called_with([(p1, 5), (p2, 10)])
+        p3.yourGo.assert_called_with([(p1, 5), (p2, 10)])
     
-    def testFirstShouldBetTheDifference(self):
-        p1 = createPlayer('p1', NoReplyMessenger())
-        p2 = createPlayer('p2', NoReplyMessenger())
-        p3 = createPlayer('p3', SingleReplyMessenger(10))
+    def testBackToFirstPlayerAfterTheLast(self):
+        p1 = createPlayer('p1', ObedientMessenger().skip())
+        p2 = createPlayer('p2', ObedientMessenger().skip())
+        p3 = createPlayer('p3', ObedientMessenger().bet(10))
         p1.yourGo = MagicMock()
 
         Dealer().deal([p1, p2, p3])
 
-        p1.yourGo.assert_called_with([('p1', 5), ('p2', 10), ('p3', 10)])
+        p1.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
     
-    def testPlayerKickedOutForBettingLessThanMinimum(self):
-        p1 = createPlayer('p1', NoReplyMessenger())
-        p2 = createPlayer('p2', NoReplyMessenger())
-        p3 = createPlayer('p3', SingleReplyMessenger(9))
+    def testPlayerFolds(self):
+        p1 = createPlayer('p1', ObedientMessenger().skip().bet(0))
+        p2 = createPlayer('p2', ObedientMessenger().skip())
+
+        p2.handResult = MagicMock()
+
+        dealer = Dealer()
+        dealer.evt_handFinished.fire = MagicMock()
+        dealer.deal([p1, p2])
+
+        dealer.evt_handFinished.fire.assert_called_with(dealer)
+        p2.handResult.assert_called_once_with('You Win')
+    
+    def testPlayerBetsLessThanMinimum(self):
+        p1 = createPlayer('p1', ObedientMessenger().skip())
+        p2 = createPlayer('p2', ObedientMessenger().skip())
+        p3 = createPlayer('p3', ObedientMessenger().bet(9))
+        p4 = createPlayer('p4', ObedientMessenger())
         p3.outOfGame = MagicMock()
+        p4.yourGo = MagicMock()
+
+        Dealer().deal([p1, p2, p3, p4])
+
+        p3.outOfGame.assert_called_once_with()
+        p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
+    
+    def testFirstPlayerBetsLessThanMinimum(self):
+        p1 = createPlayer('p1', ObedientMessenger().skip().bet(4))
+        p2 = createPlayer('p2', ObedientMessenger().skip())
+        p3 = createPlayer('p3', ObedientMessenger().bet(10))
+        p1.outOfGame = MagicMock()
+        p2.yourGo = MagicMock()
 
         Dealer().deal([p1, p2, p3])
 
-        p3.outOfGame.assert_called_once_with()
+        p1.outOfGame.assert_called_once_with()
+        p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
+        
+    def testPlayerBetsMoreThanTheyHave(self):
+        p1 = createPlayer('p1', ObedientMessenger().skip())
+        p2 = createPlayer('p2', ObedientMessenger().skip())
+        p3 = createPlayer('p3', ObedientMessenger().bet(1001))
+        p4 = createPlayer('p4', ObedientMessenger())
+        p3.outOfGame = MagicMock()
+        p4.yourGo = MagicMock()
 
-class NoReplyMessenger():
+        Dealer().deal([p1, p2, p3, p4])
+
+        p3.outOfGame.assert_called_once_with()
+        p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
+        
+    def testPlayerBetsMoreThanTheyHaveInTwoParts(self):
+        p1 = createPlayer('p1', ObedientMessenger().skip().bet(10).bet(986))
+        p2 = createPlayer('p2', ObedientMessenger().skip().bet(10))
+        p1.outOfGame = MagicMock()
+        p2.handResult = MagicMock()
+
+        Dealer().deal([p1, p2])
+
+        p1.outOfGame.assert_called_once_with()
+        p2.handResult.assert_called_once_with('You Win')
+        
+# class testDealingTheCards(unittest.TestCase):
+    
+#     def testTheDealerShouldGiveEachPlayerPrivateCards(self):
+#         p1 = createPlayer('p1', ObedientMessenger())
+#         p2 = createPlayer('p2', ObedientMessenger())
+
+#         p1.cards = MagicMock()
+#         p2.cards = MagicMock()
+
+#         Dealer(PredictableDeck()).deal([p1, p2])
+
+#         p1.cards.assert_called_once_with((1, 2))
+#         p2.cards.assert_called_once_with((3, 4))
+
+# a player that folds is excluded from the next round
+# player folds, all players are in
+# if only one player left then they win
+
+    # def testPlayerFoldsAndTheRemainingPlayerIsTheWinner(self):
+    #     p1 = createPlayer('p1', ObedientMessenger().skip().bet(0))
+    #     p2 = createPlayer('p2', ObedientMessenger().skip())
+
+    #     p1.cards = MagicMock()
+    #     p2.cards = MagicMock()
+
+    #     Dealer(PredictableDeck()).deal([p1, p2])
+
+    #     p1.cards.assert_not_called_with((5, 6, 7))
+    #     p1.cards.assert_not_called_with((5, 6, 7))
+
+# player kicked out because they don't respond within the allowed time
+
+# no community cards until all palyers are in
+
+    # def testCommunityCardsAreDealtAfterTheFirstRoundOfBetting(self):
+    #     p1 = createPlayer('p1', ObedientMessenger().skip().bet(5))
+    #     p2 = createPlayer('p2', ObedientMessenger().skip().bet(0))
+
+    #     p1.cards = MagicMock()
+    #     p2.cards = MagicMock()
+
+    #     Dealer(PredictableDeck()).deal([p1, p2])
+
+    #     p1.cards.assert_called_with((5, 6, 7))
+    #     p2.cards.assert_called_with((5, 6, 7))
+
+class PredictableDeck():
 
     def __init__(self):
-        self.evt_messageReceived = Event()
+        self.card = 0
 
-    def sendMessage(self, jid, msg):
+    def take(self):
+        self.card += 1
+        return self.card
+    
+class AnyDeck():
+    def take(self):
         pass
 
-class SingleReplyMessenger():
-
-    def __init__(self, msg):
+class ObedientMessenger(object):
+    """docstring for ObedientMessenger"""
+    def __init__(self):
         self.evt_messageReceived = Event()
-        self.msg = msg
+        self.replies = Queue()
+
+    def skip(self):
+        self.replies.put('skip')
+        return self
+
+    def bet(self, amount):
+        self.replies.put(amount)
+        return self
 
     def sendMessage(self, jid, msg):
-        self.evt_messageReceived.fire(self, self.msg)
 
+        if self.replies.empty(): return
+
+        response = self.replies.get()
+
+        if response == 'skip': return
+
+        self.evt_messageReceived.fire(self, response)
+        
 if __name__=="__main__":
     unittest.main()

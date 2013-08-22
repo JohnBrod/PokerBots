@@ -14,13 +14,12 @@ from runningTheApp import FakePlayer
 class testPokerGame(unittest.TestCase):
 
 # common causes of failing tests
-# throwing an exception, need to implement some handling, they are just being swallowed without notification
 # player being logged in through pidgin, it seems to intercept the message
 # some failing tests print messages with e instead of the @ character
 # message queue not being cleared out between tests. i.e. assert stops test but game keeps going and sends messages. These messages are pickedup when the next test starts
 # exceptions get swallowed sometimes. Remove import of dealer in poker game to see
 # python.exe from previous test still running (caused by exception being thrown in the main app)
-
+# wrong signature on an event will fail without exception. Events should always have the signature (self, sender, args), even if args is not used
     @classmethod
     def setUpClass(cls):
         logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(message)s')
@@ -58,7 +57,7 @@ class testPokerGame(unittest.TestCase):
         self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
         self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
-    def testTwoPlayersFullGame(self):
+    def testTwoPlayersAllIn(self):
         
         self.theGame.shouldDisplay('Game started, waiting for players\r\n')
         
@@ -73,11 +72,14 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('player1@pokerchat 5')
         self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10')
         self.aPlayer.hears('player1@pokerchat 5,player2@pokerchat 10')
-        self.aPlayer.says('5')
-        self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10,player1@pokerchat 5')
-        self.anotherPlayer.says('0')
+        self.aPlayer.says('995')
+        self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10,player1@pokerchat 995')
+        self.anotherPlayer.says('990')
 
-        self.aPlayer.hears('Game Result...')        
+        self.aPlayer.hears('Hand Result...')
+        self.anotherPlayer.hears('Hand Result...')
+
+        self.aPlayer.hears('Game Result...')
         self.anotherPlayer.hears('Game Result...')
 
 if __name__=="__main__":
