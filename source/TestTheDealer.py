@@ -43,13 +43,15 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p2 = createPlayer('p2', StubMessenger().skipBlind())
 
         p2.handResult = MagicMock()
+        p1.outOfGame = MagicMock()
 
         dealer = Dealer()
         dealer.evt_handFinished.fire = MagicMock()
         dealer.deal([p1, p2])
 
         dealer.evt_handFinished.fire.assert_called_with(dealer)
-        p2.handResult.assert_called_once_with('You Win')
+        p1.outOfGame.assert_called_once_with('You folded')
+        p2.handResult.assert_called_once_with('You win')
     
     def testPlayerBetsLessThanMinimum(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind())
@@ -61,7 +63,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3, p4])
 
-        p3.outOfGame.assert_called_once_with()
+        p3.outOfGame.assert_called_once_with('You bet 9, minimum bet was 10')
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
     
     def testFirstPlayerBetsLessThanMinimum(self):
@@ -73,7 +75,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3])
 
-        p1.outOfGame.assert_called_once_with()
+        p1.outOfGame.assert_called_once_with('You bet 4, minimum bet was 5')
         p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
         
     def testPlayerBetsMoreThanTheyHave(self):
@@ -86,7 +88,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         Dealer().deal([p1, p2, p3, p4])
 
-        p3.outOfGame.assert_called_once_with()
+        p3.outOfGame.assert_called_once_with('You bet 1001, you have only 1000 cash avaiable')
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
         
     def testPlayerBetsMoreThanTheyHaveInTwoParts(self):
@@ -97,19 +99,9 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         Dealer().deal([p1, p2])
 
-        p1.outOfGame.assert_called_once_with()
-        p2.handResult.assert_called_once_with('You Win')
+        p1.outOfGame.assert_called_once_with('You bet 986, you have only 985 cash avaiable')
+        p2.handResult.assert_called_once_with('You win')
 
-    def testMovingToTheNextRoundOfBetting(self):
-        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(15))
-        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
-        p3 = createPlayer('p3', StubMessenger().bet(20))
-        p3.yourGo = MagicMock()
-
-        Dealer().deal([p1, p2, p3])
-
-        p3.yourGo.assert_called_with([])
-        
 # class testDealingTheCards(unittest.TestCase):
     
 #     def testTheDealerShouldGiveEachPlayerSeparatePrivateCards(self):

@@ -1,6 +1,16 @@
 from theHouse import Pot
 from EventHandling import Event
 
+def outMessage(bet, min, max):
+    if bet == 0:
+        return 'You folded'
+
+    if bet < min:
+        return 'You bet %d, minimum bet was %d' % (bet, min)
+
+    if bet > max:
+        return "You bet %d, you have only %d cash avaiable" % (bet, max)
+
 class Dealer(object):
     """deals a hand to players"""
     def __init__(self):
@@ -30,10 +40,12 @@ class Dealer(object):
     def __on_PlayerResponse(self, sender, bet):
 
         if (bet < self.pot.getMinimumBet(sender)) or (bet > sender.cash):
-            sender.outOfGame()
+
+            sender.outOfGame(outMessage(bet, self.pot.getMinimumBet(sender), sender.cash))
             self.table.removeCurrent()
+
             if self.table.lastPlayer():
-                self.table.lastPlayer().handResult('You Win')
+                self.table.lastPlayer().handResult('You win')
                 self.evt_handFinished.fire(self)
             else:
                 self.table.dealingTo().yourGo(list(self.pot.transactions))
