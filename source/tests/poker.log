@@ -770,3 +770,274 @@ DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped scheduler thread. 1 threads remain.
 DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped send thread. 0 threads remain.
 DEBUG:sleekxmpp.thirdparty.statemachine: ==== TRANSITION connected -> disconnected
 DEBUG:sleekxmpp.thirdparty.statemachine:State was not ready
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: STARTTLS
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: Resource Binding
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 3920: Stream Feature: Start Session
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6121: Stream Feature: Roster Versioning
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6121: Stream Feature: Subscription Pre-Approval
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: SASL
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0030: Service Discovery
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0004: Data Forms
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0082: XMPP Date and Time Profiles
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0131: Stanza Headers and Internet Metadata
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0060: Publish-Subscribe
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0199: XMPP Ping
+DEBUG:sleekxmpp.xmlstream.resolver:DNS: Querying localhost for AAAA records.
+DEBUG:sleekxmpp.xmlstream.resolver:DNS: Querying localhost for A records.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Connecting to [::1]:5222
+ERROR:sleekxmpp.xmlstream.xmlstream:Could not connect to [::1]:5222. Socket Error #10061: No connection could be made because the target machine actively refused it
+DEBUG:sleekxmpp.xmlstream.xmlstream:Connecting to 127.0.0.1:5222
+DEBUG:sleekxmpp.thirdparty.statemachine: ==== TRANSITION disconnected -> connected
+DEBUG:sleekxmpp.xmlstream.xmlstream:Starting HANDLER THREAD
+DEBUG:sleekxmpp.xmlstream.xmlstream:Loading event runner
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="1bd92c80" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls" /><mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><mechanism>DIGEST-MD5</mechanism><mechanism>PLAIN</mechanism><mechanism>ANONYMOUS</mechanism><mechanism>CRAM-MD5</mechanism></mechanisms><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><auth xmlns="http://jabber.org/features/iq-auth" /><register xmlns="http://jabber.org/features/iq-register" /></stream:features>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <proceed xmlns="urn:ietf:params:xml:ns:xmpp-tls" />
+DEBUG:sleekxmpp.features.feature_starttls.starttls:Starting TLS
+INFO:sleekxmpp.xmlstream.xmlstream:Negotiating TLS
+INFO:sleekxmpp.xmlstream.xmlstream:Using SSL version: 3
+DEBUG:sleekxmpp.xmlstream.xmlstream:CERT: -----BEGIN CERTIFICATE-----
+MIIC0jCCAbqgAwIBAgIIdSODTtzVZ6AwDQYJKoZIhvcNAQEFBQAwFDESMBAGA1UE
+AwwJcG9rZXJjaGF0MB4XDTEzMDIyNTA4MjgyMVoXDTE4MDEzMDA4MjgyMVowFDES
+MBAGA1UEAwwJcG9rZXJjaGF0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+AQEAh0afrTSeuR/HR+T2WMc+af+DU0Rwpuz6l2ElfT1mKUDME5vqWFBucoA9eyz1
+014azDsISlxz6pFNegZ+Tg8QLGoBoaOzHCh4/vawBvrcWAmf8MsTuyqvBD4JH8W7
+QZOohxJP1a8PCqMSNO5rvPs1Fir+PVCDAVsbK9a0/ZwVP0zTgjqP77l1Hbb8pV9g
+ygJLDKVInF/MycynD9Uofo/WwVK2naBegcHI+DtqKB5DSbmfZpt9/zXnA2uyIxb/
+7Ytq4NQal6bBgOIYM71+ctheD5QLjNWFvu+boJpxgM8FOdv8NmqDY9ga9A19/wbN
+/Cxl7HEwkYQcx5EBj5kU26sdDwIDAQABoygwJjAkBgNVHREEHTAboBkGCCsGAQUF
+BwgFoA0MCyoucG9rZXJjaGF0MA0GCSqGSIb3DQEBBQUAA4IBAQBorBOzz2rHV7K0
+pfTx8iD1jE3aMck6R+hySf1qIEnhhK0vbE92eK9W6bGD2zzDTpvRRmgkwE1yEljh
+1FfDcPow6cFiKyj+5n2fH2Z7OsRWp8RVU7EhFOEPt4onHpD2xo34ZctaqYJM+2iA
+9a36IBov4HZvIcajiXvN4KQYj9q5GvecqhtHsY86VSTtVBWt+Ctnqfb6rYCwV8TM
+jMr/8ADI1TvDiiaWI0CxHajvRh6tA7+I77T+hVuiKqV9NmP8hD7EZGI838EfHEA4
+5ZlCaG3ZrMtXoLn37LAcQC2rl0C21244No/2ontt5NT6RwQjCatsfJwH9udDRckl
+83rsXYEn
+-----END CERTIFICATE-----
+
+WARNING:sleekxmpp.xmlstream.cert:Could not find pyasn1 and pyasn1_modules. SSL certificate COULD NOT BE VERIFIED.
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="1bd92c80" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><mechanism>DIGEST-MD5</mechanism><mechanism>PLAIN</mechanism><mechanism>ANONYMOUS</mechanism><mechanism>CRAM-MD5</mechanism></mechanisms><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><auth xmlns="http://jabber.org/features/iq-auth" /><register xmlns="http://jabber.org/features/iq-register" /></stream:features>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="DIGEST-MD5">=</auth>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <challenge xmlns="urn:ietf:params:xml:ns:xmpp-sasl">cmVhbG09InBva2VyY2hhdCIsbm9uY2U9InVzY0U0WlZTMFZrTk1aQ0pQc211WUtTNmRVYi9HMDNNbkpwdnRXWUoiLHFvcD0iYXV0aCIsY2hhcnNldD11dGYtOCxhbGdvcml0aG09bWQ1LXNlc3M=</challenge>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <response xmlns="urn:ietf:params:xml:ns:xmpp-sasl">dXNlcm5hbWU9ImRlYWxlciIsbm9uY2U9InVzY0U0WlZTMFZrTk1aQ0pQc211WUtTNmRVYi9HMDNNbkpwdnRXWUoiLGRpZ2VzdC11cmk9InhtcHAvbG9jYWxob3N0IixtYXhidWY9NjU1MzYscmVhbG09ImxvY2FsaG9zdCIscW9wPWF1dGgsY25vbmNlPSIyNzMxNDkzOTkxNSIsbmM9MDAwMDAwMDEscmVzcG9uc2U9ODE5ZjUwYTkyYmI5YWJhYjVjYWRkNDA5OWNlNzU2Mjg=</response>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <failure xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><not-authorized /></failure>
+INFO:sleekxmpp.features.feature_mechanisms.mechanisms:Authentication failed: not-authorized
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="CRAM-MD5" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <challenge xmlns="urn:ietf:params:xml:ns:xmpp-sasl">PC0yMDQ2MDAzNTI3MjAxOTA3NTIuMTM3NzI0NjA0NDc4N0Bwb2tlcmNoYXQ+</challenge>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <response xmlns="urn:ietf:params:xml:ns:xmpp-sasl">ZGVhbGVyIGI0MjY0NTcxNjJhZDI5ODMyZmI4OWI5MWUyODJlMzdi</response>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="1bd92c80" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind" /><session xmlns="urn:ietf:params:xml:ns:xmpp-session" /></stream:features>
+DEBUG:sleekxmpp.features.feature_bind.bind:Requesting resource: 
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <iq type="set" id="ae42820a-986a-459a-bd06-e3efba61a68f-1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="pokerchat/1bd92c80" type="result" id="ae42820a-986a-459a-bd06-e3efba61a68f-1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>dealer@pokerchat/1bd92c80</jid></bind></iq>
+INFO:sleekxmpp.features.feature_bind.bind:Node set to: dealer@pokerchat/1bd92c80
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <iq type="set" id="ae42820a-986a-459a-bd06-e3efba61a68f-2"><session xmlns="urn:ietf:params:xml:ns:xmpp-session" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="dealer@pokerchat/1bd92c80" type="result" id="ae42820a-986a-459a-bd06-e3efba61a68f-2" />
+DEBUG:sleekxmpp.features.feature_session.session:Established Session
+DEBUG:sleekxmpp.clientxmpp:Finished processing stream features.
+WARNING:sleekxmpp.xmlstream.cert:Could not find pyasn1 and pyasn1_modules. SSL certificate expiration COULD NOT BE VERIFIED.
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <presence xml:lang="en" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <iq type="get" id="ae42820a-986a-459a-bd06-e3efba61a68f-3"><query xmlns="jabber:iq:roster" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="dealer@pokerchat/1bd92c80" type="result" id="ae42820a-986a-459a-bd06-e3efba61a68f-3"><query xmlns="jabber:iq:roster" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): </stream:stream>
+INFO:sleekxmpp.xmlstream.xmlstream:Waiting for </stream:stream> from server
+DEBUG:sleekxmpp.xmlstream.xmlstream:End of stream recieved
+DEBUG:sleekxmpp.xmlstream.xmlstream:Waiting for 3 threads to exit.
+DEBUG:sleekxmpp.xmlstream.scheduler:Quitting Scheduler thread
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped scheduler thread. 2 threads remain.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped event runner thread. 1 threads remain.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped send thread. 0 threads remain.
+DEBUG:sleekxmpp.thirdparty.statemachine: ==== TRANSITION connected -> disconnected
+DEBUG:sleekxmpp.thirdparty.statemachine:State was not ready
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: STARTTLS
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: Resource Binding
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 3920: Stream Feature: Start Session
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6121: Stream Feature: Roster Versioning
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6121: Stream Feature: Subscription Pre-Approval
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: SASL
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0030: Service Discovery
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0004: Data Forms
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0082: XMPP Date and Time Profiles
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0131: Stanza Headers and Internet Metadata
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0060: Publish-Subscribe
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0199: XMPP Ping
+DEBUG:sleekxmpp.xmlstream.resolver:DNS: Querying localhost for AAAA records.
+DEBUG:sleekxmpp.xmlstream.resolver:DNS: Querying localhost for A records.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Connecting to [::1]:5222
+ERROR:sleekxmpp.xmlstream.xmlstream:Could not connect to [::1]:5222. Socket Error #10061: No connection could be made because the target machine actively refused it
+DEBUG:sleekxmpp.xmlstream.xmlstream:Connecting to 127.0.0.1:5222
+DEBUG:sleekxmpp.thirdparty.statemachine: ==== TRANSITION disconnected -> connected
+DEBUG:sleekxmpp.xmlstream.xmlstream:Starting HANDLER THREAD
+DEBUG:sleekxmpp.xmlstream.xmlstream:Loading event runner
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="975165c4" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls" /><mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><mechanism>DIGEST-MD5</mechanism><mechanism>PLAIN</mechanism><mechanism>ANONYMOUS</mechanism><mechanism>CRAM-MD5</mechanism></mechanisms><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><auth xmlns="http://jabber.org/features/iq-auth" /><register xmlns="http://jabber.org/features/iq-register" /></stream:features>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <proceed xmlns="urn:ietf:params:xml:ns:xmpp-tls" />
+DEBUG:sleekxmpp.features.feature_starttls.starttls:Starting TLS
+INFO:sleekxmpp.xmlstream.xmlstream:Negotiating TLS
+INFO:sleekxmpp.xmlstream.xmlstream:Using SSL version: 3
+DEBUG:sleekxmpp.xmlstream.xmlstream:CERT: -----BEGIN CERTIFICATE-----
+MIIC0jCCAbqgAwIBAgIIdSODTtzVZ6AwDQYJKoZIhvcNAQEFBQAwFDESMBAGA1UE
+AwwJcG9rZXJjaGF0MB4XDTEzMDIyNTA4MjgyMVoXDTE4MDEzMDA4MjgyMVowFDES
+MBAGA1UEAwwJcG9rZXJjaGF0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+AQEAh0afrTSeuR/HR+T2WMc+af+DU0Rwpuz6l2ElfT1mKUDME5vqWFBucoA9eyz1
+014azDsISlxz6pFNegZ+Tg8QLGoBoaOzHCh4/vawBvrcWAmf8MsTuyqvBD4JH8W7
+QZOohxJP1a8PCqMSNO5rvPs1Fir+PVCDAVsbK9a0/ZwVP0zTgjqP77l1Hbb8pV9g
+ygJLDKVInF/MycynD9Uofo/WwVK2naBegcHI+DtqKB5DSbmfZpt9/zXnA2uyIxb/
+7Ytq4NQal6bBgOIYM71+ctheD5QLjNWFvu+boJpxgM8FOdv8NmqDY9ga9A19/wbN
+/Cxl7HEwkYQcx5EBj5kU26sdDwIDAQABoygwJjAkBgNVHREEHTAboBkGCCsGAQUF
+BwgFoA0MCyoucG9rZXJjaGF0MA0GCSqGSIb3DQEBBQUAA4IBAQBorBOzz2rHV7K0
+pfTx8iD1jE3aMck6R+hySf1qIEnhhK0vbE92eK9W6bGD2zzDTpvRRmgkwE1yEljh
+1FfDcPow6cFiKyj+5n2fH2Z7OsRWp8RVU7EhFOEPt4onHpD2xo34ZctaqYJM+2iA
+9a36IBov4HZvIcajiXvN4KQYj9q5GvecqhtHsY86VSTtVBWt+Ctnqfb6rYCwV8TM
+jMr/8ADI1TvDiiaWI0CxHajvRh6tA7+I77T+hVuiKqV9NmP8hD7EZGI838EfHEA4
+5ZlCaG3ZrMtXoLn37LAcQC2rl0C21244No/2ontt5NT6RwQjCatsfJwH9udDRckl
+83rsXYEn
+-----END CERTIFICATE-----
+
+WARNING:sleekxmpp.xmlstream.cert:Could not find pyasn1 and pyasn1_modules. SSL certificate COULD NOT BE VERIFIED.
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="975165c4" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><mechanism>DIGEST-MD5</mechanism><mechanism>PLAIN</mechanism><mechanism>ANONYMOUS</mechanism><mechanism>CRAM-MD5</mechanism></mechanisms><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><auth xmlns="http://jabber.org/features/iq-auth" /><register xmlns="http://jabber.org/features/iq-register" /></stream:features>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="DIGEST-MD5">=</auth>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <challenge xmlns="urn:ietf:params:xml:ns:xmpp-sasl">cmVhbG09InBva2VyY2hhdCIsbm9uY2U9IkdPM2plaGFxdWZxK0VGVy9vQ1p0WHh0SU1PbTVXbmtCb003ZU5VejMiLHFvcD0iYXV0aCIsY2hhcnNldD11dGYtOCxhbGdvcml0aG09bWQ1LXNlc3M=</challenge>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <response xmlns="urn:ietf:params:xml:ns:xmpp-sasl">dXNlcm5hbWU9ImRlYWxlciIsbm9uY2U9IkdPM2plaGFxdWZxK0VGVy9vQ1p0WHh0SU1PbTVXbmtCb003ZU5VejMiLGRpZ2VzdC11cmk9InhtcHAvbG9jYWxob3N0IixtYXhidWY9NjU1MzYscmVhbG09ImxvY2FsaG9zdCIscW9wPWF1dGgsY25vbmNlPSI1MjU0MzU2MDAyOTQiLG5jPTAwMDAwMDAxLHJlc3BvbnNlPTMzMTk2Y2MwMGU2YzEzYTBiNjBkZDMxODRjNmQ4ZGU3</response>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <failure xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><not-authorized /></failure>
+INFO:sleekxmpp.features.feature_mechanisms.mechanisms:Authentication failed: not-authorized
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="CRAM-MD5" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <challenge xmlns="urn:ietf:params:xml:ns:xmpp-sasl">PDQ1OTgzMzEzMzYxNjY3NjU2NDMuMTM3NzI0NjA1ODQ4OUBwb2tlcmNoYXQ+</challenge>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <response xmlns="urn:ietf:params:xml:ns:xmpp-sasl">ZGVhbGVyIDEyMmMzMTM0MGQxODE1ZGMyNDQ3Y2M4MzdhYWM5YzRk</response>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="975165c4" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind" /><session xmlns="urn:ietf:params:xml:ns:xmpp-session" /></stream:features>
+DEBUG:sleekxmpp.features.feature_bind.bind:Requesting resource: 
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <iq type="set" id="05e2c05a-5bfd-49c0-a5c6-fc78cf98f465-1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="pokerchat/975165c4" type="result" id="05e2c05a-5bfd-49c0-a5c6-fc78cf98f465-1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>dealer@pokerchat/975165c4</jid></bind></iq>
+INFO:sleekxmpp.features.feature_bind.bind:Node set to: dealer@pokerchat/975165c4
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <iq type="set" id="05e2c05a-5bfd-49c0-a5c6-fc78cf98f465-2"><session xmlns="urn:ietf:params:xml:ns:xmpp-session" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="dealer@pokerchat/975165c4" type="result" id="05e2c05a-5bfd-49c0-a5c6-fc78cf98f465-2" />
+DEBUG:sleekxmpp.features.feature_session.session:Established Session
+DEBUG:sleekxmpp.clientxmpp:Finished processing stream features.
+WARNING:sleekxmpp.xmlstream.cert:Could not find pyasn1 and pyasn1_modules. SSL certificate expiration COULD NOT BE VERIFIED.
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <presence xml:lang="en" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <iq type="get" id="05e2c05a-5bfd-49c0-a5c6-fc78cf98f465-3"><query xmlns="jabber:iq:roster" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <message to="dealer@pokerchat" type="chat" xml:lang="en" from="player1@pokerchat/c628d362"><body>player1@pokerchat</body><delay xmlns="urn:xmpp:delay" stamp="2013-08-23T08:20:56.492Z" from="pokerchat" /><x xmlns="jabber:x:delay" stamp="20130823T08:20:56" from="pokerchat" /></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="dealer@pokerchat/975165c4" type="result" id="05e2c05a-5bfd-49c0-a5c6-fc78cf98f465-3"><query xmlns="jabber:iq:roster" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player1@pokerchat" type="chat" xml:lang="en"><body>Cash 1000</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): </stream:stream>
+INFO:sleekxmpp.xmlstream.xmlstream:Waiting for </stream:stream> from server
+DEBUG:sleekxmpp.xmlstream.xmlstream:End of stream recieved
+DEBUG:sleekxmpp.xmlstream.xmlstream:Waiting for 3 threads to exit.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped event runner thread. 2 threads remain.
+DEBUG:sleekxmpp.xmlstream.scheduler:Quitting Scheduler thread
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped scheduler thread. 1 threads remain.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped send thread. 0 threads remain.
+DEBUG:sleekxmpp.thirdparty.statemachine: ==== TRANSITION connected -> disconnected
+DEBUG:sleekxmpp.thirdparty.statemachine:State was not ready
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: STARTTLS
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: Resource Binding
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 3920: Stream Feature: Start Session
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6121: Stream Feature: Roster Versioning
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6121: Stream Feature: Subscription Pre-Approval
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: RFC 6120: Stream Feature: SASL
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0030: Service Discovery
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0004: Data Forms
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0082: XMPP Date and Time Profiles
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0131: Stanza Headers and Internet Metadata
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0060: Publish-Subscribe
+DEBUG:sleekxmpp.plugins.base:Loaded Plugin: XEP-0199: XMPP Ping
+DEBUG:sleekxmpp.xmlstream.resolver:DNS: Querying localhost for AAAA records.
+DEBUG:sleekxmpp.xmlstream.resolver:DNS: Querying localhost for A records.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Connecting to [::1]:5222
+ERROR:sleekxmpp.xmlstream.xmlstream:Could not connect to [::1]:5222. Socket Error #10061: No connection could be made because the target machine actively refused it
+DEBUG:sleekxmpp.xmlstream.xmlstream:Connecting to 127.0.0.1:5222
+DEBUG:sleekxmpp.thirdparty.statemachine: ==== TRANSITION disconnected -> connected
+DEBUG:sleekxmpp.xmlstream.xmlstream:Starting HANDLER THREAD
+DEBUG:sleekxmpp.xmlstream.xmlstream:Loading event runner
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="680c7423" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls" /><mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><mechanism>DIGEST-MD5</mechanism><mechanism>PLAIN</mechanism><mechanism>ANONYMOUS</mechanism><mechanism>CRAM-MD5</mechanism></mechanisms><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><auth xmlns="http://jabber.org/features/iq-auth" /><register xmlns="http://jabber.org/features/iq-register" /></stream:features>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <proceed xmlns="urn:ietf:params:xml:ns:xmpp-tls" />
+DEBUG:sleekxmpp.features.feature_starttls.starttls:Starting TLS
+INFO:sleekxmpp.xmlstream.xmlstream:Negotiating TLS
+INFO:sleekxmpp.xmlstream.xmlstream:Using SSL version: 3
+DEBUG:sleekxmpp.xmlstream.xmlstream:CERT: -----BEGIN CERTIFICATE-----
+MIIC0jCCAbqgAwIBAgIIdSODTtzVZ6AwDQYJKoZIhvcNAQEFBQAwFDESMBAGA1UE
+AwwJcG9rZXJjaGF0MB4XDTEzMDIyNTA4MjgyMVoXDTE4MDEzMDA4MjgyMVowFDES
+MBAGA1UEAwwJcG9rZXJjaGF0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+AQEAh0afrTSeuR/HR+T2WMc+af+DU0Rwpuz6l2ElfT1mKUDME5vqWFBucoA9eyz1
+014azDsISlxz6pFNegZ+Tg8QLGoBoaOzHCh4/vawBvrcWAmf8MsTuyqvBD4JH8W7
+QZOohxJP1a8PCqMSNO5rvPs1Fir+PVCDAVsbK9a0/ZwVP0zTgjqP77l1Hbb8pV9g
+ygJLDKVInF/MycynD9Uofo/WwVK2naBegcHI+DtqKB5DSbmfZpt9/zXnA2uyIxb/
+7Ytq4NQal6bBgOIYM71+ctheD5QLjNWFvu+boJpxgM8FOdv8NmqDY9ga9A19/wbN
+/Cxl7HEwkYQcx5EBj5kU26sdDwIDAQABoygwJjAkBgNVHREEHTAboBkGCCsGAQUF
+BwgFoA0MCyoucG9rZXJjaGF0MA0GCSqGSIb3DQEBBQUAA4IBAQBorBOzz2rHV7K0
+pfTx8iD1jE3aMck6R+hySf1qIEnhhK0vbE92eK9W6bGD2zzDTpvRRmgkwE1yEljh
+1FfDcPow6cFiKyj+5n2fH2Z7OsRWp8RVU7EhFOEPt4onHpD2xo34ZctaqYJM+2iA
+9a36IBov4HZvIcajiXvN4KQYj9q5GvecqhtHsY86VSTtVBWt+Ctnqfb6rYCwV8TM
+jMr/8ADI1TvDiiaWI0CxHajvRh6tA7+I77T+hVuiKqV9NmP8hD7EZGI838EfHEA4
+5ZlCaG3ZrMtXoLn37LAcQC2rl0C21244No/2ontt5NT6RwQjCatsfJwH9udDRckl
+83rsXYEn
+-----END CERTIFICATE-----
+
+WARNING:sleekxmpp.xmlstream.cert:Could not find pyasn1 and pyasn1_modules. SSL certificate COULD NOT BE VERIFIED.
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="680c7423" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><mechanism>DIGEST-MD5</mechanism><mechanism>PLAIN</mechanism><mechanism>ANONYMOUS</mechanism><mechanism>CRAM-MD5</mechanism></mechanisms><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><auth xmlns="http://jabber.org/features/iq-auth" /><register xmlns="http://jabber.org/features/iq-register" /></stream:features>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="DIGEST-MD5">=</auth>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <challenge xmlns="urn:ietf:params:xml:ns:xmpp-sasl">cmVhbG09InBva2VyY2hhdCIsbm9uY2U9InRuREdUZ05GaU5qMW9PNzM0TlZ6eDR3Nk1DTllVM2QrUFRtNnhnelAiLHFvcD0iYXV0aCIsY2hhcnNldD11dGYtOCxhbGdvcml0aG09bWQ1LXNlc3M=</challenge>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <response xmlns="urn:ietf:params:xml:ns:xmpp-sasl">dXNlcm5hbWU9ImRlYWxlciIsbm9uY2U9InRuREdUZ05GaU5qMW9PNzM0TlZ6eDR3Nk1DTllVM2QrUFRtNnhnelAiLGRpZ2VzdC11cmk9InhtcHAvbG9jYWxob3N0IixtYXhidWY9NjU1MzYscmVhbG09ImxvY2FsaG9zdCIscW9wPWF1dGgsY25vbmNlPSI1ODE4MzE1ODc3MzYiLG5jPTAwMDAwMDAxLHJlc3BvbnNlPWNjMWFiYmI2YWIxOWE5NGVkNDU3NTczNTgwZjVjNjRm</response>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <failure xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><not-authorized /></failure>
+INFO:sleekxmpp.features.feature_mechanisms.mechanisms:Authentication failed: not-authorized
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="CRAM-MD5" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <challenge xmlns="urn:ietf:params:xml:ns:xmpp-sasl">PC04OTYwNjU1MjE4NzY4MjQ0OTgxLjEzNzcyNDYwNzE4MjNAcG9rZXJjaGF0Pg==</challenge>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <response xmlns="urn:ietf:params:xml:ns:xmpp-sasl">ZGVhbGVyIDhiNTQ1NDVkZGU3ZGYyNGQ3N2Y4ZGEwYWY2NDk4ODc0</response>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <success xmlns="urn:ietf:params:xml:ns:xmpp-sasl" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <stream:stream to='localhost' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:stream version="1.0" from="pokerchat" id="680c7423" xml:lang="en">
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <stream:features xmlns="http://etherx.jabber.org/streams"><compression xmlns="http://jabber.org/features/compress"><method>zlib</method></compression><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind" /><session xmlns="urn:ietf:params:xml:ns:xmpp-session" /></stream:features>
+DEBUG:sleekxmpp.features.feature_bind.bind:Requesting resource: 
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <iq type="set" id="73b80b66-0ab8-4bb2-a456-ae6d8c6f1692-1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="pokerchat/680c7423" type="result" id="73b80b66-0ab8-4bb2-a456-ae6d8c6f1692-1"><bind xmlns="urn:ietf:params:xml:ns:xmpp-bind"><jid>dealer@pokerchat/680c7423</jid></bind></iq>
+INFO:sleekxmpp.features.feature_bind.bind:Node set to: dealer@pokerchat/680c7423
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): <iq type="set" id="73b80b66-0ab8-4bb2-a456-ae6d8c6f1692-2"><session xmlns="urn:ietf:params:xml:ns:xmpp-session" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="dealer@pokerchat/680c7423" type="result" id="73b80b66-0ab8-4bb2-a456-ae6d8c6f1692-2" />
+DEBUG:sleekxmpp.features.feature_session.session:Established Session
+DEBUG:sleekxmpp.clientxmpp:Finished processing stream features.
+WARNING:sleekxmpp.xmlstream.cert:Could not find pyasn1 and pyasn1_modules. SSL certificate expiration COULD NOT BE VERIFIED.
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <presence xml:lang="en" />
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <iq type="get" id="73b80b66-0ab8-4bb2-a456-ae6d8c6f1692-3"><query xmlns="jabber:iq:roster" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <message to="dealer@pokerchat" type="chat" xml:lang="en" from="player1@pokerchat/d8d785da"><body>player1@pokerchat</body><delay xmlns="urn:xmpp:delay" stamp="2013-08-23T08:21:09.913Z" from="pokerchat" /><x xmlns="jabber:x:delay" stamp="20130823T08:21:09" from="pokerchat" /></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <iq to="dealer@pokerchat/680c7423" type="result" id="73b80b66-0ab8-4bb2-a456-ae6d8c6f1692-3"><query xmlns="jabber:iq:roster" /></iq>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player1@pokerchat" type="chat" xml:lang="en"><body>Cash 1000</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <message to="dealer@pokerchat" type="chat" xml:lang="en" from="player2@pokerchat/6eb14573"><body>player2@pokerchat</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player2@pokerchat" type="chat" xml:lang="en"><body>Cash 1000</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player1@pokerchat" type="chat" xml:lang="en"><body>player1@pokerchat 5</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player2@pokerchat" type="chat" xml:lang="en"><body>player1@pokerchat 5,player2@pokerchat 10</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player1@pokerchat" type="chat" xml:lang="en"><body>player1@pokerchat 5,player2@pokerchat 10</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <message to="dealer@pokerchat" type="chat" xml:lang="en" from="player1@pokerchat/d8d785da"><body>995</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player2@pokerchat" type="chat" xml:lang="en"><body>player1@pokerchat 5,player2@pokerchat 10,player1@pokerchat 995</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:RECV: <message to="dealer@pokerchat" type="chat" xml:lang="en" from="player2@pokerchat/6eb14573"><body>990</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player1@pokerchat" type="chat" xml:lang="en"><body>Hand Result</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player2@pokerchat" type="chat" xml:lang="en"><body>Hand Result</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player1@pokerchat" type="chat" xml:lang="en"><body>Game Result</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND: <message to="player2@pokerchat" type="chat" xml:lang="en"><body>Game Result</body></message>
+DEBUG:sleekxmpp.xmlstream.xmlstream:SEND (IMMED): </stream:stream>
+INFO:sleekxmpp.xmlstream.xmlstream:Waiting for </stream:stream> from server
+DEBUG:sleekxmpp.xmlstream.xmlstream:End of stream recieved
+DEBUG:sleekxmpp.xmlstream.xmlstream:Waiting for 3 threads to exit.
+DEBUG:sleekxmpp.xmlstream.scheduler:Quitting Scheduler thread
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped scheduler thread. 2 threads remain.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped event runner thread. 1 threads remain.
+DEBUG:sleekxmpp.xmlstream.xmlstream:Stopped send thread. 0 threads remain.
+DEBUG:sleekxmpp.thirdparty.statemachine: ==== TRANSITION connected -> disconnected
+DEBUG:sleekxmpp.thirdparty.statemachine:State was not ready

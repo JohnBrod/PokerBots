@@ -14,9 +14,9 @@ def createPlayer(name, messenger):
 class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
     
     def testMoveLeftToRightAtTheTable(self):
-        p1 = createPlayer('p1', ObedientMessenger().skip())
-        p2 = createPlayer('p2', ObedientMessenger().skip())
-        p3 = createPlayer('p3', ObedientMessenger())
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger())
 
         p1.yourGo = MagicMock()
         p2.yourGo = MagicMock()
@@ -29,9 +29,9 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p3.yourGo.assert_called_with([(p1, 5), (p2, 10)])
     
     def testBackToFirstPlayerAfterTheLast(self):
-        p1 = createPlayer('p1', ObedientMessenger().skip())
-        p2 = createPlayer('p2', ObedientMessenger().skip())
-        p3 = createPlayer('p3', ObedientMessenger().bet(10))
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(10))
         p1.yourGo = MagicMock()
 
         Dealer().deal([p1, p2, p3])
@@ -39,8 +39,8 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p1.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
     
     def testPlayerFolds(self):
-        p1 = createPlayer('p1', ObedientMessenger().skip().bet(0))
-        p2 = createPlayer('p2', ObedientMessenger().skip())
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
 
         p2.handResult = MagicMock()
 
@@ -52,10 +52,10 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p2.handResult.assert_called_once_with('You Win')
     
     def testPlayerBetsLessThanMinimum(self):
-        p1 = createPlayer('p1', ObedientMessenger().skip())
-        p2 = createPlayer('p2', ObedientMessenger().skip())
-        p3 = createPlayer('p3', ObedientMessenger().bet(9))
-        p4 = createPlayer('p4', ObedientMessenger())
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(9))
+        p4 = createPlayer('p4', StubMessenger())
         p3.outOfGame = MagicMock()
         p4.yourGo = MagicMock()
 
@@ -65,9 +65,9 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
     
     def testFirstPlayerBetsLessThanMinimum(self):
-        p1 = createPlayer('p1', ObedientMessenger().skip().bet(4))
-        p2 = createPlayer('p2', ObedientMessenger().skip())
-        p3 = createPlayer('p3', ObedientMessenger().bet(10))
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(4))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(10))
         p1.outOfGame = MagicMock()
         p2.yourGo = MagicMock()
 
@@ -77,10 +77,10 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
         
     def testPlayerBetsMoreThanTheyHave(self):
-        p1 = createPlayer('p1', ObedientMessenger().skip())
-        p2 = createPlayer('p2', ObedientMessenger().skip())
-        p3 = createPlayer('p3', ObedientMessenger().bet(1001))
-        p4 = createPlayer('p4', ObedientMessenger())
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(1001))
+        p4 = createPlayer('p4', StubMessenger())
         p3.outOfGame = MagicMock()
         p4.yourGo = MagicMock()
 
@@ -90,8 +90,8 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
         
     def testPlayerBetsMoreThanTheyHaveInTwoParts(self):
-        p1 = createPlayer('p1', ObedientMessenger().skip().bet(10).bet(986))
-        p2 = createPlayer('p2', ObedientMessenger().skip().bet(10))
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(10).bet(986))
+        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
         p1.outOfGame = MagicMock()
         p2.handResult = MagicMock()
 
@@ -99,10 +99,20 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p1.outOfGame.assert_called_once_with()
         p2.handResult.assert_called_once_with('You Win')
+
+    def testMovingToTheNextRoundOfBetting(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(15))
+        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
+        p3 = createPlayer('p3', StubMessenger().bet(20))
+        p3.yourGo = MagicMock()
+
+        Dealer().deal([p1, p2, p3])
+
+        p3.yourGo.assert_called_with([])
         
 # class testDealingTheCards(unittest.TestCase):
     
-#     def testTheDealerShouldGiveEachPlayerPrivateCards(self):
+#     def testTheDealerShouldGiveEachPlayerSeparatePrivateCards(self):
 #         p1 = createPlayer('p1', ObedientMessenger())
 #         p2 = createPlayer('p2', ObedientMessenger())
 
@@ -159,13 +169,12 @@ class AnyDeck():
     def take(self):
         pass
 
-class ObedientMessenger(object):
-    """docstring for ObedientMessenger"""
+class StubMessenger(object):
     def __init__(self):
         self.evt_messageReceived = Event()
         self.replies = Queue()
 
-    def skip(self):
+    def skipBlind(self):
         self.replies.put('skip')
         return self
 

@@ -1,9 +1,5 @@
 from theHouse import Pot
 from EventHandling import Event
-import logging
-
-def fold(bet):
-    return bet == 0
 
 class Dealer(object):
     """deals a hand to players"""
