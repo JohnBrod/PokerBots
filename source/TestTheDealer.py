@@ -48,7 +48,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(AnyDeck()).deal([p1, p2])
 
         p1.outOfGame.assert_called_once_with('You folded')
-        p2.handResult.assert_called_once_with('You win')
+        p2.handResult.assert_called_once_with('p2 wins')
     
     def testPlayerBetsLessThanMinimum(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind())
@@ -106,7 +106,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(AnyDeck()).deal([p1, p2])
 
         p1.outOfGame.assert_called_once_with('You bet 986, you have only 985 cash avaiable')
-        p2.handResult.assert_called_once_with('You win')
+        p2.handResult.assert_called_once_with('p2 wins')
 
 class testDealingTheCards(unittest.TestCase):
     
@@ -182,7 +182,7 @@ class testDealingTheCards(unittest.TestCase):
 
         p1.cards.assert_called_with((10))
         p2.cards.assert_called_with((10))
-        p1.handResult.assert_called_once_with('xxx')
+        p1.handResult.assert_called_once_with('someone wins')
 
 class PredictableDeck():
 
