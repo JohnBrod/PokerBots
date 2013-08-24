@@ -22,7 +22,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p2.yourGo = MagicMock()
         p3.yourGo = MagicMock()
 
-        Dealer().deal([p1, p2, p3])
+        Dealer(AnyDeck()).deal([p1, p2, p3])
 
         p1.yourGo.assert_called_with([(p1, 5)])
         p2.yourGo.assert_called_with([(p1, 5), (p2, 10)])
@@ -34,7 +34,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p3 = createPlayer('p3', StubMessenger().bet(10))
         p1.yourGo = MagicMock()
 
-        Dealer().deal([p1, p2, p3])
+        Dealer(AnyDeck()).deal([p1, p2, p3])
 
         p1.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
     
@@ -45,11 +45,8 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p2.handResult = MagicMock()
         p1.outOfGame = MagicMock()
 
-        dealer = Dealer()
-        dealer.evt_handFinished.fire = MagicMock()
-        dealer.deal([p1, p2])
+        Dealer(AnyDeck()).deal([p1, p2])
 
-        dealer.evt_handFinished.fire.assert_called_with(dealer)
         p1.outOfGame.assert_called_once_with('You folded')
         p2.handResult.assert_called_once_with('You win')
     
@@ -61,7 +58,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p3.outOfGame = MagicMock()
         p4.yourGo = MagicMock()
 
-        Dealer().deal([p1, p2, p3, p4])
+        Dealer(AnyDeck()).deal([p1, p2, p3, p4])
 
         p3.outOfGame.assert_called_once_with('You bet 9, minimum bet was 10')
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
@@ -73,10 +70,19 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p1.outOfGame = MagicMock()
         p2.yourGo = MagicMock()
 
-        Dealer().deal([p1, p2, p3])
+        Dealer(AnyDeck()).deal([p1, p2, p3])
 
         p1.outOfGame.assert_called_once_with('You bet 4, minimum bet was 5')
         p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
+        
+    def testPlayerBetsTheMax(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(995))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p2.yourGo = MagicMock()
+
+        Dealer(AnyDeck()).deal([p1, p2])
+
+        p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p1, 995)])
         
     def testPlayerBetsMoreThanTheyHave(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind())
@@ -86,7 +92,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p3.outOfGame = MagicMock()
         p4.yourGo = MagicMock()
 
-        Dealer().deal([p1, p2, p3, p4])
+        Dealer(AnyDeck()).deal([p1, p2, p3, p4])
 
         p3.outOfGame.assert_called_once_with('You bet 1001, you have only 1000 cash avaiable')
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
@@ -97,56 +103,86 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p1.outOfGame = MagicMock()
         p2.handResult = MagicMock()
 
-        Dealer().deal([p1, p2])
+        Dealer(AnyDeck()).deal([p1, p2])
 
         p1.outOfGame.assert_called_once_with('You bet 986, you have only 985 cash avaiable')
         p2.handResult.assert_called_once_with('You win')
 
-# class testDealingTheCards(unittest.TestCase):
+class testDealingTheCards(unittest.TestCase):
     
-#     def testTheDealerShouldGiveEachPlayerSeparatePrivateCards(self):
-#         p1 = createPlayer('p1', ObedientMessenger())
-#         p2 = createPlayer('p2', ObedientMessenger())
+    def testTheDealerShouldGiveEachPlayerSeparatePrivateCards(self):
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
 
-#         p1.cards = MagicMock()
-#         p2.cards = MagicMock()
+        p1.cards = MagicMock()
+        p2.cards = MagicMock()
 
-#         Dealer(PredictableDeck()).deal([p1, p2])
+        Dealer(PredictableDeck()).deal([p1, p2])
 
-#         p1.cards.assert_called_once_with((1, 2))
-#         p2.cards.assert_called_once_with((3, 4))
+        p1.cards.assert_called_with((1, 2))
+        p2.cards.assert_called_with((3, 4))
 
-# a player that folds is excluded from the next round
-# player folds, all players are in
-# if only one player left then they win
+    def testCommunityCardsAreDealtAfterTheFirstRoundOfBetting(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
 
-    # def testPlayerFoldsAndTheRemainingPlayerIsTheWinner(self):
-    #     p1 = createPlayer('p1', ObedientMessenger().skip().bet(0))
-    #     p2 = createPlayer('p2', ObedientMessenger().skip())
+        p1.cards = MagicMock()
+        p2.cards = MagicMock()
 
-    #     p1.cards = MagicMock()
-    #     p2.cards = MagicMock()
+        Dealer(PredictableDeck()).deal([p1, p2])
 
-    #     Dealer(PredictableDeck()).deal([p1, p2])
+        p1.cards.assert_called_with((5, 6, 7))
+        p2.cards.assert_called_with((5, 6, 7))
 
-    #     p1.cards.assert_not_called_with((5, 6, 7))
-    #     p1.cards.assert_not_called_with((5, 6, 7))
+    def testThenTheFlop(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10))
+        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
 
-# player kicked out because they don't respond within the allowed time
+        p1.cards = MagicMock()
+        p2.cards = MagicMock()
 
-# no community cards until all palyers are in
+        Dealer(PredictableDeck()).deal([p1, p2])
 
-    # def testCommunityCardsAreDealtAfterTheFirstRoundOfBetting(self):
-    #     p1 = createPlayer('p1', ObedientMessenger().skip().bet(5))
-    #     p2 = createPlayer('p2', ObedientMessenger().skip().bet(0))
+        p1.cards.assert_called_with((8))
+        p2.cards.assert_called_with((8))
 
-    #     p1.cards = MagicMock()
-    #     p2.cards = MagicMock()
+    def testThenTheRiver(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10).bet(10))
+        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10).bet(10))
 
-    #     Dealer(PredictableDeck()).deal([p1, p2])
+        p1.cards = MagicMock()
+        p2.cards = MagicMock()
 
-    #     p1.cards.assert_called_with((5, 6, 7))
-    #     p2.cards.assert_called_with((5, 6, 7))
+        Dealer(PredictableDeck()).deal([p1, p2])
+
+        p1.cards.assert_called_with((9))
+        p2.cards.assert_called_with((9))
+
+    def testThenTheTurn(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10).bet(10).bet(10))
+        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10).bet(10).bet(10))
+
+        p1.cards = MagicMock()
+        p2.cards = MagicMock()
+
+        Dealer(PredictableDeck()).deal([p1, p2])
+
+        p1.cards.assert_called_with((10))
+        p2.cards.assert_called_with((10))
+
+    def testThenTheWinnerIsDeclared(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10).bet(10).bet(10).bet(10))
+        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10).bet(10).bet(10).bet(10))
+
+        p1.cards = MagicMock()
+        p1.handResult = MagicMock()
+        p2.cards = MagicMock()
+
+        Dealer(PredictableDeck()).deal([p1, p2])
+
+        p1.cards.assert_called_with((10))
+        p2.cards.assert_called_with((10))
+        p1.handResult.assert_called_once_with('xxx')
 
 class PredictableDeck():
 
@@ -176,6 +212,8 @@ class StubMessenger(object):
 
     def sendMessage(self, jid, msg):
 
+        self.lastMessage = msg
+
         if self.replies.empty(): return
 
         response = self.replies.get()
@@ -183,6 +221,6 @@ class StubMessenger(object):
         if response == 'skip': return
 
         self.evt_messageReceived.fire(self, response)
-        
+
 if __name__=="__main__":
     unittest.main()

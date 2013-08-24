@@ -31,7 +31,7 @@ class Casino(object):
         self.dealer = dealer
         self.players = players
         self.playing = False
-        self.dealer.evt_handFinished += self.on_handFinished
+        self.dealer.evt_gameFinished += self.on_gameFinished
 
     def play(self):
 
@@ -39,7 +39,7 @@ class Casino(object):
 
         self.dealer.deal(list(self.players))
 
-    def on_handFinished(self, sender, args = None):
+    def on_gameFinished(self, sender, args = None):
 
         for player in self.players: player.gameResult('xxx')
 
@@ -63,7 +63,7 @@ class PlayerProxy(object):
     def cards(self, transactions):
         pass
 
-    def outOfGame(self):
+    def outOfGame(self, msg):
         pass
 
     def youWin(self):
@@ -112,3 +112,8 @@ class Pot(object):
             return 0
 
         return highestContribution - playerContribution
+
+    def allIn(self):
+        contributors = list(set(map(lambda x: x[0], self.transactions)))
+
+        return len(filter(lambda x: self.getMinimumBet(x) > 0, contributors)) == 0
