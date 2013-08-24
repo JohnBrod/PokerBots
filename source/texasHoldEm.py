@@ -1,6 +1,6 @@
 from theHouse import Pot
 from EventHandling import Event
-from Queue import Queue
+from collections import deque
 
 def outMessage(bet, min, max):
     if bet == 0:
@@ -19,12 +19,9 @@ class Dealer(object):
         self.bigBlind = 10
         self.smallBlind = 5
         self.evt_gameFinished = Event()
-        self.dealStages = Queue()
-        self.dealStages.put(self.dealPrivateCards)
-        self.dealStages.put(self.dealCommunityCards)
-        self.dealStages.put(self.dealTurnCard)
-        self.dealStages.put(self.dealTurnCard)
-        self.dealStages.put(self.dealTurnCard)
+        self.dealStages = deque([self.dealPrivateCards, self.dealCommunityCards, self.dealTurnCard, self.dealTurnCard, self.dealTurnCard])
+        self.ccDealt = False
+        self.optionGiven = False
 
     def deal(self, players):
 
@@ -34,7 +31,7 @@ class Dealer(object):
         for player in self.table.players:
             player.evt_response += self.__on_PlayerResponse
 
-        self.dealStages.get()()
+        self.dealStages.popleft()()
 
         self.pot.add(self.table.dealingTo(), self.smallBlind)        
         self.table.dealingTo().yourGo(list(self.pot.transactions))
@@ -42,6 +39,7 @@ class Dealer(object):
         self.table.nextPlayer()
         self.pot.add(self.table.dealingTo(), self.bigBlind)
         self.table.dealingTo().yourGo(list(self.pot.transactions))
+        self.bbPlayer = self.table.dealingTo()
 
         self.table.nextPlayer()
         self.table.dealingTo().yourGo(list(self.pot.transactions))
@@ -64,10 +62,10 @@ class Dealer(object):
 
         self.pot.add(sender, bet)
 
-        if self.pot.allIn():
+        if self.roundOfBettingFinished(sender, bet):
 
-            if not self.dealStages.empty():
-                self.dealStages.get()()
+            if len(self.dealStages) > 0:
+                self.dealStages.popleft()()
             else:
                 for player in self.table.players: player.handResult('someone wins')
 
@@ -78,6 +76,14 @@ class Dealer(object):
         
         self.table.nextPlayer()
         self.table.dealingTo().yourGo(list(self.pot.transactions))
+
+    def roundOfBettingFinished(self, player, bet):
+
+        if self.optionGiven: return self.pot.allIn()
+
+        self.optionGiven = True
+        
+        return player == self.bbPlayer and bet == 0
 
     def dealCommunityCards(self):
         communityCards = (self.deck.take(), self.deck.take(), self.deck.take())
