@@ -57,7 +57,7 @@ class Dealer(object):
             self.table.removeCurrent()
 
             if self.table.lastPlayer():
-                for player in self.table.players: player.handResult('p2 wins')
+                for player in self.table.players: player.handResult('%s wins' % self.table.lastPlayer().name)
             else:
                 self.table.dealingTo().yourGo(list(self.pot.transactions))
             return
@@ -72,7 +72,7 @@ class Dealer(object):
                 for player in self.table.players: player.handResult('someone wins')
 
         if self.table.allIn():
-            for player in self.table.players: player.handResult('someone wins')                
+            for player in self.table.players: player.handResult('someone wins')
             self.evt_gameFinished.fire(self)
             return
         
