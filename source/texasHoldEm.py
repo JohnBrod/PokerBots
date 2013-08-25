@@ -45,9 +45,6 @@ class Dealer(object):
         self.table.dealingTo().yourGo(list(self.pot.transactions))
 
     def __on_PlayerResponse(self, sender, bet):
-# the next round of cards are dealt once all players (other than players that have folded) have put the same amount in the pot
-# the exception is the community cards, the big blind has the option to bet again if everyone just calls the big blind. In this case the big blind can choose not
-# to exercise the option by calling (bet of 0), or exercise the option (bet more than 0)
 
         if bet not in range(self.pot.getMinimumBet(sender), sender.cash + 1):
 
@@ -82,7 +79,7 @@ class Dealer(object):
         if self.optionGiven: return self.pot.allIn()
 
         self.optionGiven = True
-        
+
         return player == self.bbPlayer and bet == 0
 
     def dealCommunityCards(self):

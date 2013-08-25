@@ -11,102 +11,102 @@ def createPlayer(name, messenger):
     player.fromMe = lambda x: True
     return player
                
-# class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
+class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
     
-#     def testMoveLeftToRightAtTheTable(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind())
-#         p2 = createPlayer('p2', StubMessenger().skipBlind())
-#         p3 = createPlayer('p3', StubMessenger())
+    def testMoveLeftToRightAtTheTable(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger())
 
-#         p1.yourGo = MagicMock()
-#         p2.yourGo = MagicMock()
-#         p3.yourGo = MagicMock()
+        p1.yourGo = MagicMock()
+        p2.yourGo = MagicMock()
+        p3.yourGo = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2, p3])
+        Dealer(AnyDeck()).deal([p1, p2, p3])
 
-#         p1.yourGo.assert_called_with([(p1, 5)])
-#         p2.yourGo.assert_called_with([(p1, 5), (p2, 10)])
-#         p3.yourGo.assert_called_with([(p1, 5), (p2, 10)])
+        p1.yourGo.assert_called_with([(p1, 5)])
+        p2.yourGo.assert_called_with([(p1, 5), (p2, 10)])
+        p3.yourGo.assert_called_with([(p1, 5), (p2, 10)])
     
-#     def testBackToFirstPlayerAfterTheLast(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind())
-#         p2 = createPlayer('p2', StubMessenger().skipBlind())
-#         p3 = createPlayer('p3', StubMessenger().bet(10))
-#         p1.yourGo = MagicMock()
+    def testBackToFirstPlayerAfterTheLast(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(10))
+        p1.yourGo = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2, p3])
+        Dealer(AnyDeck()).deal([p1, p2, p3])
 
-#         p1.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
+        p1.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
     
-#     def testPlayerFolds(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))
-#         p2 = createPlayer('p2', StubMessenger().skipBlind())
+    def testPlayerFolds(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
 
-#         p2.handResult = MagicMock()
-#         p1.outOfGame = MagicMock()
+        p2.handResult = MagicMock()
+        p1.outOfGame = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2])
+        Dealer(AnyDeck()).deal([p1, p2])
 
-#         p1.outOfGame.assert_called_once_with('You folded')
-#         p2.handResult.assert_called_once_with('p2 wins')
+        p1.outOfGame.assert_called_once_with('You folded')
+        p2.handResult.assert_called_once_with('p2 wins')
     
-#     def testPlayerBetsLessThanMinimum(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind())
-#         p2 = createPlayer('p2', StubMessenger().skipBlind())
-#         p3 = createPlayer('p3', StubMessenger().bet(9))
-#         p4 = createPlayer('p4', StubMessenger())
-#         p3.outOfGame = MagicMock()
-#         p4.yourGo = MagicMock()
+    def testPlayerBetsLessThanMinimum(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(9))
+        p4 = createPlayer('p4', StubMessenger())
+        p3.outOfGame = MagicMock()
+        p4.yourGo = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2, p3, p4])
+        Dealer(AnyDeck()).deal([p1, p2, p3, p4])
 
-#         p3.outOfGame.assert_called_once_with('You bet 9, minimum bet was 10')
-#         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
+        p3.outOfGame.assert_called_once_with('You bet 9, minimum bet was 10')
+        p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
     
-#     def testFirstPlayerBetsLessThanMinimum(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(4))
-#         p2 = createPlayer('p2', StubMessenger().skipBlind())
-#         p3 = createPlayer('p3', StubMessenger().bet(10))
-#         p1.outOfGame = MagicMock()
-#         p2.yourGo = MagicMock()
+    def testFirstPlayerBetsLessThanMinimum(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(4))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(10))
+        p1.outOfGame = MagicMock()
+        p2.yourGo = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2, p3])
+        Dealer(AnyDeck()).deal([p1, p2, p3])
 
-#         p1.outOfGame.assert_called_once_with('You bet 4, minimum bet was 5')
-#         p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
+        p1.outOfGame.assert_called_once_with('You bet 4, minimum bet was 5')
+        p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
         
-#     def testPlayerBetsTheMax(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(995))
-#         p2 = createPlayer('p2', StubMessenger().skipBlind())
-#         p2.yourGo = MagicMock()
+    def testPlayerBetsTheMax(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(995))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p2.yourGo = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2])
+        Dealer(AnyDeck()).deal([p1, p2])
 
-#         p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p1, 995)])
+        p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p1, 995)])
         
-#     def testPlayerBetsMoreThanTheyHave(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind())
-#         p2 = createPlayer('p2', StubMessenger().skipBlind())
-#         p3 = createPlayer('p3', StubMessenger().bet(1001))
-#         p4 = createPlayer('p4', StubMessenger())
-#         p3.outOfGame = MagicMock()
-#         p4.yourGo = MagicMock()
+    def testPlayerBetsMoreThanTheyHave(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind())
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(1001))
+        p4 = createPlayer('p4', StubMessenger())
+        p3.outOfGame = MagicMock()
+        p4.yourGo = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2, p3, p4])
+        Dealer(AnyDeck()).deal([p1, p2, p3, p4])
 
-#         p3.outOfGame.assert_called_once_with('You bet 1001, you have only 1000 cash avaiable')
-#         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
+        p3.outOfGame.assert_called_once_with('You bet 1001, you have only 1000 cash avaiable')
+        p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
         
-#     def testPlayerBetsMoreThanTheyHaveInTwoParts(self):
-#         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(10).bet(986))
-#         p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
-#         p1.outOfGame = MagicMock()
-#         p2.handResult = MagicMock()
+    def testPlayerBetsMoreThanTheyHaveInTwoParts(self):
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(10).bet(986))
+        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
+        p1.outOfGame = MagicMock()
+        p2.handResult = MagicMock()
 
-#         Dealer(AnyDeck()).deal([p1, p2])
+        Dealer(AnyDeck()).deal([p1, p2])
 
-#         p1.outOfGame.assert_called_once_with('You bet 986, you have only 985 cash avaiable')
-#         p2.handResult.assert_called_once_with('p2 wins')
+        p1.outOfGame.assert_called_once_with('You bet 986, you have only 985 cash avaiable')
+        p2.handResult.assert_called_once_with('p2 wins')
 
 class testDealingTheCards(unittest.TestCase):
     

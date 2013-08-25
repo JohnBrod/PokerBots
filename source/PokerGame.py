@@ -6,6 +6,11 @@ from theHouse import PlayerProxy
 import texasHoldEm
 from Xmpp import XmppMessenger
 		
+
+class AnyDeck():
+    def take(self):
+        pass
+
 def write(text):
 	print text
 	sys.stdout.flush()
@@ -35,10 +40,9 @@ else:
 
 	try:
 		players = map(lambda x: PlayerProxy(x, dealerMessenger), players)
-		casino = Casino(texasHoldEm.Dealer(), players)
-		# need to start this on a thread and wait for it to finish
+		casino = Casino(texasHoldEm.Dealer(AnyDeck()), players)
 		casino.play()
-		while casino.playing: pass # could do screen updates here
+		while casino.playing: pass 
 	except Exception, e:
 		write(e)
 
