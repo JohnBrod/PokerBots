@@ -1,9 +1,9 @@
 import unittest
-from Queue import Queue
 from theHouse import PlayerProxy
 from texasHoldEm import Dealer
 from EventHandling import Event
 from mock import MagicMock
+from collections import deque
 
 def createPlayer(name, messenger):
     player = PlayerProxy(name, messenger)
@@ -226,23 +226,23 @@ class AnyDeck():
 class StubMessenger(object):
     def __init__(self):
         self.evt_messageReceived = Event()
-        self.replies = Queue()
+        self.replies = deque()
 
     def skipBlind(self):
-        self.replies.put('skip')
+        self.replies.append('skip')
         return self
 
     def bet(self, amount):
-        self.replies.put(amount)
+        self.replies.append(amount)
         return self
 
     def sendMessage(self, jid, msg):
 
         self.lastMessage = msg
 
-        if self.replies.empty(): return
+        if len(self.replies) == 0: return
 
-        response = self.replies.get()
+        response = self.replies.popleft()
 
         if response == 'skip': return
 
