@@ -18,7 +18,7 @@ class Dealer(object):
         self.deck = deck
         self.bigBlind = 10
         self.smallBlind = 5
-        self.evt_gameFinished = Event()
+        self.evt_handFinished = Event()
         self.dealStages = deque([self.dealPrivateCards, self.dealCommunityCards, self.dealTurnCard, self.dealTurnCard, self.dealTurnCard])
         self.ccDealt = False
         self.optionGiven = False
@@ -60,7 +60,6 @@ class Dealer(object):
         self.pot.add(sender, bet)
 
         if self.roundOfBettingFinished(sender, bet):
-
             if not self.finishedDealing():
                 self.dealNext()
             else:
@@ -68,7 +67,7 @@ class Dealer(object):
 
         if self.table.allIn():
             for player in self.table.players: player.handResult('someone wins')
-            self.evt_gameFinished.fire(self)
+            self.evt_handFinished.fire(self)
             return
         
         self.table.nextPlayer()
@@ -84,7 +83,7 @@ class Dealer(object):
 
         if self.optionGiven: return self.pot.allIn()
 
-        self.optionGiven = True
+        if player == self.bbPlayer: self.optionGiven = True
 
         return player == self.bbPlayer and bet == 0
 

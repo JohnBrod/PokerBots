@@ -31,17 +31,17 @@ class Casino(object):
         self.dealer = dealer
         self.players = players
         self.playing = False
-        self.dealer.evt_gameFinished += self.on_gameFinished
+        self.dealer.evt_handFinished += self.on_handFinished
 
-    def play(self):
+    def playWinnerTakesAll(self):
 
         self.playing = True
 
         self.dealer.deal(list(self.players))
 
-    def on_gameFinished(self, sender, args = None):
+    def on_handFinished(self, sender, args = None):
 
-        for player in self.players: player.gameResult('xxx')
+        for player in self.players: player.gameResult('Someone won')
 
         self.playing = False
 

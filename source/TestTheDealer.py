@@ -125,14 +125,17 @@ class testDealingTheCards(unittest.TestCase):
     def testCommunityCardsShouldNotBeDealtUntilTheBigBlindGetsTheOption(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5))
         p2 = createPlayer('p2', StubMessenger().skipBlind())
+        p3 = createPlayer('p3', StubMessenger().bet(10))
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
+        p3.cards = MagicMock()
 
-        Dealer(PredictableDeck()).deal([p1, p2])
+        Dealer(PredictableDeck()).deal([p1, p2, p3])
 
         p1.cards.assert_called_with((1, 2))
         p2.cards.assert_called_with((3, 4))
+        p3.cards.assert_called_with((5, 6))
 
     def testCommunityCardsDealtAfterTheBigBlindRefusesTheOption(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5))
@@ -149,14 +152,17 @@ class testDealingTheCards(unittest.TestCase):
     def testCommunityCardsDealtAfterTheBigBlindGetsTakesTheOption(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10))
         p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
+        p3 = createPlayer('p3', StubMessenger().bet(10).bet(10))
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
+        p3.cards = MagicMock()
 
-        Dealer(PredictableDeck()).deal([p1, p2])
+        Dealer(PredictableDeck()).deal([p1, p2, p3])
 
-        p1.cards.assert_called_with((5, 6, 7))
-        p2.cards.assert_called_with((5, 6, 7))
+        p1.cards.assert_called_with((7, 8, 9))
+        p2.cards.assert_called_with((7, 8, 9))
+        p3.cards.assert_called_with((7, 8, 9))
 
     def testThenTheFlop(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10))
