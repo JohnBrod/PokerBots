@@ -61,8 +61,8 @@ class Dealer(object):
 
         if self.roundOfBettingFinished(sender, bet):
 
-            if len(self.dealStages) > 0:
-                self.dealStages.popleft()()
+            if not self.finishedDealing():
+                self.dealNext()
             else:
                 for player in self.table.players: player.handResult('someone wins')
 
@@ -73,6 +73,12 @@ class Dealer(object):
         
         self.table.nextPlayer()
         self.table.dealingTo().yourGo(list(self.pot.transactions))
+
+    def dealNext(self):
+        self.dealStages.popleft()()
+
+    def finishedDealing(self):
+        return len(self.dealStages) == 0
 
     def roundOfBettingFinished(self, player, bet):
 
