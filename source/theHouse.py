@@ -104,7 +104,8 @@ class Pot(object):
         playerContribution = self.getTotal(player)
         contributors = set(map(lambda x: x[0], self.transactions))
 
-        if not contributors: return 0
+        if not contributors:
+            return 0
 
         highestContribution = max(map(lambda x: self.getTotal(x), contributors))
 
@@ -113,7 +114,28 @@ class Pot(object):
 
         return highestContribution - playerContribution
 
-    def allIn(self):
+    def smallBlind(self):
+        return self.transactions[0][0]
+
+    def bigBlind(self):
+        return self.transactions[1][0]
+
+    def smallBlindWasPrevious(self):
+        return self.transactions[-1][0] == self.smallBlind()
+
+    def hadOneGo(self, player):
+        return len(filter(lambda x: x[0] == player, self.transactions)) == 1
+
+    def bigBlindDueOption(self):
+        return self.smallBlindWasPrevious() and self.hadOneGo(self.bigBlind())
+
+    def roundOfBettingOver(self):
+
+        # if next player is big blind and their second go
+        # if current player is player 1 and second go
+        if self.bigBlindDueOption():
+            return False
+
         contributors = list(set(map(lambda x: x[0], self.transactions)))
 
         return len(filter(lambda x: self.getMinimumBet(x) > 0, contributors)) == 0
