@@ -1,8 +1,10 @@
 import time
 from EventHandling import Event
 
+
 def getName(x):
     return str(x)[:str(x).find('/')]
+
 
 class Doorman(object):
     """greets players and passes their details onto the its boss"""
@@ -25,6 +27,7 @@ class Doorman(object):
             self.evt_playerJoined.fire(self, msg['body'])
             self.messenger.sendMessage(msg['body'], 'Cash ' + str(self.cash))
 
+
 class Casino(object):
     """Controls the flow of a game of poker"""
     def __init__(self, dealer, players):
@@ -39,14 +42,17 @@ class Casino(object):
 
         self.dealer.deal(list(self.players))
 
-    def on_handFinished(self, sender, args = None):
+    def on_handFinished(self, sender, args=None):
 
-        for player in self.players: player.gameResult('Someone won')
+        for player in self.players:
+            player.gameResult('Someone won')
 
         self.playing = False
 
+
 class PlayerProxy(object):
-    """allows the game to interact with the player messages as if they were from an object"""
+    """allows the game to interact with the player messages """
+    """as if they were from an object"""
     def __init__(self, name, dealer):
         self.cash = 1000
         self.name = name
@@ -85,6 +91,7 @@ class PlayerProxy(object):
     def fromMe(self, msg):
         return msg['type'] in ('normal', 'chat') and getName(msg['from']) == self.name
 
+
 class Pot(object):
 
     def __init__(self):
@@ -94,25 +101,35 @@ class Pot(object):
         player.cash -= amount
         self.transactions.append((player, amount))
 
-    def getTotal(self, player = None):
+    def total(self, player=None):
 
-        txns = filter(lambda x: x[0].name == player.name, self.transactions) if player else self.transactions
+        txns = self.transactionsFor(player) if player else self.transactions
 
         return sum(map(lambda x: x[1], txns))
 
     def getMinimumBet(self, player):
-        playerContribution = self.getTotal(player)
-        contributors = set(map(lambda x: x[0], self.transactions))
+        playerContribution = self.total(player)
 
-        if not contributors:
+        if not self.players():
             return 0
 
-        highestContribution = max(map(lambda x: self.getTotal(x), contributors))
-
-        if playerContribution == highestContribution:
+        if playerContribution == self.highestContribution():
             return 0
 
-        return highestContribution - playerContribution
+        return self.highestContribution() - playerContribution
+
+    def roundOfBettingOver(self):
+
+        if len(self.players()) == 1:
+            return True
+
+        if self.bigBlindDueOption():
+            return False
+
+        return len(filter(lambda x: self.getMinimumBet(x) > 0, self.players())) == 0
+
+    def highestContribution(self):
+        return max(map(lambda x: self.total(x), self.players()))
 
     def smallBlind(self):
         return self.transactions[0][0]
@@ -123,19 +140,18 @@ class Pot(object):
     def smallBlindWasPrevious(self):
         return self.transactions[-1][0] == self.smallBlind()
 
+    def transactionsFor(self, player):
+        return filter(lambda x: x[0] == player, self.transactions)
+
     def hadOneGo(self, player):
-        return len(filter(lambda x: x[0] == player, self.transactions)) == 1
+        return len(self.transactionsFor(player)) == 1
 
     def bigBlindDueOption(self):
         return self.smallBlindWasPrevious() and self.hadOneGo(self.bigBlind())
 
-    def roundOfBettingOver(self):
+    def players(self):
+        players = list(set(map(lambda x: x[0], self.transactions)))
+        players = filter(lambda x: self.transactionsFor(x)[-1][1] > 0, players)
 
-        # if next player is big blind and their second go
-        # if current player is player 1 and second go
-        if self.bigBlindDueOption():
-            return False
+        return players
 
-        contributors = list(set(map(lambda x: x[0], self.transactions)))
-
-        return len(filter(lambda x: self.getMinimumBet(x) > 0, contributors)) == 0
