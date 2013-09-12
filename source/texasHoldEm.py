@@ -58,6 +58,9 @@ class Dealer(object):
                 for player in self.table.players:
                     player.handResult('%s wins' % self.table.lastPlayer().name)
             else:
+
+                # what if player being kicked out is the last player?
+                # then the round of betting should be over?
                 self.table.dealingTo().yourGo(list(self.pot.transactions))
             return
 
@@ -76,7 +79,7 @@ class Dealer(object):
                 player.handResult('someone wins')
             self.evt_handFinished.fire(self)
             return
-        
+
         self.table.nextPlayer()
         self.table.dealingTo().yourGo(list(self.pot.transactions))
 
@@ -132,4 +135,3 @@ class Table(object):
 
     def allIn(self):
         return len(filter(lambda x: x.cash == 0, self.players)) == len(self.players)
-
