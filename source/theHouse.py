@@ -6,6 +6,14 @@ def getName(x):
     return str(x)[:str(x).find('/')]
 
 
+def chat(msg):
+    return msg['type'] in ('normal', 'chat')
+
+
+def playerMessage(transactions):
+    return ','.join(map(lambda x: '%s %s' % (x[0].name, x[1]), transactions))
+
+
 class Doorman(object):
     """greets players and passes their details onto the its boss"""
     def __init__(self, waitFor, messenger, cash):
@@ -21,8 +29,8 @@ class Doorman(object):
         return self.players
 
     def on_messageReceived(self, sender, msg):
-        
-        if msg['type'] in ('normal', 'chat') and msg['body'].startswith('player'):
+
+        if chat(msg) and msg['body'].startswith('player'):
             self.players.append(getName(msg['from']))
             self.evt_playerJoined.fire(self, msg['body'])
             self.messenger.sendMessage(msg['body'], 'Cash ' + str(self.cash))
@@ -61,7 +69,7 @@ class PlayerProxy(object):
         self.dealer.evt_messageReceived += self.on_messageReceived
 
     def yourGo(self, transactions):
-        self.dealer.sendMessage(self.name, ','.join(map(lambda x: '%s %s' % (x[0].name, x[1]), transactions)))
+        self.dealer.sendMessage(self.name, playerMessage(transactions))
 
     def send(self, msg):
         self.dealer.sendMessage(self.name, msg)
@@ -89,7 +97,7 @@ class PlayerProxy(object):
         return int(msg['body'])
 
     def fromMe(self, msg):
-        return msg['type'] in ('normal', 'chat') and getName(msg['from']) == self.name
+        return chat(msg) and getName(msg['from']) == self.name
 
 
 class Pot(object):
@@ -126,7 +134,22 @@ class Pot(object):
         if self.bigBlindDueOption():
             return False
 
-        return len(filter(lambda x: self.getMinimumBet(x) > 0, self.players())) == 0
+        return len(self.leftToContribute()) == 0
+
+    def leftToContribute(self):
+        return filter(lambda x: self.getMinimumBet(x) > 0, self.players())
+
+    def players(self):
+        players = set(map(lambda x: x[0], self.transactions))
+
+        return players.difference(set(filter(self.folded, players)))
+
+    def folded(self, player):
+
+        if player == self.bigBlind() and len(self.transactionsFor(player)) == 2:
+            return False
+
+        return self.transactionsFor(player)[-1][1] == 0
 
     def highestContribution(self):
         return max(map(lambda x: self.total(x), self.players()))
@@ -135,7 +158,8 @@ class Pot(object):
         return self.transactions[0][0]
 
     def bigBlind(self):
-        return self.transactions[1][0]
+        if len(self.transactions) > 1:
+            return self.transactions[1][0]
 
     def smallBlindWasPrevious(self):
         return self.transactions[-1][0] == self.smallBlind()
@@ -148,10 +172,3 @@ class Pot(object):
 
     def bigBlindDueOption(self):
         return self.smallBlindWasPrevious() and self.hadOneGo(self.bigBlind())
-
-    def players(self):
-        players = list(set(map(lambda x: x[0], self.transactions)))
-        players = filter(lambda x: self.transactionsFor(x)[-1][1] > 0, players)
-
-        return players
-

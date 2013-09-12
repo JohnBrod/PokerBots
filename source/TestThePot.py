@@ -1,6 +1,7 @@
 import unittest
 from texasHoldEm import Pot
 
+
 class testTheMinimumBetOfThePot(unittest.TestCase):
 
     def testZeroWhenThereIsNothingInThePot(self):
@@ -15,7 +16,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 5)
 
         self.assertEqual(5, p.getMinimumBet(p2))
@@ -25,7 +26,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 5)
         p.add(p2, 5)
 
@@ -37,7 +38,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 5)
         p.add(p2, 10)
 
@@ -48,11 +49,12 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 10)
         p.add(p2, 10)
 
         self.assertEqual(0, p.getMinimumBet(p1))
+
 
 class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
 
@@ -60,7 +62,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 10)
         p.add(p2, 10)
 
@@ -70,7 +72,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 10)
         p.add(p2, 15)
 
@@ -80,7 +82,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 5)
         p.add(p2, 10)
         p.add(p1, 5)
@@ -91,7 +93,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 5)
         p.add(p2, 10)
         p.add(p1, 5)
@@ -104,7 +106,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
-        
+
         p.add(p1, 5)
         p.add(p2, 10)
         p.add(p1, 0)
@@ -116,13 +118,40 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         p1 = Player('p1')
         p2 = Player('p2')
         p3 = Player('p3')
-        
+
         p.add(p1, 5)
         p.add(p2, 10)
         p.add(p3, 15)
         p.add(p1, 0)
 
         self.assertFalse(p.roundOfBettingOver())
+
+    def testBigBlindIsNotOutWhenItChecksTheOption(self):
+        p = Pot()
+        p1 = Player('p1')
+        p2 = Player('p2')
+
+        p.add(p1, 5)
+        p.add(p2, 10)
+        p.add(p1, 5)
+        p.add(p2, 0)
+        p.add(p1, 10)
+
+        self.assertFalse(p.roundOfBettingOver())
+
+    def testBigBlindFolding(self):
+        p = Pot()
+        p1 = Player('p1')
+        p2 = Player('p2')
+
+        p.add(p1, 5)
+        p.add(p2, 10)
+        p.add(p1, 5)
+        p.add(p2, 0)
+        p.add(p1, 10)
+        p.add(p2, 0)
+
+        self.assertTrue(p.roundOfBettingOver())
 
 
 class Player(object):
@@ -131,6 +160,6 @@ class Player(object):
         self.name = name
         self.cash = 0
 
-        
+
 if __name__ == "__main__":
     unittest.main()
