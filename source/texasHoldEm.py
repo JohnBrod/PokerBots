@@ -2,6 +2,7 @@ from theHouse import Pot
 from EventHandling import Event
 from collections import deque
 
+
 def outMessage(bet, min, max):
     if bet == 0:
         return 'You folded'
@@ -12,6 +13,7 @@ def outMessage(bet, min, max):
     if bet > max:
         return "You bet %d, you have only %d cash avaiable" % (bet, max)
 
+
 class Dealer(object):
     """deals a hand to players"""
     def __init__(self, deck):
@@ -19,9 +21,11 @@ class Dealer(object):
         self.bigBlind = 10
         self.smallBlind = 5
         self.evt_handFinished = Event()
-        self.dealStages = deque([self.dealPrivateCards, self.dealCommunityCards, self.dealTurnCard, self.dealTurnCard, self.dealTurnCard])
-        self.ccDealt = False
-        self.optionGiven = False
+        self.dealStages = deque([
+            self.dealCommunityCards,
+            self.dealTurnCard,
+            self.dealTurnCard,
+            self.dealTurnCard])
 
     def deal(self, players):
 
@@ -31,9 +35,9 @@ class Dealer(object):
         for player in self.table.players:
             player.evt_response += self.__on_PlayerResponse
 
-        self.dealStages.popleft()()
+        self.dealPrivateCards()
 
-        self.pot.add(self.table.dealingTo(), self.smallBlind)        
+        self.pot.add(self.table.dealingTo(), self.smallBlind)
         self.table.dealingTo().yourGo(list(self.pot.transactions))
 
         self.table.nextPlayer()
@@ -48,30 +52,38 @@ class Dealer(object):
 
         if bet not in range(self.pot.getMinimumBet(sender), sender.cash + 1):
 
-            sender.outOfGame(outMessage(bet, self.pot.getMinimumBet(sender), sender.cash))
-            self.table.removeCurrent()
+            self.kickOut(sender, bet)
 
             if self.table.lastPlayer():
-                for player in self.table.players: player.handResult('%s wins' % self.table.lastPlayer().name)
+                for player in self.table.players:
+                    player.handResult('%s wins' % self.table.lastPlayer().name)
             else:
                 self.table.dealingTo().yourGo(list(self.pot.transactions))
             return
 
         self.pot.add(sender, bet)
 
-        if self.roundOfBettingFinished(sender, bet):
+        if self.pot.roundOfBettingOver():
+
             if not self.finishedDealing():
                 self.dealNext()
             else:
-                for player in self.table.players: player.handResult('someone wins')
+                for player in self.table.players:
+                    player.handResult('someone wins')
 
         if self.table.allIn():
-            for player in self.table.players: player.handResult('someone wins')
+            for player in self.table.players:
+                player.handResult('someone wins')
             self.evt_handFinished.fire(self)
             return
         
         self.table.nextPlayer()
         self.table.dealingTo().yourGo(list(self.pot.transactions))
+
+    def kickOut(self, player, bet):
+        msg = outMessage(bet, self.pot.getMinimumBet(player), player.cash)
+        player.outOfGame(msg)
+        self.table.removeCurrent()
 
     def dealNext(self):
         self.dealStages.popleft()()
@@ -79,28 +91,20 @@ class Dealer(object):
     def finishedDealing(self):
         return len(self.dealStages) == 0
 
-    def roundOfBettingFinished(self, player, bet):
-
-        if self.optionGiven: return self.pot.allIn()
-
-        if player == self.bbPlayer: self.optionGiven = True
-
-        return player == self.bbPlayer and bet == 0
-
     def dealCommunityCards(self):
         communityCards = (self.deck.take(), self.deck.take(), self.deck.take())
         for player in self.table.players:
             player.cards(communityCards)
-        self.ccDealt = True
 
     def dealTurnCard(self):
-        flop = (self.deck.take())
+        card = self.deck.take()
         for player in self.table.players:
-            player.cards(flop)
+            player.cards(card)
 
     def dealPrivateCards(self):
-        for player in self.table.players:            
+        for player in self.table.players:
             player.cards((self.deck.take(), self.deck.take()))
+
 
 class Table(object):
     """players sit around this and get dealt to in order"""
@@ -123,7 +127,9 @@ class Table(object):
             self.dealingToPosition = 0
 
     def lastPlayer(self):
-        if len(self.players) == 1: return self.players[0]
+        if len(self.players) == 1:
+            return self.players[0]
 
     def allIn(self):
         return len(filter(lambda x: x.cash == 0, self.players)) == len(self.players)
+

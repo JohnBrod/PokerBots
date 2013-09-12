@@ -5,14 +5,16 @@ from EventHandling import Event
 from mock import MagicMock
 from collections import deque
 
+
 def createPlayer(name, messenger):
     player = PlayerProxy(name, messenger)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player
-               
+
+
 class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
-    
+
     def testMoveLeftToRightAtTheTable(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind())
         p2 = createPlayer('p2', StubMessenger().skipBlind())
@@ -27,7 +29,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p1.yourGo.assert_called_with([(p1, 5)])
         p2.yourGo.assert_called_with([(p1, 5), (p2, 10)])
         p3.yourGo.assert_called_with([(p1, 5), (p2, 10)])
-    
+
     def testBackToFirstPlayerAfterTheLast(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind())
         p2 = createPlayer('p2', StubMessenger().skipBlind())
@@ -37,7 +39,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(AnyDeck()).deal([p1, p2, p3])
 
         p1.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
-    
+
     def testPlayerFolds(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))
         p2 = createPlayer('p2', StubMessenger().skipBlind())
@@ -49,7 +51,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p1.outOfGame.assert_called_once_with('You folded')
         p2.handResult.assert_called_once_with('p2 wins')
-    
+
     def testPlayerBetsLessThanMinimum(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind())
         p2 = createPlayer('p2', StubMessenger().skipBlind())
@@ -62,7 +64,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p3.outOfGame.assert_called_once_with('You bet 9, minimum bet was 10')
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
-    
+
     def testFirstPlayerBetsLessThanMinimum(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(4))
         p2 = createPlayer('p2', StubMessenger().skipBlind())
@@ -74,7 +76,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p1.outOfGame.assert_called_once_with('You bet 4, minimum bet was 5')
         p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p3, 10)])
-        
+
     def testPlayerBetsTheMax(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(995))
         p2 = createPlayer('p2', StubMessenger().skipBlind())
@@ -83,7 +85,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(AnyDeck()).deal([p1, p2])
 
         p2.yourGo.assert_called_with([(p1, 5), (p2, 10), (p1, 995)])
-        
+
     def testPlayerBetsMoreThanTheyHave(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind())
         p2 = createPlayer('p2', StubMessenger().skipBlind())
@@ -96,7 +98,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p3.outOfGame.assert_called_once_with('You bet 1001, you have only 1000 cash avaiable')
         p4.yourGo.assert_called_with([(p1, 5), (p2, 10)])
-        
+
     def testPlayerBetsMoreThanTheyHaveInTwoParts(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(10).bet(986))
         p2 = createPlayer('p2', StubMessenger().skipBlind().bet(10))
@@ -108,8 +110,9 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p1.outOfGame.assert_called_once_with('You bet 986, you have only 985 cash avaiable')
         p2.handResult.assert_called_once_with('p2 wins')
 
+
 class testDealingTheCards(unittest.TestCase):
-    
+
     def testTheDealerShouldGiveEachPlayerSeparatePrivateCards(self):
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
@@ -216,6 +219,7 @@ class testDealingTheCards(unittest.TestCase):
 
 # should not send out any more messages after the winner
 
+
 class PredictableDeck():
 
     def __init__(self):
@@ -224,10 +228,12 @@ class PredictableDeck():
     def take(self):
         self.card += 1
         return self.card
-    
+
+
 class AnyDeck():
     def take(self):
         pass
+
 
 class StubMessenger(object):
     def __init__(self):
@@ -246,13 +252,16 @@ class StubMessenger(object):
 
         self.lastMessage = msg
 
-        if len(self.replies) == 0: return
+        if len(self.replies) == 0:
+            return
 
         response = self.replies.popleft()
 
-        if response == 'skip': return
+        if response == 'skip':
+            return
 
         self.evt_messageReceived.fire(self, response)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     unittest.main()
