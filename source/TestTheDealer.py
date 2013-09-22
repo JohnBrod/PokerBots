@@ -56,7 +56,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         dealer.deal([p1, p2])
 
         p1.outOfGame.assert_called_once_with('You folded')
-        p2.handResult.assert_called_once_with('someone wins')
+        p2.handResult.assert_called_once_with('p2 wins')
         self.assertTrue(dealer.playing)
 
     def testPlayerBetsLessThanMinimum(self):
@@ -115,7 +115,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(AnyDeck(), p2Wins).deal([p1, p2])
 
         p1.outOfGame.assert_called_once_with('You bet 986, you have only 985 cash avaiable')
-        p2.handResult.assert_called_once_with('someone wins')
+        p2.handResult.assert_called_once_with('p2 wins')
 
     def testTheWinnerGetsThePot(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))
@@ -237,8 +237,8 @@ class testDealingTheCards(unittest.TestCase):
 
         Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
 
-        p1.handResult.assert_called_once_with('someone wins')
-        p2.handResult.assert_called_once_with('someone wins')
+        p1.handResult.assert_called_once_with('p2 wins')
+        p2.handResult.assert_called_once_with('p2 wins')
 
     def testMovingButtonToNextPlayerAfterFirstHand(self):
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))

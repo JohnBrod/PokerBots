@@ -74,7 +74,7 @@ class Dealer(object):
             winner = self.handComparison(None, self.table.players)
 
             for player in self.players:
-                player.handResult('someone wins')
+                player.handResult(winner.name + ' wins')
 
             winner.youWin(self.pot.total())
 
