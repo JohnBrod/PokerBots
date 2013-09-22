@@ -16,7 +16,9 @@ def outMessage(bet, min, max):
 
 class Dealer(object):
     """deals a hand to players"""
-    def __init__(self, deck):
+    def __init__(self, deck, handComparison):
+        self.handComparison = handComparison
+        self.playing = True
         self.deck = deck
         self.bigBlind = 10
         self.smallBlind = 5
@@ -29,12 +31,17 @@ class Dealer(object):
 
     def deal(self, players):
 
-        self.table = Table(players)
-        self.pot = Pot()
+        self.players = players
 
-        for player in self.table.players:
+        for player in self.players:
             player.evt_response += self.__on_PlayerResponse
 
+        self.startHand()
+
+    def startHand(self):
+        self.table = Table(self.players)
+        self.pot = Pot()
+        self.deck.shuffle()
         self.dealPrivateCards()
 
         self.pot.add(self.table.dealingTo(), self.smallBlind)
@@ -50,38 +57,53 @@ class Dealer(object):
 
     def __on_PlayerResponse(self, sender, bet):
 
-        if bet not in range(self.pot.getMinimumBet(sender), sender.cash + 1):
-
+        if self.illegal(bet, sender):
             self.kickOut(sender, bet)
-
-            if self.table.lastPlayer():
-                for player in self.table.players:
-                    player.handResult('%s wins' % self.table.lastPlayer().name)
-            else:
-
-                # what if player being kicked out is the last player?
-                # then the round of betting should be over?
-                self.table.dealingTo().yourGo(list(self.pot.transactions))
-            return
+            bet = 0
+        else:
+            self.table.nextPlayer()
 
         self.pot.add(sender, bet)
 
-        if self.pot.roundOfBettingOver():
+        if self.allInGame():
+            while len(self.dealStages) > 0:
+                self.dealStages.popleft()()
 
-            if not self.finishedDealing():
-                self.dealNext()
-            else:
-                for player in self.table.players:
-                    player.handResult('someone wins')
+        if self.handFinished():
 
-        if self.table.allIn():
-            for player in self.table.players:
+            winner = self.handComparison(None, self.table.players)
+
+            for player in self.players:
                 player.handResult('someone wins')
-            self.evt_handFinished.fire(self)
-            return
 
-        self.table.nextPlayer()
-        self.table.dealingTo().yourGo(list(self.pot.transactions))
+            winner.youWin(self.pot.total())
+
+            if not self.gameOver():
+                self.rotateButton()
+                self.startHand()
+        else:
+            if self.pot.roundOfBettingOver() and not self.finishedDealing():
+                self.dealNext()
+
+            self.table.dealingTo().yourGo(list(self.pot.transactions))
+
+    def allInGame(self):
+        return len(filter(lambda x: x.cash > 0, self.table.players)) == 0
+        
+    def gameOver(self):
+        return len(filter(lambda x: x.cash > 0, self.players)) <= 1
+
+    def illegal(self, bet, sender):
+        return bet not in range(self.pot.getMinimumBet(sender), sender.cash + 1)
+
+    def handFinished(self):
+        bettingAndDealingDone = self.pot.roundOfBettingOver() and self.finishedDealing()
+        lastPlayer = self.table.lastPlayer() is not None
+
+        return bettingAndDealingDone or lastPlayer
+
+    def rotateButton(self):
+        self.players = self.players[1:] + self.players[:1]
 
     def kickOut(self, player, bet):
         msg = outMessage(bet, self.pot.getMinimumBet(player), player.cash)
@@ -106,7 +128,8 @@ class Dealer(object):
 
     def dealPrivateCards(self):
         for player in self.table.players:
-            player.cards((self.deck.take(), self.deck.take()))
+            privateCards = (self.deck.take(), self.deck.take())
+            player.cards(privateCards)
 
 
 class Table(object):

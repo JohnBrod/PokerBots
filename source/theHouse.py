@@ -36,28 +36,6 @@ class Doorman(object):
             self.messenger.sendMessage(msg['body'], 'Cash ' + str(self.cash))
 
 
-class Casino(object):
-    """Controls the flow of a game of poker"""
-    def __init__(self, dealer, players):
-        self.dealer = dealer
-        self.players = players
-        self.playing = False
-        self.dealer.evt_handFinished += self.on_handFinished
-
-    def playWinnerTakesAll(self):
-
-        self.playing = True
-
-        self.dealer.deal(list(self.players))
-
-    def on_handFinished(self, sender, args=None):
-
-        for player in self.players:
-            player.gameResult('Someone won')
-
-        self.playing = False
-
-
 class PlayerProxy(object):
     """allows the game to interact with the player messages """
     """as if they were from an object"""
@@ -80,8 +58,8 @@ class PlayerProxy(object):
     def outOfGame(self, msg):
         pass
 
-    def youWin(self):
-        pass
+    def youWin(self, amount):
+        self.cash = amount
 
     def gameResult(self, result):
         self.dealer.sendMessage(self.name, 'Game Result')

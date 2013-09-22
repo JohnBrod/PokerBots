@@ -40,9 +40,9 @@ else:
 
 	try:
 		players = map(lambda x: PlayerProxy(x, dealerMessenger), players)
-		casino = Casino(texasHoldEm.Dealer(AnyDeck()), players)
-		casino.play()
-		while casino.playing: pass 
+		dealer = texasHoldEm.Dealer(AnyDeck())
+		dealer.deal(players)
+		while dealer.playing: pass 
 	except Exception, e:
 		write(e)
 
