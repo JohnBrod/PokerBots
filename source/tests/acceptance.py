@@ -3,7 +3,7 @@ import unittest
 import os
 import sys
 import logging
-# these two lines do some freaky stuff so I can import from the parent directory
+# these two lines do some freaky stuff so I can import from the parent director
 parpath = os.path.join(os.path.dirname(sys.argv[0]), os.pardir)
 sys.path.insert(0, os.path.abspath(parpath))
 
@@ -11,15 +11,20 @@ from Xmpp import XmppMessenger
 from runningTheApp import PokerGameRunner
 from runningTheApp import FakePlayer
 
+
 class testPokerGame(unittest.TestCase):
 
 # common causes of failing tests
 # player being logged in through pidgin, it seems to intercept the message
 # some failing tests print messages with e instead of the @ character
-# message queue not being cleared out between tests. i.e. assert stops test but game keeps going and sends messages. These messages are pickedup when the next test starts
-# exceptions get swallowed sometimes. Remove import of dealer in poker game to see
-# python.exe from previous test still running (caused by exception being thrown in the main app)
-# wrong signature on an event will fail without exception. Events should always have the signature (self, sender, args), even if args is not used
+# message queue not being cleared out between tests. i.e. assert stops test but
+# game keeps going and sends messages. These messages are pickedup when the
+# next test starts
+# exceptions get swallowed sometimes. Remove import of dealer in poker game to
+# see python.exe from previous test still running (caused by exception being
+# thrown in the main app)
+# wrong signature on an event will fail without exception. Events should always
+# have the signature (self, sender, args), even if args is not used
     @classmethod
     def setUpClass(cls):
         logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(message)s')
@@ -48,9 +53,9 @@ class testPokerGame(unittest.TestCase):
         self.theGame.shouldDisplay('No players joined so quitting\r\n')
 
     def testQuittingGameThatOnlyOnePlayerJoins(self):
-        
+
         self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-        
+
         self.aPlayer.says('player1@pokerchat')
         self.aPlayer.hears('Cash 1000')
 
@@ -58,9 +63,9 @@ class testPokerGame(unittest.TestCase):
         self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
     def testTwoPlayersAllIn(self):
-        
+
         self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-        
+
         self.aPlayer.says('player1@pokerchat')
         self.aPlayer.hears('Cash 1000')
         self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
@@ -79,8 +84,6 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('Hand Result...')
         self.anotherPlayer.hears('Hand Result...')
 
-        self.aPlayer.hears('Game Result...')
-        self.anotherPlayer.hears('Game Result...')
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()

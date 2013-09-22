@@ -78,7 +78,9 @@ class Dealer(object):
 
             winner.youWin(self.pot.total())
 
-            if not self.gameOver():
+            if self.gameOver():
+                self.playing = False
+            else:
                 self.rotateButton()
                 self.startHand()
         else:

@@ -259,10 +259,12 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
+        dealer = Dealer(PredictableDeck(), p2Wins)
+        dealer.deal([p1, p2])
 
         p1.cards.assert_called_with((10))
         p2.cards.assert_called_with((10))
+        self.assertFalse(dealer.playing)
 
 
 class PredictableDeck():
