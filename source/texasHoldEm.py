@@ -91,7 +91,7 @@ class Dealer(object):
 
     def allInGame(self):
         return len(filter(lambda x: x.cash > 0, self.table.players)) == 0
-        
+
     def gameOver(self):
         return len(filter(lambda x: x.cash > 0, self.players)) <= 1
 
