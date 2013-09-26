@@ -65,18 +65,11 @@ class Dealer(object):
 
         self.pot.add(sender, bet)
 
-        if self.allInGame():
-            while len(self.dealStages) > 0:
-                self.dealStages.popleft()()
+        if self.table.allIn():
+            self.dealRemainingCards()
 
         if self.handFinished():
-
-            winner = self.handComparison(None, self.table.players)
-
-            for player in self.players:
-                player.handResult(winner.name + ' wins')
-
-            winner.youWin(self.pot.total())
+            self.declareWinner()
 
             if self.gameOver():
                 self.playing = False
@@ -89,20 +82,32 @@ class Dealer(object):
 
             self.table.dealingTo().yourGo(list(self.pot.transactions))
 
-    def allInGame(self):
-        return len(filter(lambda x: x.cash > 0, self.table.players)) == 0
+    def declareWinner(self):
+        winner = self.handComparison(None, self.table.players)
+
+        for player in self.players:
+            player.handResult(winner.name + ' wins')
+
+        winner.youWin(self.pot.total())
+
+    def dealRemainingCards(self):
+        while len(self.dealStages) > 0:
+            self.dealStages.popleft()()
 
     def gameOver(self):
         return len(filter(lambda x: x.cash > 0, self.players)) <= 1
 
     def illegal(self, bet, sender):
-        return bet not in range(self.pot.getMinimumBet(sender), sender.cash + 1)
+        minimum = self.pot.getMinimumBet(sender)
+        maximum = sender.cash + 1
+        return bet not in range(minimum, maximum)
 
     def handFinished(self):
-        bettingAndDealingDone = self.pot.roundOfBettingOver() and self.finishedDealing()
+        bettingDone = self.pot.roundOfBettingOver()
+        dealingDone = self.finishedDealing()
         lastPlayer = self.table.lastPlayer() is not None
 
-        return bettingAndDealingDone or lastPlayer
+        return (bettingDone and dealingDone) or lastPlayer
 
     def rotateButton(self):
         self.players = self.players[1:] + self.players[:1]
@@ -116,7 +121,7 @@ class Dealer(object):
         self.dealStages.popleft()()
 
     def finishedDealing(self):
-        return len(self.dealStages) == 0
+        return not self.dealStages
 
     def dealCommunityCards(self):
         communityCards = (self.deck.take(), self.deck.take(), self.deck.take())
@@ -159,4 +164,4 @@ class Table(object):
             return self.players[0]
 
     def allIn(self):
-        return len(filter(lambda x: x.cash == 0, self.players)) == len(self.players)
+        return all(x.cash == 0 for x in self.players)
