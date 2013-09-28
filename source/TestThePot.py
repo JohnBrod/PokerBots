@@ -4,7 +4,11 @@ from texasHoldEm import Pot
 
 class testTheMinimumBetOfThePot(unittest.TestCase):
 
+    def setUp(self):
+        print 'The minimum bet of the pot,', self.shortDescription()
+
     def testZeroWhenThereIsNothingInThePot(self):
+        '''zero when there is nothing in the pot'''
 
         p = Pot()
         p1 = Player('p1')
@@ -12,7 +16,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         self.assertEqual(0, p.getMinimumBet(p1))
 
     def testSecondPlayerMustBetAtLeastTheFirstBet(self):
-
+        '''second player should pay at least the first bet'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -22,7 +26,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         self.assertEqual(5, p.getMinimumBet(p2))
 
     def testZeroBecauseAllAreEven(self):
-
+        '''zero when all players are even'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -34,6 +38,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         self.assertEqual(0, p.getMinimumBet(p2))
 
     def testShouldPayTheDifferenceWhenRaised(self):
+        '''player should pay the difference when raised'''
 
         p = Pot()
         p1 = Player('p1')
@@ -45,7 +50,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         self.assertEqual(5, p.getMinimumBet(p1))
 
     def testZeroOnceTheRoundIsComplete(self):
-
+        '''will be zero once the round is complete'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -58,7 +63,11 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
 
 class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
 
+    def setUp(self):
+        print 'Determing when the betting is over,', self.shortDescription()
+
     def testOverWhenAllPlayersHaveAddedTheSameAmount(self):
+        '''over when all players have added the same amount'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -69,6 +78,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         self.assertTrue(p.roundOfBettingOver())
 
     def testNotOverWhenSomePlayersStillOweCash(self):
+        '''not over when some players still owe cash'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -79,6 +89,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         self.assertFalse(p.roundOfBettingOver())
 
     def testNotOverWhenTheBigBlindIsDueTheOption(self):
+        '''not over when the big blind owes the option'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -90,6 +101,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         self.assertFalse(p.roundOfBettingOver())
 
     def testBigBlindDoesNotGetOptionTheSecondTime(self):
+        '''big blind will not get the option the second time'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -103,6 +115,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         self.assertTrue(p.roundOfBettingOver())
 
     def testPlayerFolding(self):
+        '''over when a player folds'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -114,6 +127,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         self.assertTrue(p.roundOfBettingOver())
 
     def testGameContinuesAfterPlayerFolding(self):
+        '''continues after a player folds'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -127,6 +141,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         self.assertFalse(p.roundOfBettingOver())
 
     def testBigBlindIsNotOutWhenItChecksTheOption(self):
+        '''big blind is not out when they check on the option'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
@@ -140,6 +155,7 @@ class testDetermingWhenTheRoundOfBettingIsOver(unittest.TestCase):
         self.assertFalse(p.roundOfBettingOver())
 
     def testBigBlindFolding(self):
+        '''over when the big blind folds'''
         p = Pot()
         p1 = Player('p1')
         p2 = Player('p2')
