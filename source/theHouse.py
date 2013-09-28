@@ -1,6 +1,7 @@
 import time
 from EventHandling import Event
-
+from collections import deque
+import random
 
 def getName(x):
     return str(x)[:str(x).find('/')]
@@ -59,7 +60,7 @@ class PlayerProxy(object):
         pass
 
     def youWin(self, amount):
-        self.cash = amount
+        self.cash += amount
 
     def gameResult(self, result):
         self.dealer.sendMessage(self.name, 'Game Result')
@@ -69,7 +70,9 @@ class PlayerProxy(object):
 
     def on_messageReceived(self, sender, msg):
         if self.fromMe(msg):
-            self.evt_response.fire(self, self.parse(msg))
+            bet = self.parse(msg)
+            self.cash -= bet
+            self.evt_response.fire(self, bet)
 
     def parse(self, msg):
         return int(msg['body'])
@@ -150,3 +153,17 @@ class Pot(object):
 
     def bigBlindDueOption(self):
         return self.smallBlindWasPrevious() and self.hadOneGo(self.bigBlind())
+
+
+class Deck(object):
+    def __init__(self):
+        self.cards = deque()
+        for suit in ['C', 'D', 'H', 'S']:
+            for num in xrange(2, 15):
+                self.cards.append((num, suit))
+
+    def take(self):
+        return self.cards.popleft()
+
+    def shuffle(self):
+        random.shuffle(self.cards)
