@@ -139,19 +139,6 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p2.youWin.assert_called_once_with(15)
 
-    def testJ_movingButtonToNextPlayerAfterFirstHand(self):
-        '''moving the button to the next player after a hand'''
-        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))
-        p2 = createPlayer('p2', StubMessenger().skipBlind())
-
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
-
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
-
-        p2.cards.assert_called_with((1, 2))
-        p1.cards.assert_called_with((3, 4))
-
 
 class testDealingTheCards(unittest.TestCase):
 
@@ -252,6 +239,19 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards.assert_called_with((10))
         p2.cards.assert_called_with((10))
         self.assertFalse(dealer.playing)
+
+    def testJ_movingButtonToNextPlayerAfterFirstHand(self):
+        '''moving the button to the next player after a hand'''
+        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(0))
+        p2 = createPlayer('p2', StubMessenger().skipBlind())
+
+        p1.cards = MagicMock()
+        p2.cards = MagicMock()
+
+        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
+
+        p2.cards.assert_called_with((1, 2))
+        p1.cards.assert_called_with((3, 4))
 
 
 class PredictableDeck():
