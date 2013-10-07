@@ -71,7 +71,6 @@ class PlayerProxy(object):
     def on_messageReceived(self, sender, msg):
         if self.fromMe(msg):
             bet = self.parse(msg)
-            self.cash -= bet
             self.evt_response.fire(self, bet)
 
     def parse(self, msg):
