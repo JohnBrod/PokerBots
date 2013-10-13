@@ -19,18 +19,12 @@ class Dealer(object):
     def __init__(self, deck, handComparison):
         self.handComparison = handComparison
         self.playing = True
-        self.deck = deck
         self.bigBlind = 10
         self.smallBlind = 5
         self.evt_handFinished = Event()
-        self.dealStages = deque([
-            self.dealCommunityCards,
-            self.dealTurnCard,
-            self.dealTurnCard,
-            self.dealTurnCard])
+        self.deck = deck
 
     def deal(self, players):
-
         self.players = players
 
         for player in self.players:
@@ -40,9 +34,9 @@ class Dealer(object):
 
     def startHand(self):
         self.table = Table(self.players)
+        self.cardDealer = CardDealer(self.deck, self.table)
         self.pot = Pot()
-        self.deck.shuffle()
-        self.dealPrivateCards()
+        self.cardDealer.dealPrivateCards()
 
         self.pot.add(self.table.dealingTo(), self.smallBlind)
         self.table.dealingTo().yourGo(list(self.pot.transactions))
@@ -66,7 +60,7 @@ class Dealer(object):
         self.pot.add(sender, bet)
 
         if self.table.allIn():
-            self.dealRemainingCards()
+            self.cardDealer.dealRemainingCards()
 
         if self.handFinished():
             self.declareWinner()
@@ -77,8 +71,8 @@ class Dealer(object):
                 self.rotateButton()
                 self.startHand()
         else:
-            if self.pot.roundOfBettingOver() and not self.finishedDealing():
-                self.dealNext()
+            if self.pot.roundOfBettingOver() and not self.cardDealer.finishedDealing():
+                self.cardDealer.dealNext()
 
             self.table.dealingTo().yourGo(list(self.pot.transactions))
 
@@ -88,11 +82,8 @@ class Dealer(object):
         for player in self.players:
             player.handResult(winner.name + ' wins')
 
+        winner.cash += self.pot.total()
         winner.youWin(self.pot.total())
-
-    def dealRemainingCards(self):
-        while len(self.dealStages) > 0:
-            self.dealStages.popleft()()
 
     def gameOver(self):
         return len(filter(lambda x: x.cash > 0, self.players)) <= 1
@@ -104,7 +95,7 @@ class Dealer(object):
 
     def handFinished(self):
         bettingDone = self.pot.roundOfBettingOver()
-        dealingDone = self.finishedDealing()
+        dealingDone = self.cardDealer.finishedDealing()
         lastPlayer = self.table.lastPlayer() is not None
 
         return (bettingDone and dealingDone) or lastPlayer
@@ -116,6 +107,20 @@ class Dealer(object):
         msg = outMessage(bet, self.pot.getMinimumBet(player), player.cash)
         player.outOfGame(msg)
         self.table.removeCurrent()
+
+
+class CardDealer(object):
+    """deals a hand to players"""
+    def __init__(self, deck, table):
+        self.deck = deck
+        self.table = table
+        self.dealStages = deque([
+            self.dealCommunityCards,
+            self.dealTurnCard,
+            self.dealTurnCard,
+            self.dealTurnCard])
+
+        self.deck.shuffle()
 
     def dealNext(self):
         self.dealStages.popleft()()
@@ -137,6 +142,10 @@ class Dealer(object):
         for player in self.table.players:
             privateCards = (self.deck.take(), self.deck.take())
             player.cards(privateCards)
+
+    def dealRemainingCards(self):
+        while len(self.dealStages) > 0:
+            self.dealStages.popleft()()
 
 
 class Table(object):

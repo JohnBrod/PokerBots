@@ -60,7 +60,7 @@ class PlayerProxy(object):
         pass
 
     def youWin(self, amount):
-        self.cash += amount
+        pass
 
     def gameResult(self, result):
         self.dealer.sendMessage(self.name, 'Game Result')
