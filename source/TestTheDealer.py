@@ -135,7 +135,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p2.youWin = MagicMock()
 
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), p2Wins).deal([p1, p2])
 
         p2.youWin.assert_called_once_with(15)
 
@@ -145,85 +145,31 @@ class testDealingTheCards(unittest.TestCase):
     def setUp(self):
         print 'Dealing the cards,', self.shortDescription()
 
-    def testA_theDealerShouldGiveEachPlayerSeparatePrivateCards(self):
-        '''the dealer should give each player separate private cards'''
+    def testA_shouldDealCardsToPlayersAtTheStart(self):
+        '''should deal cards to the players at the start'''
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), p2Wins).deal([p1, p2])
 
-        p1.cards.assert_called_with((1, 2))
-        p2.cards.assert_called_with((3, 4))
+        self.assertEqual(p1.cards.call_count, 1)
+        self.assertEqual(p2.cards.call_count, 1)
 
-    def testB_thenCommunityCards(self):
-        '''then the public community cards'''
+    def testB_shouldDealCardsAfterRoundOfBetting(self):
+        '''should deal after round of betting'''
         p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5))
         p2 = createPlayer('p2', StubMessenger().skipBlind().bet(0))
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), p2Wins).deal([p1, p2])
 
-        p1.cards.assert_called_with((5, 6, 7))
-        p2.cards.assert_called_with((5, 6, 7))
-
-    def testC_thenTheFlop(self):
-        '''then the public flop'''
-        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10))
-        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(0).bet(10))
-
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
-
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
-
-        p1.cards.assert_called_with((8))
-        p2.cards.assert_called_with((8))
-
-    def testD_thenTheRiver(self):
-        '''then the public river'''
-        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10).bet(10))
-        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(0).bet(10).bet(10))
-
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
-
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
-
-        p1.cards.assert_called_with((9))
-        p2.cards.assert_called_with((9))
-
-    def testE_thenTheTurn(self):
-        '''then the public turn'''
-        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10).bet(10).bet(10))
-        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(0).bet(10).bet(10).bet(10))
-
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
-
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
-
-        p1.cards.assert_called_with((10))
-        p2.cards.assert_called_with((10))
-
-    def testF_thenTheWinnerIsDeclared(self):
-        '''the winner is declared at the end'''
-        p1 = createPlayer('p1', StubMessenger().skipBlind().bet(5).bet(10).bet(10).bet(10).bet(10))
-        p2 = createPlayer('p2', StubMessenger().skipBlind().bet(0).bet(10).bet(10).bet(10).bet(10))
-
-        p1.cards = MagicMock()
-        p1.handResult = MagicMock()
-        p2.handResult = MagicMock()
-        p2.cards = MagicMock()
-
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
-
-        p1.handResult.assert_called_once_with('p2 wins')
-        p2.handResult.assert_called_once_with('p2 wins')
+        self.assertEqual(p1.cards.call_count, 2)
+        self.assertEqual(p2.cards.call_count, 2)
 
     def testG_shouldNotDealAnotherHandAfterTheGameIsWon(self):
         '''should not deal another hand after the game is won'''
@@ -233,11 +179,11 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = Dealer(PredictableDeck(), p2Wins)
+        dealer = Dealer(Deck(), p2Wins)
         dealer.deal([p1, p2])
 
-        p1.cards.assert_called_with((10))
-        p2.cards.assert_called_with((10))
+        self.assertEqual(p1.cards.call_count, 5)
+        self.assertEqual(p2.cards.call_count, 5)
         self.assertFalse(dealer.playing)
 
     def testJ_movingButtonToNextPlayerAfterFirstHand(self):

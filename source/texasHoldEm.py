@@ -36,7 +36,7 @@ class Dealer(object):
         self.table = Table(self.players)
         self.cardDealer = CardDealer(self.deck, self.table)
         self.pot = Pot()
-        self.cardDealer.dealPrivateCards()
+        self.cardDealer.dealNext()
 
         self.pot.add(self.table.dealingTo(), self.smallBlind)
         self.table.dealingTo().yourGo(list(self.pot.transactions))
@@ -115,6 +115,7 @@ class CardDealer(object):
         self.deck = deck
         self.table = table
         self.dealStages = deque([
+            self.dealPrivateCards,
             self.dealCommunityCards,
             self.dealTurnCard,
             self.dealTurnCard,
@@ -123,6 +124,9 @@ class CardDealer(object):
         self.deck.shuffle()
 
     def dealNext(self):
+
+        if not self.dealStages:
+            raise Exception("No more stages left to deal")
         self.dealStages.popleft()()
 
     def finishedDealing(self):
