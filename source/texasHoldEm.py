@@ -51,7 +51,7 @@ class Dealer(object):
 
     def __on_PlayerResponse(self, sender, bet):
 
-        if self.illegal(bet, sender):
+        if not self.legal(bet, sender):
             self.kickOut(sender, bet)
             bet = 0
         else:
@@ -88,10 +88,10 @@ class Dealer(object):
     def gameOver(self):
         return len(filter(lambda x: x.cash > 0, self.players)) <= 1
 
-    def illegal(self, bet, sender):
+    def legal(self, bet, sender):
         minimum = self.pot.getMinimumBet(sender)
         maximum = sender.cash + 1
-        return bet not in range(minimum, maximum)
+        return bet in range(minimum, maximum)
 
     def handFinished(self):
         bettingDone = self.pot.roundOfBettingOver()
