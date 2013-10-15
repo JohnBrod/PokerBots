@@ -3,6 +3,7 @@ from EventHandling import Event
 from collections import deque
 import random
 
+
 def getName(x):
     return str(x)[:str(x).find('/')]
 
@@ -106,19 +107,6 @@ class Pot(object):
 
         return self.highestContribution() - playerContribution
 
-    def roundOfBettingOver(self):
-
-        if len(self.players()) == 1:
-            return True
-
-        if self.bigBlindDueOption():
-            return False
-
-        return len(self.leftToContribute()) == 0
-
-    def leftToContribute(self):
-        return filter(lambda x: self.getMinimumBet(x) > 0, self.players())
-
     def players(self):
         players = set(map(lambda x: x[0], self.transactions))
 
@@ -149,9 +137,6 @@ class Pot(object):
 
     def hadOneGo(self, player):
         return len(self.transactionsFor(player)) == 1
-
-    def bigBlindDueOption(self):
-        return self.smallBlindWasPrevious() and self.hadOneGo(self.bigBlind())
 
 
 class Deck(object):
