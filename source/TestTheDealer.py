@@ -48,25 +48,10 @@ class testTellingThePlayersToTakeTheirGo(unittest.TestCase):
         p2.yourGo.assert_called_with([(p1, 1)])
 
 
-class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
+class testIllegalBetting(unittest.TestCase):
 
     def setUp(self):
-        print 'Betting between dealers and players,', self.shortDescription()
-
-    def testC_playerFolds(self):
-        '''a player folding'''
-        p1 = createPlayer('p1', StubMessenger().bet(1))
-        p2 = createPlayer('p2', StubMessenger().bet(0))
-
-        p1.handResult = MagicMock()
-        p2.outOfGame = MagicMock()
-
-        dealer = Dealer(Deck(), p1Wins)
-        dealer.deal([p1, p2])
-
-        p2.outOfGame.assert_called_once_with('You folded')
-        p1.handResult.assert_called_once_with('p1 wins')
-        self.assertTrue(dealer.playing)
+        print 'Illegal betting,', self.shortDescription()
 
     def testD_playerBetsLessThanMinimum(self):
         '''a player betting less than minimum'''
@@ -94,16 +79,6 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p1.outOfGame.assert_called_once_with('You bet 4, minimum bet was 5')
 
-    def testF_playerBetsTheMax(self):
-        '''a player betting the max'''
-        p1 = createPlayer('p1', StubMessenger().bet(1000))
-        p2 = createPlayer('p2', StubMessenger())
-        p2.yourGo = MagicMock()
-
-        Dealer(Deck(), p2Wins).deal([p1, p2])
-
-        p2.yourGo.assert_called_with([(p1, 1000)])
-
     def testG_playerBetsMoreThanTheyHave(self):
         '''a player betting more than they have'''
         p1 = createPlayer('p1', StubMessenger().bet(1001))
@@ -128,6 +103,50 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p1.outOfGame.assert_called_once_with('You bet 991, you have only 990 cash avaiable')
         p2.handResult.assert_called_once_with('p2 wins')
+
+    def testI_playerCanBetLessThanMinimumIfTheyGoAllIn(self):
+        '''a player can bet less than minimum if they go all in'''
+        p1 = createPlayer('p1', StubMessenger().bet(10))
+        p2 = createPlayer('p2', StubMessenger().bet(5))
+        p2.outOfGame = MagicMock()
+
+        p1.cash = 10
+        p2.cash = 5
+
+        Dealer(Deck(), p1Wins).deal([p1, p2])
+
+        self.assertFalse(p2.outOfGame.called)
+
+
+class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
+
+    def setUp(self):
+        print 'Betting between dealers and players,', self.shortDescription()
+
+    def testC_playerFoldsByBettingZero(self):
+        '''a player folds by betting 0'''
+        p1 = createPlayer('p1', StubMessenger().bet(1))
+        p2 = createPlayer('p2', StubMessenger().bet(0))
+
+        p1.handResult = MagicMock()
+        p2.outOfGame = MagicMock()
+
+        dealer = Dealer(Deck(), p1Wins)
+        dealer.deal([p1, p2])
+
+        p2.outOfGame.assert_called_once_with('You folded')
+        p1.handResult.assert_called_once_with('p1 wins')
+        self.assertTrue(dealer.playing)
+
+    def testF_playerBetsTheMax(self):
+        '''a player betting the max'''
+        p1 = createPlayer('p1', StubMessenger().bet(1000))
+        p2 = createPlayer('p2', StubMessenger())
+        p2.yourGo = MagicMock()
+
+        Dealer(Deck(), p2Wins).deal([p1, p2])
+
+        p2.yourGo.assert_called_with([(p1, 1000)])
 
     def testI_theWinnerGetsThePot(self):
         '''player that wins the hand receives the pot'''

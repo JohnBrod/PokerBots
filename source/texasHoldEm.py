@@ -74,7 +74,7 @@ class Dealer(object):
     def roundOfBettingDone(self):
 
         return self.lastToRaise == self.table.dealingTo()
-    
+
     def declareWinner(self):
         winner = self.handComparison(None, self.table.players)
 
@@ -90,8 +90,9 @@ class Dealer(object):
     def legal(self, bet, sender):
         minimum = self.pot.getMinimumBet(sender)
         maximum = sender.cash + 1
+        allIn = sender.cash - bet == 0
 
-        return bet in range(minimum, maximum)
+        return bet in range(minimum, maximum) or allIn
 
     def handDone(self):
         bettingDone = self.lastToRaise == self.table.dealingTo()
