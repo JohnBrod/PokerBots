@@ -19,7 +19,7 @@ class Dealer(object):
     def __init__(self, deck, handComparison):
         self.handComparison = handComparison
         self.playing = True
-        self.evt_handFinished = Event()
+        self.evt_handDone = Event()
         self.deck = deck
         self.lastToRaise = None
         self.highestBet = None
@@ -34,6 +34,7 @@ class Dealer(object):
 
     def startHand(self):
         self.table = Table(self.players)
+        self.lastToRaise = self.table.dealingTo()
         self.cardDealer = CardDealer(self.deck, self.table)
         self.pot = Pot()
         self.cardDealer.dealNext()
@@ -48,9 +49,6 @@ class Dealer(object):
         else:
             self.table.nextPlayer()
 
-        if self.lastToRaise is None:
-            self.lastToRaise = sender
-
         if bet > self.pot.getMinimumBet(sender):
             self.lastToRaise = sender
 
@@ -59,20 +57,24 @@ class Dealer(object):
         if self.table.allIn():
             self.cardDealer.dealRemainingCards()
 
-        if self.handFinished():
+        if self.handDone():
             self.declareWinner()
 
-            if self.gameOver():
-                self.playing = False
-            else:
+            if not self.gameOver():
                 self.rotateButton()
                 self.startHand()
+            else:
+                self.playing = False
         else:
-            if self.lastToRaise == self.table.dealingTo() and not self.cardDealer.finishedDealing():
+            if self.roundOfBettingDone():
                 self.cardDealer.dealNext()
 
             self.table.dealingTo().yourGo(list(self.pot.transactions))
 
+    def roundOfBettingDone(self):
+
+        return self.lastToRaise == self.table.dealingTo()
+    
     def declareWinner(self):
         winner = self.handComparison(None, self.table.players)
 
@@ -91,9 +93,9 @@ class Dealer(object):
 
         return bet in range(minimum, maximum)
 
-    def handFinished(self):
+    def handDone(self):
         bettingDone = self.lastToRaise == self.table.dealingTo()
-        dealingDone = self.cardDealer.finishedDealing()
+        dealingDone = self.cardDealer.done()
         lastPlayer = self.table.lastPlayer() is not None
 
         return (bettingDone and dealingDone) or lastPlayer
@@ -129,7 +131,7 @@ class CardDealer(object):
         stage = self.dealStages.popleft()
         stage()
 
-    def finishedDealing(self):
+    def done(self):
         return not self.dealStages
 
     def dealCommunityCards(self):
