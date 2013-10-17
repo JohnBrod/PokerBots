@@ -4,6 +4,7 @@ from theHouse import Deck
 from texasHoldEm import Dealer
 from EventHandling import Event
 from mock import MagicMock
+from mock import call
 from collections import deque
 
 
@@ -12,14 +13,6 @@ def createPlayer(name, messenger):
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player
-
-
-def p2Wins(publicCards, players):
-    return filter(lambda x: x.name == 'p2', players)[0]
-
-
-def p1Wins(publicCards, players):
-    return filter(lambda x: x.name == 'p1', players)[0]
 
 
 class testTellingThePlayersToTakeTheirGo(unittest.TestCase):
@@ -32,7 +25,7 @@ class testTellingThePlayersToTakeTheirGo(unittest.TestCase):
         p1 = createPlayer('p1', StubMessenger())
         p1.yourGo = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1])
+        Dealer(Deck(), lambda x: [p1]).deal([p1])
 
         p1.yourGo.assert_called_with([])
 
@@ -43,7 +36,7 @@ class testTellingThePlayersToTakeTheirGo(unittest.TestCase):
 
         p2.yourGo = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2])
 
         p2.yourGo.assert_called_with([(p1, 1)])
 
@@ -61,7 +54,7 @@ class testIllegalBetting(unittest.TestCase):
         p1.handResult = MagicMock()
         p2.outOfGame = MagicMock()
 
-        dealer = Dealer(Deck(), p1Wins)
+        dealer = Dealer(Deck(), lambda x: [p1, p2])
         dealer.deal([p1, p2])
 
         p2.outOfGame.assert_called_once_with('You bet 1, minimum bet was 2')
@@ -75,7 +68,7 @@ class testIllegalBetting(unittest.TestCase):
         p3 = createPlayer('p3', StubMessenger().bet(6))
         p1.outOfGame = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1, p2, p3])
+        Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2, p3])
 
         p1.outOfGame.assert_called_once_with('You bet 4, minimum bet was 5')
 
@@ -87,7 +80,7 @@ class testIllegalBetting(unittest.TestCase):
         p1.outOfGame = MagicMock()
         p2.yourGo = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1, p2, p3])
+        Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2, p3])
 
         p1.outOfGame.assert_called_once_with('You bet 1001, you have only 1000 cash avaiable')
         p2.yourGo.assert_called_with([(p1, 0)])
@@ -99,23 +92,10 @@ class testIllegalBetting(unittest.TestCase):
         p1.outOfGame = MagicMock()
         p2.handResult = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2])
 
         p1.outOfGame.assert_called_once_with('You bet 991, you have only 990 cash avaiable')
         p2.handResult.assert_called_once_with('p2 wins')
-
-    def testI_playerCanBetLessThanMinimumIfTheyGoAllIn(self):
-        '''a player can bet less than minimum if they go all in'''
-        p1 = createPlayer('p1', StubMessenger().bet(10))
-        p2 = createPlayer('p2', StubMessenger().bet(5))
-        p2.outOfGame = MagicMock()
-
-        p1.cash = 10
-        p2.cash = 5
-
-        Dealer(Deck(), p1Wins).deal([p1, p2])
-
-        self.assertFalse(p2.outOfGame.called)
 
 
 class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
@@ -131,7 +111,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p1.handResult = MagicMock()
         p2.outOfGame = MagicMock()
 
-        dealer = Dealer(Deck(), p1Wins)
+        dealer = Dealer(Deck(), lambda x: [p1, p2])
         dealer.deal([p1, p2])
 
         p2.outOfGame.assert_called_once_with('You folded')
@@ -144,7 +124,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p2 = createPlayer('p2', StubMessenger())
         p2.yourGo = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2])
 
         p2.yourGo.assert_called_with([(p1, 1000)])
 
@@ -155,9 +135,35 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p2.youWin = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2])
 
         p2.youWin.assert_called_once_with(30)
+
+    def testI_playerCanBetLessThanMinimumIfTheyGoAllIn(self):
+        '''a player can bet less than minimum if they go all in'''
+        p1 = createPlayer('p1', StubMessenger().bet(10))
+        p2 = createPlayer('p2', StubMessenger().bet(5))
+        p2.outOfGame = MagicMock()
+
+        p1.cash = 10
+        p2.cash = 5
+
+        Dealer(Deck(), lambda x: [p1, p2]).deal([p1, p2])
+
+        self.assertFalse(p2.outOfGame.called)
+
+    def testJ_playerWinningMainPotAndSidePot(self):
+        '''a player winning main pot and a side pot'''
+        p1 = createPlayer('p1', StubMessenger().bet(10))
+        p2 = createPlayer('p2', StubMessenger().bet(5))
+        p1.youWin = MagicMock()
+
+        p1.cash = 10
+        p2.cash = 5
+
+        Dealer(Deck(), lambda x: [p1, p2]).deal([p1, p2])
+
+        self.assertEqual(p1.youWin.mock_calls, [call(10), call(5)])
 
 
 class testDealingTheCards(unittest.TestCase):
@@ -173,7 +179,7 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        Dealer(Deck(), p2Wins).deal([p1, p2])
+        Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2])
 
         self.assertEqual(p1.cards.call_count, 1)
         self.assertEqual(p2.cards.call_count, 1)
@@ -186,7 +192,7 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        Dealer(Deck(), p1Wins).deal([p1, p2])
+        Dealer(Deck(), lambda x: [p1, p2]).deal([p1, p2])
 
         self.assertEqual(p1.cards.call_count, 2)
         self.assertEqual(p2.cards.call_count, 2)
@@ -199,7 +205,7 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = Dealer(Deck(), p1Wins)
+        dealer = Dealer(Deck(), lambda x: [p1, p2])
         dealer.deal([p1, p2])
 
         self.assertEqual(p1.cards.call_count, 5)
@@ -214,7 +220,7 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        Dealer(PredictableDeck(), p2Wins).deal([p1, p2])
+        Dealer(PredictableDeck(), lambda x: [p2, p1]).deal([p1, p2])
 
         p2.cards.assert_called_with((1, 2))
         p1.cards.assert_called_with((3, 4))

@@ -58,7 +58,16 @@ class Dealer(object):
             self.cardDealer.dealRemainingCards()
 
         if self.handDone():
-            self.declareWinner()
+            ranking = self.handComparison(self.table.players)
+
+            winners = self.pot.getWinners(ranking)
+
+            for winner in winners:
+                for player in self.players:
+                    player.handResult(winner[0].name + ' wins')
+
+                winner[0].cash += self.pot.total()
+                winner[0].youWin(winner[1].total())
 
             if not self.gameOver():
                 self.rotateButton()
@@ -74,15 +83,6 @@ class Dealer(object):
     def roundOfBettingDone(self):
 
         return self.lastToRaise == self.table.dealingTo()
-
-    def declareWinner(self):
-        winner = self.handComparison(None, self.table.players)
-
-        for player in self.players:
-            player.handResult(winner.name + ' wins')
-
-        winner.cash += self.pot.total()
-        winner.youWin(self.pot.total())
 
     def gameOver(self):
         return len(filter(lambda x: x.cash > 0, self.players)) <= 1

@@ -85,14 +85,25 @@ class Pot(object):
 
     def __init__(self):
         self.transactions = []
+        self.sidePots = []
 
     def add(self, player, amount):
-        player.cash -= amount
-        self.transactions.append((player, amount))
+
+        if amount > 0 and amount < self.getMinimumBet(player):
+            sidePot = Pot()
+            sidePot.add(player, amount)
+            self.sidePots.append(sidePot)
+        else:
+            player.cash -= amount
+            self.transactions.append((player, amount))
+
+    def getWinners(self, ranking):
+        pots = [self] + self.sidePots
+        return map(lambda x: (ranking[0], x), pots)
 
     def total(self, player=None):
 
-        txns = self.transactionsFor(player) if player else self.transactions
+        txns = self.txnsFor(player) if player else self.transactions
 
         return sum(map(lambda x: x[1], txns))
 
@@ -114,10 +125,10 @@ class Pot(object):
 
     def folded(self, player):
 
-        if player == self.bigBlind() and len(self.transactionsFor(player)) == 2:
+        if player == self.bigBlind() and len(self.txnsFor(player)) == 2:
             return False
 
-        return self.transactionsFor(player)[-1][1] == 0
+        return self.txnsFor(player)[-1][1] == 0
 
     def highestContribution(self):
         return max(map(lambda x: self.total(x), self.players()))
@@ -132,11 +143,11 @@ class Pot(object):
     def smallBlindWasPrevious(self):
         return self.transactions[-1][0] == self.smallBlind()
 
-    def transactionsFor(self, player):
+    def txnsFor(self, player):
         return filter(lambda x: x[0] == player, self.transactions)
 
     def hadOneGo(self, player):
-        return len(self.transactionsFor(player)) == 1
+        return len(self.txnsFor(player)) == 1
 
 
 class Deck(object):
