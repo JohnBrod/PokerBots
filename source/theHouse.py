@@ -92,14 +92,30 @@ class Pot(object):
         if amount > 0 and amount < self.getMinimumBet(player):
             sidePot = Pot()
             sidePot.add(player, amount)
+            for p in self.players():
+                sidePot.add(p, amount)
+                self.transactions.append((p, -amount))
+
             self.sidePots.append(sidePot)
         else:
             player.cash -= amount
             self.transactions.append((player, amount))
 
     def getWinners(self, ranking):
+
+        if not self.players() or not ranking:
+            return []
+
         pots = [self] + self.sidePots
-        return map(lambda x: (ranking[0], x), pots)
+
+        return map(lambda x: (x.potRanking(ranking)[0], x.total()), pots)
+
+    def potRanking(self, gameRanking):
+        ranking = gameRanking
+        while ranking[0] not in self.players():
+            ranking = ranking[1:]
+
+        return ranking
 
     def total(self, player=None):
 
