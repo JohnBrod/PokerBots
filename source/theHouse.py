@@ -93,13 +93,16 @@ class Pot(object):
             sidePot = Pot()
             sidePot.add(player, amount)
             for p in self.players():
-                sidePot.add(p, amount)
-                self.transactions.append((p, -amount))
+                self.transferTo(sidePot, p, amount)
 
             self.sidePots.append(sidePot)
         else:
             player.cash -= amount
             self.transactions.append((player, amount))
+
+    def transferTo(self, target, player, amount):
+        target.add(player, amount)
+        self.transactions.append((player, -amount))
 
     def getWinners(self, ranking):
 
