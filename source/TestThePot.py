@@ -5,6 +5,13 @@ from texasHoldEm import Pot
 from collections import deque
 
 
+def shouldMatch(test, a, b):
+    a = map(lambda x: (x[0].name, x[1]), a)
+    b = map(lambda x: (x[0].name, x[1]), b)
+
+    test.assertEqual(a, b)
+
+
 class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
 
     def setUp(self):
@@ -16,7 +23,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         p = Pot()
         p1 = createPlayer('p1', StubMessenger())
 
-        self.assertEqual([], p.getWinners([p1]))
+        shouldMatch(self, [], p.getWinners([p1]))
 
     def testB_noRankingMeansNoWinner(self):
         '''no ranking means no winner'''
@@ -25,7 +32,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         p1 = createPlayer('p1', StubMessenger())
         p.add(p1, 5)
 
-        self.assertEqual([], p.getWinners([]))
+        shouldMatch(self, [], p.getWinners([]))
 
     def testC_onePlayerOneRankingMeansThatPlayerWinsThePot(self):
         '''one player one ranking means that player wins the pot'''
@@ -34,7 +41,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         p1 = createPlayer('p1', StubMessenger())
         p.add(p1, 5)
 
-        self.assertEqual([(p1, 5)], p.getWinners([p1]))
+        shouldMatch(self, [(p1, 5)], p.getWinners([p1]))
 
     def testD_highestRankingPlayerWins(self):
         '''the highest ranking player wins'''
@@ -45,7 +52,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         p.add(p1, 5)
         p.add(p2, 5)
 
-        self.assertEqual([(p1, 10)], p.getWinners([p1, p2]))
+        shouldMatch(self, [(p1, 10)], p.getWinners([p1, p2]))
 
     def testE_nextHighestWinsIfTheHighestIsNotInThePot(self):
         '''the next highest wins if the highest is not in the pot'''
@@ -55,7 +62,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         p2 = createPlayer('p2', StubMessenger())
         p.add(p2, 5)
 
-        self.assertEqual([(p2, 5)], p.getWinners([p1, p2]))
+        shouldMatch(self, [(p2, 5)], p.getWinners([p1, p2]))
 
 
 class testFiguringOutTheWinnerOfaSidePot(unittest.TestCase):
@@ -73,13 +80,7 @@ class testFiguringOutTheWinnerOfaSidePot(unittest.TestCase):
         p.add(p1, 10)
         p.add(p2, 5)
 
-        self.shouldMatch([(p1, 5), (p2, 10)], p.getWinners([p2, p1]))
-
-    def shouldMatch(self, a, b):
-        a = map(lambda x: (x[0].name, x[1]), a)
-        b = map(lambda x: (x[0].name, x[1]), b)
-
-        self.assertEqual(a, b)
+        shouldMatch(self, [(p1, 5), (p2, 10)], p.getWinners([p2, p1]))
 
 
 class testTheTotalOfThePot(unittest.TestCase):
