@@ -163,7 +163,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         Dealer(Deck(), lambda x: [p1, p2]).deal([p1, p2])
 
-        self.assertEqual(p1.youWin.mock_calls, [call(10), call(5)])
+        self.assertEqual(p1.youWin.mock_calls, [call(5), call(10)])
 
 
 class testDealingTheCards(unittest.TestCase):

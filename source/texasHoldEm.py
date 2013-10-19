@@ -66,8 +66,8 @@ class Dealer(object):
                 for player in self.players:
                     player.handResult(winner[0].name + ' wins')
 
-                winner[0].cash += self.pot.total()
-                winner[0].youWin(winner[1].total())
+                winner[0].deposit(winner[1])
+                winner[0].youWin(winner[1])
 
             if not self.gameOver():
                 self.rotateButton()

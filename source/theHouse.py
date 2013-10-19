@@ -48,6 +48,14 @@ class PlayerProxy(object):
         self.dealer = dealer
         self.dealer.evt_messageReceived += self.on_messageReceived
 
+    def withdraw(self, amount):
+        self.cash -= amount
+        if self.cash < 0:
+            raise Exception('Overdrawn cash')
+
+    def deposit(self, amount):
+        self.cash += amount
+
     def yourGo(self, transactions):
         self.dealer.sendMessage(self.name, playerMessage(transactions))
 
@@ -97,11 +105,11 @@ class Pot(object):
 
             self.sidePots.append(sidePot)
         else:
-            player.cash -= amount
+            player.withdraw(amount)
             self.transactions.append((player, amount))
 
     def transferTo(self, target, player, amount):
-        target.add(player, amount)
+        target.transactions.append((player, amount))
         self.transactions.append((player, -amount))
 
     def getWinners(self, ranking):

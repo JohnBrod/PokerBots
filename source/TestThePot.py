@@ -1,5 +1,8 @@
+from EventHandling import Event
+from theHouse import PlayerProxy
 import unittest
 from texasHoldEm import Pot
+from collections import deque
 
 
 class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
@@ -11,7 +14,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         '''no players means no winner'''
 
         p = Pot()
-        p1 = Player('p1')
+        p1 = createPlayer('p1', StubMessenger())
 
         self.assertEqual([], p.getWinners([p1]))
 
@@ -19,7 +22,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         '''no ranking means no winner'''
 
         p = Pot()
-        p1 = Player('p1')
+        p1 = createPlayer('p1', StubMessenger())
         p.add(p1, 5)
 
         self.assertEqual([], p.getWinners([]))
@@ -28,7 +31,7 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         '''one player one ranking means that player wins the pot'''
 
         p = Pot()
-        p1 = Player('p1')
+        p1 = createPlayer('p1', StubMessenger())
         p.add(p1, 5)
 
         self.assertEqual([(p1, 5)], p.getWinners([p1]))
@@ -37,8 +40,8 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         '''the highest ranking player wins'''
 
         p = Pot()
-        p1 = Player('p1')
-        p2 = Player('p2')
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
         p.add(p1, 5)
         p.add(p2, 5)
 
@@ -48,8 +51,8 @@ class testFiguringOutTheWinnerOfaPot(unittest.TestCase):
         '''the next highest wins if the highest is not in the pot'''
 
         p = Pot()
-        p1 = Player('p1')
-        p2 = Player('p2')
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
         p.add(p2, 5)
 
         self.assertEqual([(p2, 5)], p.getWinners([p1, p2]))
@@ -64,8 +67,8 @@ class testFiguringOutTheWinnerOfaSidePot(unittest.TestCase):
         '''no players means no winner'''
 
         p = Pot()
-        p1 = Player('p1')
-        p2 = Player('p2')
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
 
         p.add(p1, 10)
         p.add(p2, 5)
@@ -95,7 +98,7 @@ class testTheTotalOfThePot(unittest.TestCase):
         '''increments when chips are added'''
 
         p = Pot()
-        p1 = Player('p1')
+        p1 = createPlayer('p1', StubMessenger())
 
         p.add(p1, 5)
 
@@ -105,7 +108,7 @@ class testTheTotalOfThePot(unittest.TestCase):
         '''increments when more chips are added'''
 
         p = Pot()
-        p1 = Player('p1')
+        p1 = createPlayer('p1', StubMessenger())
 
         p.add(p1, 5)
         p.add(p1, 10)
@@ -122,15 +125,15 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         '''zero when there is nothing in the pot'''
 
         p = Pot()
-        p1 = Player('p1')
+        p1 = createPlayer('p1', StubMessenger())
 
         self.assertEqual(0, p.getMinimumBet(p1))
 
     def testSecondPlayerMustBetAtLeastTheFirstBet(self):
         '''second player should pay at least the first bet'''
         p = Pot()
-        p1 = Player('p1')
-        p2 = Player('p2')
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
 
         p.add(p1, 5)
 
@@ -139,8 +142,8 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
     def testZeroBecauseAllAreEven(self):
         '''zero when all players are even'''
         p = Pot()
-        p1 = Player('p1')
-        p2 = Player('p2')
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
 
         p.add(p1, 5)
         p.add(p2, 5)
@@ -152,8 +155,8 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         '''player should pay the difference when raised'''
 
         p = Pot()
-        p1 = Player('p1')
-        p2 = Player('p2')
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
 
         p.add(p1, 5)
         p.add(p2, 10)
@@ -163,8 +166,8 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
     def testZeroOnceTheRoundIsComplete(self):
         '''will be zero once the round is complete'''
         p = Pot()
-        p1 = Player('p1')
-        p2 = Player('p2')
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
 
         p.add(p1, 10)
         p.add(p2, 10)
@@ -172,11 +175,39 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
         self.assertEqual(0, p.getMinimumBet(p1))
 
 
-class Player(object):
-    """docstring for Player"""
-    def __init__(self, name):
-        self.name = name
-        self.cash = 0
+def createPlayer(name, messenger):
+    player = PlayerProxy(name, messenger)
+    player.parse = lambda x: x
+    player.fromMe = lambda x: True
+    return player
+
+
+class StubMessenger(object):
+    def __init__(self):
+        self.evt_messageReceived = Event()
+        self.replies = deque()
+
+    def skipBlind(self):
+        self.replies.append('skip')
+        return self
+
+    def bet(self, amount):
+        self.replies.append(amount)
+        return self
+
+    def sendMessage(self, jid, msg):
+
+        self.lastMessage = msg
+
+        if len(self.replies) == 0:
+            return
+
+        response = self.replies.popleft()
+
+        if response == 'skip':
+            return
+
+        self.evt_messageReceived.fire(self, response)
 
 
 if __name__ == "__main__":
