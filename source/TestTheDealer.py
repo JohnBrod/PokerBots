@@ -4,7 +4,6 @@ from theHouse import Deck
 from texasHoldEm import Dealer
 from EventHandling import Event
 from mock import MagicMock
-from mock import call
 from collections import deque
 
 
@@ -51,14 +50,12 @@ class testIllegalBetting(unittest.TestCase):
         p1 = createPlayer('p1', StubMessenger().bet(2))
         p2 = createPlayer('p2', StubMessenger().bet(1))
 
-        p1.handResult = MagicMock()
         p2.outOfGame = MagicMock()
 
         dealer = Dealer(Deck(), lambda x: [p1, p2])
         dealer.deal([p1, p2])
 
         p2.outOfGame.assert_called_once_with('You bet 1, minimum bet was 2')
-        p1.handResult.assert_called_once_with('p1 wins')
         self.assertTrue(dealer.playing)
 
     def testE_firstPlayerBetsLessThanMinimum(self):
@@ -95,7 +92,6 @@ class testIllegalBetting(unittest.TestCase):
         Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2])
 
         p1.outOfGame.assert_called_once_with('You bet 991, you have only 990 cash avaiable')
-        p2.handResult.assert_called_once_with('p2 wins')
 
 
 class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
@@ -115,7 +111,6 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         dealer.deal([p1, p2])
 
         p2.outOfGame.assert_called_once_with('You folded')
-        p1.handResult.assert_called_once_with('p1 wins')
         self.assertTrue(dealer.playing)
 
     def testF_playerBetsTheMax(self):
@@ -132,12 +127,11 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         '''player that wins the hand receives the pot'''
         p1 = createPlayer('p1', StubMessenger().bet(10).bet(0))
         p2 = createPlayer('p2', StubMessenger().bet(20))
-
-        p2.youWin = MagicMock()
+        p2.cash = 20
 
         Dealer(Deck(), lambda x: [p2, p1]).deal([p1, p2])
 
-        p2.youWin.assert_called_once_with(30)
+        self.assertEqual(30, p2.cash)
 
     def testI_playerCanBetLessThanMinimumIfTheyGoAllIn(self):
         '''a player can bet less than minimum if they go all in'''
@@ -163,7 +157,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         Dealer(Deck(), lambda x: [p1, p2]).deal([p1, p2])
 
-        self.assertEqual(p1.youWin.mock_calls, [call(5), call(10)])
+        self.assertEqual(15, p1.cash)
 
 
 class testDealingTheCards(unittest.TestCase):

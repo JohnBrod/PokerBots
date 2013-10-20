@@ -60,14 +60,9 @@ class Dealer(object):
         if self.handDone():
             ranking = self.handComparison(self.table.players)
 
-            winners = self.pot.getWinners(ranking)
-
-            for winner in winners:
-                for player in self.players:
-                    player.handResult(winner[0].name + ' wins')
-
-                winner[0].deposit(winner[1])
-                winner[0].youWin(winner[1])
+            for p in ranking:
+                winnings = self.pot.getWinnings(p)
+                p.deposit(winnings)
 
             if not self.gameOver():
                 self.rotateButton()

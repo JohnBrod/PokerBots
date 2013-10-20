@@ -75,6 +75,7 @@ class PlayerProxy(object):
         self.dealer.sendMessage(self.name, 'Game Result')
 
     def handResult(self, result):
+        print self.name, result
         self.dealer.sendMessage(self.name, 'Hand Result')
 
     def on_messageReceived(self, sender, msg):
@@ -112,14 +113,11 @@ class Pot(object):
         target.transactions.append((player, amount))
         self.transactions.append((player, -amount))
 
-    def getWinners(self, ranking):
-
-        if not self.players() or not ranking:
-            return []
-
-        pots = [self] + self.sidePots
-
-        return map(lambda x: (x.potRanking(ranking)[0], x.total()), pots)
+    def getWinnings(self, ranking):
+        winnings = self.total()
+        sidePotWinnings = sum(map(lambda x: x.total(), self.sidePots))
+        self.transactions = []
+        return winnings + sidePotWinnings
 
     def potRanking(self, gameRanking):
         ranking = gameRanking
