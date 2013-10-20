@@ -94,20 +94,11 @@ class Pot(object):
 
     def __init__(self):
         self.transactions = []
-        self.sidePots = []
 
     def add(self, player, amount):
 
-        if amount > 0 and amount < self.getMinimumBet(player):
-            sidePot = Pot()
-            sidePot.add(player, amount)
-            for p in self.players():
-                self.transferTo(sidePot, p, amount)
-
-            self.sidePots.append(sidePot)
-        else:
-            player.withdraw(amount)
-            self.transactions.append((player, amount))
+        player.withdraw(amount)
+        self.transactions.append((player, amount))
 
     def transferTo(self, target, player, amount):
         target.transactions.append((player, amount))
@@ -115,9 +106,8 @@ class Pot(object):
 
     def getWinnings(self, ranking):
         winnings = self.total()
-        sidePotWinnings = sum(map(lambda x: x.total(), self.sidePots))
         self.transactions = []
-        return winnings + sidePotWinnings
+        return winnings
 
     def potRanking(self, gameRanking):
         ranking = gameRanking
