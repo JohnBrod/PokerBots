@@ -90,42 +90,57 @@ class PlayerProxy(object):
         return chat(msg) and getName(msg['from']) == self.name
 
 
+class Transactions(object):
+
+    def __init__(self):
+        self.transactions = {}
+
+    def add(self, player, amount):
+
+        if player not in self.transactions:
+            self.transactions[player] = 0
+
+        self.transactions[player] += amount
+
+    def total(self, player=None):
+
+        if player and player not in self.transactions:
+            return 0
+
+        if player:
+            return self.transactions[player]
+
+        return sum(self.transactions.values())
+
+    def players(self):
+        return self.transactions.keys()
+
+
 class Pot(object):
 
     def __init__(self):
-        self.transactions = []
+        self.transactions = Transactions()
 
     def add(self, player, amount):
 
         player.withdraw(amount)
-        self.transactions.append((player, amount))
+        self.transactions.add(player, amount)
 
-    def transferTo(self, target, player, amount):
-        target.transactions.append((player, amount))
-        self.transactions.append((player, -amount))
+    def distributeWinnings(self, ranking):
 
-    def getWinnings(self, ranking):
-        winnings = self.total()
-        self.transactions = []
-        return winnings
+        for winner in ranking:
+            winnerChips = self.transactions.total(winner)
 
-    def potRanking(self, gameRanking):
-        ranking = gameRanking
-        while ranking[0] not in self.players():
-            ranking = ranking[1:]
-
-        return ranking
-
-    def total(self, player=None):
-
-        txns = self.txnsFor(player) if player else self.transactions
-
-        return sum(map(lambda x: x[1], txns))
+            for player in self.transactions.players():
+                loserChips = self.transactions.total(player)
+                wonFromPlayer = min([loserChips, winnerChips])
+                winner.deposit(wonFromPlayer)
+                self.transactions.add(player, -wonFromPlayer)
 
     def getMinimumBet(self, player):
-        playerContribution = self.total(player)
+        playerContribution = self.transactions.total(player)
 
-        if not self.players():
+        if not self.transactions.players():
             return 0
 
         if playerContribution == self.highestContribution():
@@ -133,36 +148,8 @@ class Pot(object):
 
         return self.highestContribution() - playerContribution
 
-    def players(self):
-        players = set(map(lambda x: x[0], self.transactions))
-
-        return players.difference(set(filter(self.folded, players)))
-
-    def folded(self, player):
-
-        if player == self.bigBlind() and len(self.txnsFor(player)) == 2:
-            return False
-
-        return self.txnsFor(player)[-1][1] == 0
-
     def highestContribution(self):
-        return max(map(lambda x: self.total(x), self.players()))
-
-    def smallBlind(self):
-        return self.transactions[0][0]
-
-    def bigBlind(self):
-        if len(self.transactions) > 1:
-            return self.transactions[1][0]
-
-    def smallBlindWasPrevious(self):
-        return self.transactions[-1][0] == self.smallBlind()
-
-    def txnsFor(self, player):
-        return filter(lambda x: x[0] == player, self.transactions)
-
-    def hadOneGo(self, player):
-        return len(self.txnsFor(player)) == 1
+        return max(map(lambda x: self.transactions.total(x), self.transactions.players()))
 
 
 class Deck(object):

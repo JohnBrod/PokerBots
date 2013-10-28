@@ -33,13 +33,14 @@ class Dealer(object):
         self.startHand()
 
     def startHand(self):
+        self.transactions = []
         self.table = Table(self.players)
         self.lastToRaise = self.table.dealingTo()
         self.cardDealer = CardDealer(self.deck, self.table)
         self.pot = Pot()
         self.cardDealer.dealNext()
 
-        self.table.dealingTo().yourGo(list(self.pot.transactions))
+        self.table.dealingTo().yourGo(self.transactions)
 
     def __on_PlayerResponse(self, sender, bet):
 
@@ -48,6 +49,8 @@ class Dealer(object):
             bet = 0
         else:
             self.table.nextPlayer()
+
+        self.transactions.append((sender, bet))
 
         if bet > self.pot.getMinimumBet(sender):
             self.lastToRaise = sender
@@ -59,10 +62,7 @@ class Dealer(object):
 
         if self.handDone():
             ranking = self.handComparison(self.table.players)
-
-            for p in ranking:
-                winnings = self.pot.getWinnings(p)
-                p.deposit(winnings)
+            self.pot.distributeWinnings(ranking)
 
             if not self.gameOver():
                 self.rotateButton()
@@ -73,7 +73,7 @@ class Dealer(object):
             if self.roundOfBettingDone():
                 self.cardDealer.dealNext()
 
-            self.table.dealingTo().yourGo(list(self.pot.transactions))
+            self.table.dealingTo().yourGo(self.transactions)
 
     def roundOfBettingDone(self):
 
