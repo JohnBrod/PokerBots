@@ -22,7 +22,6 @@ class Dealer(object):
         self.evt_handDone = Event()
         self.deck = deck
         self.lastToRaise = None
-        self.highestBet = None
 
     def deal(self, players):
         self.players = players
@@ -76,7 +75,6 @@ class Dealer(object):
             self.table.dealingTo().yourGo(self.transactions)
 
     def roundOfBettingDone(self):
-
         return self.lastToRaise == self.table.dealingTo()
 
     def gameOver(self):
@@ -90,7 +88,7 @@ class Dealer(object):
         return bet in range(minimum, maximum) or allIn
 
     def handDone(self):
-        bettingDone = self.lastToRaise == self.table.dealingTo()
+        bettingDone = self.roundOfBettingDone()
         dealingDone = self.cardDealer.done()
         lastPlayer = self.table.lastPlayer() is not None
 
