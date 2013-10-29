@@ -115,6 +115,11 @@ class Transactions(object):
     def players(self):
         return self.transactions.keys()
 
+    def takeFrom(self, player, chips):
+        availableChips = min(self.total(), chips)
+        self.add(player, -availableChips)
+        return availableChips
+
 
 class Pot(object):
 
@@ -128,14 +133,19 @@ class Pot(object):
 
     def distributeWinnings(self, ranking):
 
-        for winner in ranking:
-            winnerChips = self.transactions.total(winner)
+        chips = map(lambda x: self.transactions.total(x), self.transactions.players())
+        chipsFor = dict(zip(self.transactions.players(), chips))
 
-            for player in self.transactions.players():
-                loserChips = self.transactions.total(player)
-                wonFromPlayer = min([loserChips, winnerChips])
-                winner.deposit(wonFromPlayer)
-                self.transactions.add(player, -wonFromPlayer)
+        for rank in ranking:
+
+            for player in rank:
+
+                for opponent in self.transactions.players():
+                    winnerChips = chipsFor[player] / len(rank)
+                    opponentChips = chipsFor[opponent] / len(rank)
+                    chipsDue = min(winnerChips, opponentChips)
+                    winnings = self.transactions.takeFrom(opponent, chipsDue)
+                    player.deposit(winnings)
 
     def getMinimumBet(self, player):
         playerContribution = self.transactions.total(player)

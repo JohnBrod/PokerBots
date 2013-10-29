@@ -26,7 +26,7 @@ class testTheWinningsOfaPlayer(unittest.TestCase):
         p1.cash = 5
         p.add(p1, 5)
 
-        p.distributeWinnings([p1])
+        p.distributeWinnings([[p1]])
 
         self.assertEqual(p1.cash, 5)
 
@@ -43,10 +43,9 @@ class testTheWinningsOfaPlayer(unittest.TestCase):
         p.add(p1, 5)
         p.add(p2, 5)
 
-        p.distributeWinnings([p1, p2])
+        p.distributeWinnings([[p1], [p2]])
 
         self.assertEqual(p1.cash, 10)
-        self.assertEqual(p2.cash, 0)
 
     def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
         '''if a player is only in a side pot, that is all they can win'''
@@ -61,10 +60,31 @@ class testTheWinningsOfaPlayer(unittest.TestCase):
         p.add(p1, 5)
         p.add(p2, 10)
 
-        p.distributeWinnings([p1, p2])
+        p.distributeWinnings([[p1], [p2]])
 
         self.assertEqual(p1.cash, 10)
         self.assertEqual(p2.cash, 5)
+
+    def testD_splittingThePot(self):
+        '''players will split the pot if they are ranked the same'''
+
+        p = Pot()
+        p1 = createPlayer('p1', StubMessenger())
+        p2 = createPlayer('p2', StubMessenger())
+        p3 = createPlayer('p3', StubMessenger())
+
+        p1.cash = 10
+        p2.cash = 10
+        p3.cash = 10
+
+        p.add(p1, 10)
+        p.add(p2, 10)
+        p.add(p3, 10)
+
+        p.distributeWinnings([[p1, p2], [p3]])
+
+        self.assertEqual(p1.cash, 15)
+        self.assertEqual(p2.cash, 15)
 
 
 class testTheTotalOfTheTransactions(unittest.TestCase):
