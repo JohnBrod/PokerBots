@@ -47,20 +47,20 @@ class testPokerGame(unittest.TestCase):
         time.sleep(2)
         m.finish()
 
-    def testQuittingGameThatNoPlayersHaveJoined(self):
+    # def testQuittingGameThatNoPlayersHaveJoined(self):
 
-        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-        self.theGame.shouldDisplay('No players joined so quitting\r\n')
+    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+    #     self.theGame.shouldDisplay('No players joined so quitting\r\n')
 
-    def testQuittingGameThatOnlyOnePlayerJoins(self):
+    # def testQuittingGameThatOnlyOnePlayerJoins(self):
 
-        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
 
-        self.aPlayer.says('player1@pokerchat')
-        self.aPlayer.hears('Cash 1000')
+    #     self.aPlayer.says('player1@pokerchat')
+    #     self.aPlayer.hears('Cash 1000')
 
-        self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
-        self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
+    #     self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
+    #     self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
     def testTwoPlayersAllIn(self):
 
@@ -74,15 +74,12 @@ class testPokerGame(unittest.TestCase):
         self.anotherPlayer.hears('Cash 1000')
         self.theGame.shouldDisplay('player2@pokerchat has joined the game\r\n')
 
-        self.aPlayer.hears('player1@pokerchat 5')
-        self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10')
-        self.aPlayer.hears('player1@pokerchat 5,player2@pokerchat 10')
-        self.aPlayer.says('995')
-        self.anotherPlayer.hears('player1@pokerchat 5,player2@pokerchat 10,player1@pokerchat 995')
-        self.anotherPlayer.says('990')
+        self.aPlayer.hears('go')
+        self.aPlayer.says('1000')
+        self.anotherPlayer.hears('player1@pokerchat 1000')
+        self.anotherPlayer.says('1000')
 
-        self.aPlayer.hears('Hand Result...')
-        self.anotherPlayer.hears('Hand Result...')
+        self.theGame.shouldDisplay('Game Over')
 
 
 if __name__ == "__main__":

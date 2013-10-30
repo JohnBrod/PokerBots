@@ -13,7 +13,12 @@ def chat(msg):
 
 
 def playerMessage(transactions):
-    return ','.join(map(lambda x: '%s %s' % (x[0].name, x[1]), transactions))
+    msg = ','.join(map(lambda x: '%s %s' % (x[0].name, x[1]), transactions))
+
+    if msg == '':
+        return 'go'
+
+    return msg
 
 
 class Doorman(object):

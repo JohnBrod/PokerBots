@@ -53,7 +53,8 @@ else:
         dealer.deal(players)
         while dealer.playing:
             pass
-        write('done')
+        write('Game Over')
+
     except:
         write(traceback.format_exc())
 
