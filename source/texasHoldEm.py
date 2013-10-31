@@ -1,6 +1,7 @@
 from theHouse import Pot
 from EventHandling import Event
 from collections import deque
+from collections import defaultdict
 
 
 def outMessage(bet, min, max):
@@ -174,3 +175,80 @@ class Table(object):
 
     def allIn(self):
         return all(x.cash == 0 for x in self.players)
+
+
+def highestCard(hand):
+
+    return sorted(hand, key=lambda x: x[0])[-1]
+
+
+def pair(hand):
+    values = map(lambda x: x[0], hand)
+    pairs = [card for card in hand if values.count(card[0]) == 2]
+
+    if len(pairs) == 2:
+        return pairs
+
+
+def trips(hand):
+    values = map(lambda x: x[0], hand)
+    trips = [card for card in hand if values.count(card[0]) == 3]
+
+    return trips
+
+
+def poker(hand):
+    values = map(lambda x: x[0], hand)
+    poker = [card for card in hand if values.count(card[0]) == 4]
+
+    return poker
+
+
+def flush(hand):
+
+    flush = flushCards(hand)
+
+    if flush:
+        return sorted(hand, key=lambda x: x[0], reverse=True)[0:5]
+
+
+def flushCards(hand):
+    suits = map(lambda x: x[1], hand)
+    flush = [card for card in hand if suits.count(card[1]) >= 5]
+
+    return flush
+
+
+def distinctFace(cards):
+
+    distinctFaces = defaultdict(list)
+
+    for f, s in cards:
+        distinctFaces[f].append((f, s))
+
+    cards = [(distinctFaces[k][0]) for k in distinctFaces]
+
+    return cards
+
+
+def straight(cards):
+
+    cards = distinctFace(cards)
+    cards = sorted(cards, key=lambda x: x[0], reverse=True)
+
+    while len(cards) >= 5:
+
+        if cards[0][0] - cards[4][0] == 4:
+            return cards[0:5]
+
+        cards = cards[1:]
+
+
+def straightFlush(cards):
+
+    return straight(flushCards(cards))
+
+
+def highestHand(cards):
+
+    return straightFlush(cards)
