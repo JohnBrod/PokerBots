@@ -6,6 +6,7 @@ from texasHoldEm import straight
 from texasHoldEm import trips
 from texasHoldEm import poker
 from texasHoldEm import straightFlush
+from texasHoldEm import house
 
 
 class TestRecognizingHands(unittest.TestCase):
@@ -74,6 +75,11 @@ class TestRecognizingHands(unittest.TestCase):
         hand = [(1, 'H'), (2, 'H'), (3, 'H'), (4, 'H'), (5, 'H')]
         expected = [(5, 'H'), (4, 'H'), (3, 'H'), (2, 'H'), (1, 'H')]
         self.assertEqual(straightFlush(hand), expected)
+
+    def testK_house(self):
+        '''a house'''
+        hand = [(1, 'H'), (1, 'C'), (1, 'D'), (4, 'H'), (4, 'C')]
+        self.assertEqual(house(hand), hand)
 
 
 if __name__ == "__main__":

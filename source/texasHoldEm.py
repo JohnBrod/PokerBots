@@ -252,3 +252,17 @@ def straightFlush(cards):
 def highestHand(cards):
 
     return straightFlush(cards)
+
+
+def house(cards):
+
+    if not trips(cards):
+        return
+
+    hand = trips(cards)
+
+    cards = [card for card in cards if card not in hand]
+    if not pair(cards):
+        return
+    
+    return hand + pair(cards)

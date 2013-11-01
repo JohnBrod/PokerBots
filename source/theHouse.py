@@ -67,7 +67,7 @@ class PlayerProxy(object):
     def send(self, msg):
         self.dealer.sendMessage(self.name, msg)
 
-    def cards(self, transactions):
+    def cards(self, cards):
         pass
 
     def outOfGame(self, msg):
