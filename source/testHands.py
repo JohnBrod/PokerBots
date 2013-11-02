@@ -81,6 +81,5 @@ class TestRecognizingHands(unittest.TestCase):
         hand = [(1, 'H'), (1, 'C'), (1, 'D'), (4, 'H'), (4, 'C')]
         self.assertEqual(house(hand), hand)
 
-
 if __name__ == "__main__":
     unittest.main()

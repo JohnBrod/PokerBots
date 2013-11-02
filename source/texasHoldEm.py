@@ -264,5 +264,5 @@ def house(cards):
     cards = [card for card in cards if card not in hand]
     if not pair(cards):
         return
-    
+
     return hand + pair(cards)
