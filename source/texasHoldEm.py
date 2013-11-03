@@ -25,7 +25,7 @@ class Dealer(object):
         self.cardDealer = DealsCardsToThePlayers(self.deck, self.players, self.public)
         self.bettingDealer = HandlesBettingBetweenThePlayers(self.players)
         self.bettingDealer.ranking = self.ranking
-        self.cardDealer.dealNext()
+        self.cardDealer.next()
         self.bettingDealer.next()
 
     def __on_PlayerResponse(self, sender, bet):
@@ -45,12 +45,12 @@ class Dealer(object):
                 self.playing = False
         else:
             if self.bettingDealer.done():
-                self.cardDealer.dealNext()
+                self.cardDealer.next()
 
             self.bettingDealer.next()
 
     def gameOver(self):
-        return len(filter(lambda x: x.cash > 0, self.players)) <= 1
+        return len(filter(lambda x: x.cash > 0, self.players)) == 1
 
     def handDone(self):
         bettingDone = self.bettingDealer.done()
@@ -78,7 +78,7 @@ class DealsCardsToThePlayers(object):
 
         self.deck.shuffle()
 
-    def dealNext(self):
+    def next(self):
 
         if not self.dealStages:
             raise Exception("No more stages left to deal")

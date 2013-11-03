@@ -31,7 +31,7 @@ class testDealingCardsToPlayers(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        DealsCardsToThePlayers(PredictableDeck(), [p1, p2], PublicAnnouncer()).dealNext()
+        DealsCardsToThePlayers(PredictableDeck(), [p1, p2], PublicAnnouncer()).next()
 
         p1.cards.assert_called_with((1, 2))
         p2.cards.assert_called_with((3, 4))
@@ -48,8 +48,8 @@ class testDealingCardsToPlayers(unittest.TestCase):
         public.say = MagicMock()
 
         dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
-        dealer.dealNext()
-        dealer.dealNext()
+        dealer.next()
+        dealer.next()
 
         public.say.assert_called_with((5, 6, 7))
 
@@ -65,9 +65,9 @@ class testDealingCardsToPlayers(unittest.TestCase):
         p2.cards = MagicMock()
 
         dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
-        dealer.dealNext()
-        dealer.dealNext()
-        dealer.dealNext()
+        dealer.next()
+        dealer.next()
+        dealer.next()
 
         public.say.assert_called_with((8))
 
@@ -83,10 +83,10 @@ class testDealingCardsToPlayers(unittest.TestCase):
         p2.cards = MagicMock()
 
         dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
-        dealer.dealNext()
-        dealer.dealNext()
-        dealer.dealNext()
-        dealer.dealNext()
+        dealer.next()
+        dealer.next()
+        dealer.next()
+        dealer.next()
 
         public.say.assert_called_with((9))
 
@@ -102,11 +102,11 @@ class testDealingCardsToPlayers(unittest.TestCase):
         p2.cards = MagicMock()
 
         dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
-        dealer.dealNext()
-        dealer.dealNext()
-        dealer.dealNext()
-        dealer.dealNext()
-        dealer.dealNext()
+        dealer.next()
+        dealer.next()
+        dealer.next()
+        dealer.next()
+        dealer.next()
 
         public.say.assert_called_with((10))
 
@@ -124,7 +124,7 @@ class testDealingCardsToPlayers(unittest.TestCase):
         dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
         dealer.dealStages = deque([])
 
-        self.assertRaises(Exception, dealer.dealNext)
+        self.assertRaises(Exception, dealer.next)
 
 
 class PredictableDeck():
