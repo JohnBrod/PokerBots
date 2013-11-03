@@ -4,6 +4,17 @@ from collections import deque
 import random
 
 
+def outMessage(bet, min, max):
+    if bet == 0:
+        return 'You folded'
+
+    if bet < min:
+        return 'You bet %d, minimum bet was %d' % (bet, min)
+
+    if bet > max:
+        return "You bet %d, you have only %d cash avaiable" % (bet, max)
+
+
 def getName(x):
     return str(x)[:str(x).find('/')]
 
@@ -128,10 +139,22 @@ class Pot(object):
 
 class HandlesBettingBetweenThePlayers(object):
 
-    def __init__(self, table):
+    def __init__(self, players):
+        self.table = Table(players)
         self.pot = Pot()
-        self.table = table
         self.transactions = []
+        self.lastToRaise = self.table.dealingTo()
+
+    def lastPlayer(self):
+
+        return self.table.lastPlayer()
+
+    def allIn(self):
+
+        return self.table.allIn()
+
+    def done(self):
+        return self.lastToRaise == self.table.dealingTo()
 
     def ranking(self, players):
 
@@ -139,10 +162,31 @@ class HandlesBettingBetweenThePlayers(object):
 
     def add(self, player, amount):
 
+        if not self.legal(amount, player):
+            self.kickOut(player, amount)
+            amount = 0
+        else:
+            self.table.nextPlayer()
+
+        if amount > self.getMinimumBet(player):
+            self.lastToRaise = player
+
         self.transactions.append((player, amount))
 
         player.withdraw(amount)
         self.pot.add(player, amount)
+
+    def legal(self, bet, sender):
+        minimum = self.getMinimumBet(sender)
+        maximum = sender.cash + 1
+        allIn = sender.cash - bet == 0
+
+        return bet in range(minimum, maximum) or allIn
+
+    def kickOut(self, player, bet):
+        msg = outMessage(bet, self.getMinimumBet(player), player.cash)
+        player.outOfGame(msg)
+        self.table.removeCurrent()
 
     def distributeWinnings(self):
 
@@ -193,3 +237,39 @@ class Deck(object):
 
     def shuffle(self):
         random.shuffle(self.cards)
+
+
+class PublicAnnouncer(object):
+    def __init__(self):
+        pass
+
+    def say(self, msg):
+        pass
+
+
+class Table(object):
+    """players sit around this and get dealt to in order"""
+    def __init__(self, players):
+        self.players = players
+        self.dealingToPosition = 0
+
+    def nextPlayer(self):
+        self.dealingToPosition += 1
+        if self.dealingToPosition >= len(self.players):
+            self.dealingToPosition = 0
+
+    def dealingTo(self):
+
+        return self.players[self.dealingToPosition]
+
+    def removeCurrent(self):
+        self.players = filter(lambda x: x != self.dealingTo(), self.players)
+        if self.dealingToPosition >= len(self.players):
+            self.dealingToPosition = 0
+
+    def lastPlayer(self):
+        if len(self.players) == 1:
+            return self.players[0]
+
+    def allIn(self):
+        return all(x.cash == 0 for x in self.players)
