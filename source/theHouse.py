@@ -95,7 +95,7 @@ class PlayerProxy(object):
         return chat(msg) and getName(msg['from']) == self.name
 
 
-class Transactions(object):
+class Pot(object):
 
     def __init__(self):
         self.transactions = {}
@@ -126,36 +126,36 @@ class Transactions(object):
         return availableChips
 
 
-class Pot(object):
+class HandlesBettingBetweenThePlayers(object):
 
     def __init__(self):
-        self.transactions = Transactions()
+        self.pot = Pot()
 
     def add(self, player, amount):
 
         player.withdraw(amount)
-        self.transactions.add(player, amount)
+        self.pot.add(player, amount)
 
     def distributeWinnings(self, ranking):
 
-        chips = map(lambda x: self.transactions.total(x), self.transactions.players())
-        chipsFor = dict(zip(self.transactions.players(), chips))
+        chips = map(lambda x: self.pot.total(x), self.pot.players())
+        chipsFor = dict(zip(self.pot.players(), chips))
 
         for rank in ranking:
 
             for player in rank:
 
-                for opponent in self.transactions.players():
+                for opponent in self.pot.players():
                     winnerChips = chipsFor[player] / len(rank)
                     opponentChips = chipsFor[opponent] / len(rank)
                     chipsDue = min(winnerChips, opponentChips)
-                    winnings = self.transactions.takeFrom(opponent, chipsDue)
+                    winnings = self.pot.takeFrom(opponent, chipsDue)
                     player.deposit(winnings)
 
     def getMinimumBet(self, player):
-        playerContribution = self.transactions.total(player)
+        playerContribution = self.pot.total(player)
 
-        if not self.transactions.players():
+        if not self.pot.players():
             return 0
 
         if playerContribution == self.highestContribution():
@@ -164,7 +164,7 @@ class Pot(object):
         return self.highestContribution() - playerContribution
 
     def highestContribution(self):
-        return max(map(lambda x: self.transactions.total(x), self.transactions.players()))
+        return max(map(lambda x: self.pot.total(x), self.pot.players()))
 
 
 class Deck(object):

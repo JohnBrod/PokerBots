@@ -1,8 +1,8 @@
 from EventHandling import Event
 from theHouse import PlayerProxy
 import unittest
+from theHouse import HandlesBettingBetweenThePlayers
 from theHouse import Pot
-from theHouse import Transactions
 from collections import deque
 
 
@@ -13,54 +13,54 @@ def shouldMatch(test, a, b):
     test.assertEqual(a, b)
 
 
-class testTheWinningsOfaPlayer(unittest.TestCase):
+class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
 
     def setUp(self):
-        print 'The winnings of a player,', self.shortDescription()
+        print 'Splitting up the pot between the winners,', self.shortDescription()
 
     def testA_playerWinsBackTheirChips(self):
         '''a player wins back their chips if no one else is in'''
 
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
         p1.cash = 5
-        p.add(p1, 5)
+        dealer.add(p1, 5)
 
-        p.distributeWinnings([[p1]])
+        dealer.distributeWinnings([[p1]])
 
         self.assertEqual(p1.cash, 5)
 
     def testB_withoutSidePotsTheTopRankedPlayerWinsAll(self):
         '''without side pots the top ranked player wins all'''
 
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
         p1.cash = 5
         p2.cash = 5
 
-        p.add(p1, 5)
-        p.add(p2, 5)
+        dealer.add(p1, 5)
+        dealer.add(p2, 5)
 
-        p.distributeWinnings([[p1], [p2]])
+        dealer.distributeWinnings([[p1], [p2]])
 
         self.assertEqual(p1.cash, 10)
 
     def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
         '''if a player is only in a side pot, that is all they can win'''
 
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
         p1.cash = 5
         p2.cash = 10
 
-        p.add(p1, 5)
-        p.add(p2, 10)
+        dealer.add(p1, 5)
+        dealer.add(p2, 10)
 
-        p.distributeWinnings([[p1], [p2]])
+        dealer.distributeWinnings([[p1], [p2]])
 
         self.assertEqual(p1.cash, 10)
         self.assertEqual(p2.cash, 5)
@@ -68,7 +68,7 @@ class testTheWinningsOfaPlayer(unittest.TestCase):
     def testD_splittingThePot(self):
         '''players will split the pot if they are ranked the same'''
 
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
         p3 = createPlayer('p3', StubMessenger())
@@ -77,48 +77,48 @@ class testTheWinningsOfaPlayer(unittest.TestCase):
         p2.cash = 10
         p3.cash = 10
 
-        p.add(p1, 10)
-        p.add(p2, 10)
-        p.add(p3, 10)
+        dealer.add(p1, 10)
+        dealer.add(p2, 10)
+        dealer.add(p3, 10)
 
-        p.distributeWinnings([[p1, p2], [p3]])
+        dealer.distributeWinnings([[p1, p2], [p3]])
 
         self.assertEqual(p1.cash, 15)
         self.assertEqual(p2.cash, 15)
 
 
-class testTheTotalOfTheTransactions(unittest.TestCase):
+class testTheTotalOfThePot(unittest.TestCase):
 
     def setUp(self):
-        print 'The total of the transactions,', self.shortDescription()
+        print 'The total of the pot,', self.shortDescription()
 
     def testA_ZeroWhenThereIsNothingInThePot(self):
         '''zero when there is nothing in the pot'''
 
-        txns = Transactions()
+        p = Pot()
 
-        self.assertEqual(0, txns.total())
+        self.assertEqual(0, p.total())
 
     def testB_IncrementsWhenChipsAreAdded(self):
         '''increments when chips are added'''
 
-        txns = Transactions()
+        p = Pot()
         p1 = createPlayer('p1', StubMessenger())
 
-        txns.add(p1, 5)
+        p.add(p1, 5)
 
-        self.assertEqual(5, txns.total())
+        self.assertEqual(5, p.total())
 
     def testC_IncrementsWhenMoreChipsAreAdded(self):
         '''increments when more chips are added'''
 
-        txns = Transactions()
+        p = Pot()
         p1 = createPlayer('p1', StubMessenger())
 
-        txns.add(p1, 5)
-        txns.add(p1, 10)
+        p.add(p1, 5)
+        p.add(p1, 10)
 
-        self.assertEqual(15, txns.total())
+        self.assertEqual(15, p.total())
 
 
 class testTheMinimumBetOfThePot(unittest.TestCase):
@@ -129,44 +129,44 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
     def testA_ZeroWhenThereIsNothingInThePot(self):
         '''zero when there is nothing in the pot'''
 
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
 
-        self.assertEqual(0, p.getMinimumBet(p1))
+        self.assertEqual(0, dealer.getMinimumBet(p1))
 
     def testB_SecondPlayerMustBetAtLeastTheFirstBet(self):
         '''second player should pay at least the first bet'''
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
-        p.add(p1, 5)
+        dealer.add(p1, 5)
 
-        self.assertEqual(5, p.getMinimumBet(p2))
+        self.assertEqual(5, dealer.getMinimumBet(p2))
 
     def testC_ZeroBecauseAllAreEven(self):
         '''zero when all players are even'''
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
-        p.add(p1, 5)
-        p.add(p2, 5)
+        dealer.add(p1, 5)
+        dealer.add(p2, 5)
 
-        self.assertEqual(0, p.getMinimumBet(p1))
-        self.assertEqual(0, p.getMinimumBet(p2))
+        self.assertEqual(0, dealer.getMinimumBet(p1))
+        self.assertEqual(0, dealer.getMinimumBet(p2))
 
     def testD_ShouldPayTheDifferenceWhenRaised(self):
         '''player should pay the difference when raised'''
 
-        p = Pot()
+        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
-        p.add(p1, 5)
-        p.add(p2, 10)
+        dealer.add(p1, 5)
+        dealer.add(p2, 10)
 
-        self.assertEqual(5, p.getMinimumBet(p1))
+        self.assertEqual(5, dealer.getMinimumBet(p1))
 
 
 def createPlayer(name, messenger):

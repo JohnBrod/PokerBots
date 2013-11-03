@@ -1,4 +1,4 @@
-from theHouse import Pot
+from theHouse import HandlesBettingBetweenThePlayers
 from EventHandling import Event
 from collections import deque
 from collections import defaultdict
@@ -36,8 +36,8 @@ class Dealer(object):
         self.transactions = []
         self.table = Table(self.players)
         self.lastToRaise = self.table.dealingTo()
-        self.cardDealer = CardDealer(self.deck, self.table)
-        self.pot = Pot()
+        self.cardDealer = DealsCardsToThePlayers(self.deck, self.table)
+        self.bettingDealer = HandlesBettingBetweenThePlayers()
         self.cardDealer.dealNext()
 
         self.table.dealingTo().yourGo(self.transactions)
@@ -52,17 +52,17 @@ class Dealer(object):
 
         self.transactions.append((sender, bet))
 
-        if bet > self.pot.getMinimumBet(sender):
+        if bet > self.bettingDealer.getMinimumBet(sender):
             self.lastToRaise = sender
 
-        self.pot.add(sender, bet)
+        self.bettingDealer.add(sender, bet)
 
         if self.table.allIn():
             self.cardDealer.dealRemainingCards()
 
         if self.handDone():
             ranking = self.handComparison(self.table.players)
-            self.pot.distributeWinnings(ranking)
+            self.bettingDealer.distributeWinnings(ranking)
 
             if not self.gameOver():
                 self.rotateButton()
@@ -82,7 +82,7 @@ class Dealer(object):
         return len(filter(lambda x: x.cash > 0, self.players)) <= 1
 
     def legal(self, bet, sender):
-        minimum = self.pot.getMinimumBet(sender)
+        minimum = self.bettingDealer.getMinimumBet(sender)
         maximum = sender.cash + 1
         allIn = sender.cash - bet == 0
 
@@ -99,12 +99,12 @@ class Dealer(object):
         self.players = self.players[1:] + self.players[:1]
 
     def kickOut(self, player, bet):
-        msg = outMessage(bet, self.pot.getMinimumBet(player), player.cash)
+        msg = outMessage(bet, self.bettingDealer.getMinimumBet(player), player.cash)
         player.outOfGame(msg)
         self.table.removeCurrent()
 
 
-class CardDealer(object):
+class DealsCardsToThePlayers(object):
     """deals a hand to players"""
     def __init__(self, deck, table):
         self.deck = deck
