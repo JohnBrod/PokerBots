@@ -4,6 +4,7 @@ import unittest
 from theHouse import HandlesBettingBetweenThePlayers
 from theHouse import Pot
 from collections import deque
+from texasHoldEm import Table
 
 
 def shouldMatch(test, a, b):
@@ -22,7 +23,9 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
         '''a player wins back their chips if no one else is in'''
 
         p1 = createPlayer('p1', StubMessenger())
-        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1]])
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
+        dealer.ranking = lambda x: [[p1]]
+
         p1.cash = 5
         dealer.add(p1, 5)
 
@@ -33,9 +36,11 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testB_withoutSidePotsTheTopRankedPlayerWinsAll(self):
         '''without side pots the top ranked player wins all'''
 
-        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1], [p2]])
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
+
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
+        dealer.ranking = lambda x: [[p1], [p2]]
 
         p1.cash = 5
         p2.cash = 5
@@ -50,9 +55,11 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
         '''if a player is only in a side pot, that is all they can win'''
 
-        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1], [p2]])
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
+
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
+        dealer.ranking = lambda x: [[p1], [p2]]
 
         p1.cash = 5
         p2.cash = 10
@@ -68,10 +75,12 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testD_splittingThePot(self):
         '''players will split the pot if they are ranked the same'''
 
-        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1, p2], [p3]])
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
         p3 = createPlayer('p3', StubMessenger())
+
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
+        dealer.ranking = lambda x: [[p1, p2], [p3]]
 
         p1.cash = 10
         p2.cash = 10
@@ -121,22 +130,22 @@ class testTheTotalOfThePot(unittest.TestCase):
         self.assertEqual(15, p.total())
 
 
-class testTheMinimumBetOfThePot(unittest.TestCase):
+class testTheMinimumBetForPlayer(unittest.TestCase):
 
     def setUp(self):
-        print 'The minimum bet of the pot,', self.shortDescription()
+        print 'The minimum bet for a player,', self.shortDescription()
 
     def testA_ZeroWhenThereIsNothingInThePot(self):
         '''zero when there is nothing in the pot'''
 
-        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
         p1 = createPlayer('p1', StubMessenger())
 
         self.assertEqual(0, dealer.getMinimumBet(p1))
 
     def testB_SecondPlayerMustBetAtLeastTheFirstBet(self):
         '''second player should pay at least the first bet'''
-        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
@@ -146,7 +155,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
 
     def testC_ZeroBecauseAllAreEven(self):
         '''zero when all players are even'''
-        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
@@ -159,7 +168,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
     def testD_ShouldPayTheDifferenceWhenRaised(self):
         '''player should pay the difference when raised'''
 
-        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
+        dealer = HandlesBettingBetweenThePlayers(Table([]))
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 

@@ -128,18 +128,25 @@ class Pot(object):
 
 class HandlesBettingBetweenThePlayers(object):
 
-    def __init__(self, handComparison):
-        self.handComparison = handComparison
+    def __init__(self, table):
         self.pot = Pot()
+        self.table = table
+        self.transactions = []
+
+    def ranking(self, players):
+
+        return map(lambda x: [x], self.pot.players())
 
     def add(self, player, amount):
+
+        self.transactions.append((player, amount))
 
         player.withdraw(amount)
         self.pot.add(player, amount)
 
     def distributeWinnings(self):
 
-        ranking = self.handComparison(self.pot.players())
+        ranking = self.ranking(self.pot.players())
 
         chips = map(lambda x: self.pot.total(x), self.pot.players())
         chipsFor = dict(zip(self.pot.players(), chips))
@@ -168,6 +175,10 @@ class HandlesBettingBetweenThePlayers(object):
 
     def highestContribution(self):
         return max(map(lambda x: self.pot.total(x), self.pot.players()))
+
+    def next(self):
+
+        self.table.dealingTo().yourGo(self.transactions)
 
 
 class Deck(object):

@@ -17,8 +17,8 @@ def outMessage(bet, min, max):
 
 class Dealer(object):
     """deals a hand to players"""
-    def __init__(self, deck, handComparison):
-        self.handComparison = handComparison
+    def __init__(self, deck, ranking):
+        self.ranking = ranking
         self.playing = True
         self.evt_handDone = Event()
         self.deck = deck
@@ -33,14 +33,13 @@ class Dealer(object):
         self.startHand()
 
     def startHand(self):
-        self.transactions = []
         self.table = Table(self.players)
         self.lastToRaise = self.table.dealingTo()
         self.cardDealer = DealsCardsToThePlayers(self.deck, self.table)
-        self.bettingDealer = HandlesBettingBetweenThePlayers(self.handComparison)
+        self.bettingDealer = HandlesBettingBetweenThePlayers(self.table)
+        self.bettingDealer.ranking = self.ranking
         self.cardDealer.dealNext()
-
-        self.table.dealingTo().yourGo(self.transactions)
+        self.bettingDealer.next()
 
     def __on_PlayerResponse(self, sender, bet):
 
@@ -49,8 +48,6 @@ class Dealer(object):
             bet = 0
         else:
             self.table.nextPlayer()
-
-        self.transactions.append((sender, bet))
 
         if bet > self.bettingDealer.getMinimumBet(sender):
             self.lastToRaise = sender
@@ -72,7 +69,7 @@ class Dealer(object):
             if self.roundOfBettingDone():
                 self.cardDealer.dealNext()
 
-            self.table.dealingTo().yourGo(self.transactions)
+            self.bettingDealer.next()
 
     def roundOfBettingDone(self):
         return self.lastToRaise == self.table.dealingTo()
