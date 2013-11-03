@@ -21,19 +21,19 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testA_playerWinsBackTheirChips(self):
         '''a player wins back their chips if no one else is in'''
 
-        dealer = HandlesBettingBetweenThePlayers()
         p1 = createPlayer('p1', StubMessenger())
+        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1]])
         p1.cash = 5
         dealer.add(p1, 5)
 
-        dealer.distributeWinnings([[p1]])
+        dealer.distributeWinnings()
 
         self.assertEqual(p1.cash, 5)
 
     def testB_withoutSidePotsTheTopRankedPlayerWinsAll(self):
         '''without side pots the top ranked player wins all'''
 
-        dealer = HandlesBettingBetweenThePlayers()
+        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1], [p2]])
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
@@ -43,14 +43,14 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
         dealer.add(p1, 5)
         dealer.add(p2, 5)
 
-        dealer.distributeWinnings([[p1], [p2]])
+        dealer.distributeWinnings()
 
         self.assertEqual(p1.cash, 10)
 
     def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
         '''if a player is only in a side pot, that is all they can win'''
 
-        dealer = HandlesBettingBetweenThePlayers()
+        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1], [p2]])
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
@@ -60,7 +60,7 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
         dealer.add(p1, 5)
         dealer.add(p2, 10)
 
-        dealer.distributeWinnings([[p1], [p2]])
+        dealer.distributeWinnings()
 
         self.assertEqual(p1.cash, 10)
         self.assertEqual(p2.cash, 5)
@@ -68,7 +68,7 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testD_splittingThePot(self):
         '''players will split the pot if they are ranked the same'''
 
-        dealer = HandlesBettingBetweenThePlayers()
+        dealer = HandlesBettingBetweenThePlayers(lambda x: [[p1, p2], [p3]])
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
         p3 = createPlayer('p3', StubMessenger())
@@ -81,7 +81,7 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
         dealer.add(p2, 10)
         dealer.add(p3, 10)
 
-        dealer.distributeWinnings([[p1, p2], [p3]])
+        dealer.distributeWinnings()
 
         self.assertEqual(p1.cash, 15)
         self.assertEqual(p2.cash, 15)
@@ -129,14 +129,14 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
     def testA_ZeroWhenThereIsNothingInThePot(self):
         '''zero when there is nothing in the pot'''
 
-        dealer = HandlesBettingBetweenThePlayers()
+        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
         p1 = createPlayer('p1', StubMessenger())
 
         self.assertEqual(0, dealer.getMinimumBet(p1))
 
     def testB_SecondPlayerMustBetAtLeastTheFirstBet(self):
         '''second player should pay at least the first bet'''
-        dealer = HandlesBettingBetweenThePlayers()
+        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
@@ -146,7 +146,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
 
     def testC_ZeroBecauseAllAreEven(self):
         '''zero when all players are even'''
-        dealer = HandlesBettingBetweenThePlayers()
+        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 
@@ -159,7 +159,7 @@ class testTheMinimumBetOfThePot(unittest.TestCase):
     def testD_ShouldPayTheDifferenceWhenRaised(self):
         '''player should pay the difference when raised'''
 
-        dealer = HandlesBettingBetweenThePlayers()
+        dealer = HandlesBettingBetweenThePlayers(lambda x: x)
         p1 = createPlayer('p1', StubMessenger())
         p2 = createPlayer('p2', StubMessenger())
 

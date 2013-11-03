@@ -128,7 +128,8 @@ class Pot(object):
 
 class HandlesBettingBetweenThePlayers(object):
 
-    def __init__(self):
+    def __init__(self, handComparison):
+        self.handComparison = handComparison
         self.pot = Pot()
 
     def add(self, player, amount):
@@ -136,7 +137,9 @@ class HandlesBettingBetweenThePlayers(object):
         player.withdraw(amount)
         self.pot.add(player, amount)
 
-    def distributeWinnings(self, ranking):
+    def distributeWinnings(self):
+
+        ranking = self.handComparison(self.pot.players())
 
         chips = map(lambda x: self.pot.total(x), self.pot.players())
         chipsFor = dict(zip(self.pot.players(), chips))

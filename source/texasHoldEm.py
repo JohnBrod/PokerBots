@@ -37,7 +37,7 @@ class Dealer(object):
         self.table = Table(self.players)
         self.lastToRaise = self.table.dealingTo()
         self.cardDealer = DealsCardsToThePlayers(self.deck, self.table)
-        self.bettingDealer = HandlesBettingBetweenThePlayers()
+        self.bettingDealer = HandlesBettingBetweenThePlayers(self.handComparison)
         self.cardDealer.dealNext()
 
         self.table.dealingTo().yourGo(self.transactions)
@@ -61,8 +61,7 @@ class Dealer(object):
             self.cardDealer.dealRemainingCards()
 
         if self.handDone():
-            ranking = self.handComparison(self.table.players)
-            self.bettingDealer.distributeWinnings(ranking)
+            self.bettingDealer.distributeWinnings()
 
             if not self.gameOver():
                 self.rotateButton()
