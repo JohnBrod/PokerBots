@@ -1,13 +1,11 @@
 from theHouse import HandlesBettingBetweenThePlayers
 from EventHandling import Event
 from collections import deque
-from collections import defaultdict
 
 
 class Dealer(object):
     """deals a hand to players"""
-    def __init__(self, deck, ranking, public):
-        self.ranking = ranking
+    def __init__(self, deck, public):
         self.public = public
         self.playing = True
         self.evt_handDone = Event()
@@ -24,7 +22,6 @@ class Dealer(object):
     def startHand(self):
         self.cardDealer = DealsCardsToThePlayers(self.deck, self.players, self.public)
         self.bettingDealer = HandlesBettingBetweenThePlayers(self.players)
-        self.bettingDealer.ranking = self.ranking
         self.cardDealer.next()
         self.bettingDealer.next()
 
@@ -91,108 +88,21 @@ class DealsCardsToThePlayers(object):
 
     def dealCommunityCards(self):
         communityCards = (self.deck.take(), self.deck.take(), self.deck.take())
-        self.public.say(communityCards)
+        self.public.say([communityCards])
+        for player in self.players:
+            player.cards([communityCards])
 
     def dealTurnCard(self):
         card = self.deck.take()
-        self.public.say(card)
+        self.public.say([card])
+        for player in self.players:
+            player.cards([card])
 
     def dealPrivateCards(self):
         for player in self.players:
             privateCards = (self.deck.take(), self.deck.take())
-            player.cards(privateCards)
+            player.cards([privateCards])
 
     def dealRemainingCards(self):
         while len(self.dealStages) > 0:
             self.dealStages.popleft()()
-
-
-def highestCard(hand):
-
-    return sorted(hand, key=lambda x: x[0])[-1]
-
-
-def pair(hand):
-    values = map(lambda x: x[0], hand)
-    pairs = [card for card in hand if values.count(card[0]) == 2]
-
-    if len(pairs) == 2:
-        return pairs
-
-
-def trips(hand):
-    values = map(lambda x: x[0], hand)
-    trips = [card for card in hand if values.count(card[0]) == 3]
-
-    return trips
-
-
-def poker(hand):
-    values = map(lambda x: x[0], hand)
-    poker = [card for card in hand if values.count(card[0]) == 4]
-
-    return poker
-
-
-def flush(hand):
-
-    flush = flushCards(hand)
-
-    if flush:
-        return sorted(hand, key=lambda x: x[0], reverse=True)[0:5]
-
-
-def flushCards(hand):
-    suits = map(lambda x: x[1], hand)
-    flush = [card for card in hand if suits.count(card[1]) >= 5]
-
-    return flush
-
-
-def distinctFace(cards):
-
-    distinctFaces = defaultdict(list)
-
-    for f, s in cards:
-        distinctFaces[f].append((f, s))
-
-    cards = [(distinctFaces[k][0]) for k in distinctFaces]
-
-    return cards
-
-
-def straight(cards):
-
-    cards = distinctFace(cards)
-    cards = sorted(cards, key=lambda x: x[0], reverse=True)
-
-    while len(cards) >= 5:
-
-        if cards[0][0] - cards[4][0] == 4:
-            return cards[0:5]
-
-        cards = cards[1:]
-
-
-def straightFlush(cards):
-
-    return straight(flushCards(cards))
-
-
-def highestHand(cards):
-
-    return straightFlush(cards)
-
-
-def house(cards):
-
-    if not trips(cards):
-        return
-
-    hand = trips(cards)
-
-    cards = [card for card in cards if card not in hand]
-    if not pair(cards):
-        return
-
-    return hand + pair(cards)

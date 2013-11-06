@@ -13,7 +13,7 @@ def shouldMatch(test, a, b):
     test.assertEqual(a, b)
 
 
-class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
+class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
     def setUp(self):
         print 'Splitting up the pot between the winners,', self.shortDescription()
@@ -21,11 +21,9 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testA_playerWinsBackTheirChips(self):
         '''a player wins back their chips if no one else is in'''
 
-        p1 = createPlayer('p1', StubMessenger())
+        p1 = createPlayer('p1', StubMessenger(), 5)
         dealer = HandlesBettingBetweenThePlayers([p1])
-        dealer.ranking = lambda x: [[p1]]
 
-        p1.cash = 5
         dealer.add(p1, 5)
 
         dealer.distributeWinnings()
@@ -35,14 +33,13 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testB_withoutSidePotsTheTopRankedPlayerWinsAll(self):
         '''without side pots the top ranked player wins all'''
 
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1', StubMessenger(), 5)
+        p2 = createPlayer('p2', StubMessenger(), 5)
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2])
-        dealer.ranking = lambda x: [[p1], [p2]]
 
-        p1.cash = 5
-        p2.cash = 5
+        p1.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
+        p2.cards([(2, 'C'), (3, 'D'), (5, 'C'), (9, 'D'), (13, 'S')])
 
         dealer.add(p1, 5)
         dealer.add(p2, 5)
@@ -54,14 +51,13 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
         '''if a player is only in a side pot, that is all they can win'''
 
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1', StubMessenger(), 5)
+        p2 = createPlayer('p2', StubMessenger(), 10)
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2])
-        dealer.ranking = lambda x: [[p1], [p2]]
 
-        p1.cash = 5
-        p2.cash = 10
+        p1.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
+        p2.cards([(2, 'C'), (3, 'D'), (5, 'C'), (9, 'D'), (13, 'S')])
 
         dealer.add(p1, 5)
         dealer.add(p2, 10)
@@ -74,16 +70,15 @@ class testSplittiingUpThePotBetweenTheWinners(unittest.TestCase):
     def testD_splittingThePot(self):
         '''players will split the pot if they are ranked the same'''
 
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
-        p3 = createPlayer('p3', StubMessenger())
+        p1 = createPlayer('p1', StubMessenger(), 10)
+        p2 = createPlayer('p2', StubMessenger(), 10)
+        p3 = createPlayer('p3', StubMessenger(), 10)
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2, p3])
-        dealer.ranking = lambda x: [[p1, p2], [p3]]
 
-        p1.cash = 10
-        p2.cash = 10
-        p3.cash = 10
+        p1.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
+        p2.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
+        p3.cards([(2, 'C'), (3, 'D'), (5, 'C'), (9, 'D'), (13, 'S')])
 
         dealer.add(p1, 10)
         dealer.add(p2, 10)
@@ -144,7 +139,7 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
 
     def testB_SecondPlayerMustBetAtLeastTheFirstBet(self):
         '''second player should pay at least the first bet'''
-        p1 = createPlayer('p1', StubMessenger())
+        p1 = createPlayer('p1', StubMessenger(), 5)
         p2 = createPlayer('p2', StubMessenger())
         dealer = HandlesBettingBetweenThePlayers([p1, p2])
 
@@ -154,8 +149,8 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
 
     def testC_ZeroBecauseAllAreEven(self):
         '''zero when all players are even'''
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1', StubMessenger(), 5)
+        p2 = createPlayer('p2', StubMessenger(), 5)
         dealer = HandlesBettingBetweenThePlayers([p1, p2])
 
         dealer.add(p1, 5)
@@ -167,8 +162,8 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
     def testD_ShouldPayTheDifferenceWhenRaised(self):
         '''player should pay the difference when raised'''
 
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1', StubMessenger(), 5)
+        p2 = createPlayer('p2', StubMessenger(), 10)
         dealer = HandlesBettingBetweenThePlayers([p1, p2])
 
         dealer.add(p1, 5)
@@ -177,10 +172,12 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
         self.assertEqual(5, dealer.getMinimumBet(p1))
 
 
-def createPlayer(name, messenger):
+def createPlayer(name, messenger, cash=0):
     player = PlayerProxy(name, messenger)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
+    player.cash = cash
+
     return player
 
 

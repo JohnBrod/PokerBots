@@ -1,3 +1,4 @@
+from collections import defaultdict
 import time
 from EventHandling import Event
 from collections import deque
@@ -58,6 +59,7 @@ class PlayerProxy(object):
     """allows the game to interact with the player messages """
     """as if they were from an object"""
     def __init__(self, name, dealer):
+        self.c = []
         self.cash = 1000
         self.name = name
         self.evt_response = Event()
@@ -79,7 +81,10 @@ class PlayerProxy(object):
         self.dealer.sendMessage(self.name, msg)
 
     def cards(self, cards):
-        pass
+        self.c = self.c + cards
+
+    def hand(self):
+        return self.c
 
     def outOfGame(self, msg):
         pass
@@ -146,19 +151,36 @@ class HandlesBettingBetweenThePlayers(object):
         self.lastToRaise = self.table.dealingTo()
 
     def lastPlayer(self):
-
         return self.table.lastPlayer()
 
     def allIn(self):
-
         return self.table.allIn()
 
     def done(self):
         return self.lastToRaise == self.table.dealingTo()
 
-    def ranking(self, players):
+    def ranking(self):
 
-        return map(lambda x: [x], self.pot.players())
+        ranks = group(lambda x: rank(x.hand()), self.pot.players())
+        ranks = map(lambda x: x[1], ranks)
+
+        return ranks
+
+    def distributeWinnings(self):
+
+        chips = map(lambda x: self.pot.total(x), self.pot.players())
+        chipsFor = dict(zip(self.pot.players(), chips))
+
+        for rank in self.ranking():
+
+            for player in rank:
+
+                for opponent in self.pot.players():
+                    winnerChips = chipsFor[player] / len(rank)
+                    opponentChips = chipsFor[opponent] / len(rank)
+                    chipsDue = min(winnerChips, opponentChips)
+                    winnings = self.pot.takeFrom(opponent, chipsDue)
+                    player.deposit(winnings)
 
     def add(self, player, amount):
 
@@ -187,24 +209,6 @@ class HandlesBettingBetweenThePlayers(object):
         msg = outMessage(bet, self.getMinimumBet(player), player.cash)
         player.outOfGame(msg)
         self.table.removeCurrent()
-
-    def distributeWinnings(self):
-
-        ranking = self.ranking(self.pot.players())
-
-        chips = map(lambda x: self.pot.total(x), self.pot.players())
-        chipsFor = dict(zip(self.pot.players(), chips))
-
-        for rank in ranking:
-
-            for player in rank:
-
-                for opponent in self.pot.players():
-                    winnerChips = chipsFor[player] / len(rank)
-                    opponentChips = chipsFor[opponent] / len(rank)
-                    chipsDue = min(winnerChips, opponentChips)
-                    winnings = self.pot.takeFrom(opponent, chipsDue)
-                    player.deposit(winnings)
 
     def getMinimumBet(self, player):
         playerContribution = self.pot.total(player)
@@ -273,3 +277,109 @@ class Table(object):
 
     def allIn(self):
         return all(x.cash == 0 for x in self.players)
+
+
+def rank(hand):
+
+    if pair(hand):
+        return 0
+
+    return 1
+
+
+def highestCard(hand):
+
+    return sorted(hand, key=lambda x: x[0])[-1]
+
+
+def pair(hand):
+    values = map(lambda x: x[0], hand)
+    pairs = [card for card in hand if values.count(card[0]) == 2]
+
+    if len(pairs) == 2:
+        return pairs
+
+
+def trips(hand):
+    values = map(lambda x: x[0], hand)
+    trips = [card for card in hand if values.count(card[0]) == 3]
+
+    return trips
+
+
+def poker(hand):
+    values = map(lambda x: x[0], hand)
+    poker = [card for card in hand if values.count(card[0]) == 4]
+
+    return poker
+
+
+def flush(hand):
+
+    flush = flushCards(hand)
+
+    if flush:
+        return sorted(hand, key=lambda x: x[0], reverse=True)[0:5]
+
+
+def flushCards(hand):
+    suits = map(lambda x: x[1], hand)
+    flush = [card for card in hand if suits.count(card[1]) >= 5]
+
+    return flush
+
+
+def distinctFace(cards):
+
+    distinctFaces = defaultdict(list)
+
+    for f, s in cards:
+        distinctFaces[f].append((f, s))
+
+    cards = [(distinctFaces[k][0]) for k in distinctFaces]
+
+    return cards
+
+
+def straight(cards):
+
+    cards = distinctFace(cards)
+    cards = sorted(cards, key=lambda x: x[0], reverse=True)
+
+    while len(cards) >= 5:
+
+        if cards[0][0] - cards[4][0] == 4:
+            return cards[0:5]
+
+        cards = cards[1:]
+
+
+def straightFlush(cards):
+
+    return straight(flushCards(cards))
+
+
+def highestHand(cards):
+
+    return straightFlush(cards)
+
+
+def house(cards):
+
+    if not trips(cards):
+        return
+
+    hand = trips(cards)
+
+    cards = [card for card in cards if card not in hand]
+    if not pair(cards):
+        return
+
+    return hand + pair(cards)
+
+
+def group(by, sequence):
+    keys = list(set(map(lambda x: by(x), sequence)))
+    grouping = map(lambda x: (x, filter(lambda y: by(y) == x, sequence)), keys)
+
+    return grouping

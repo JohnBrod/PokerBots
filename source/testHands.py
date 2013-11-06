@@ -20,7 +20,7 @@ class TestRecognizingHands(unittest.TestCase):
         self.assertEqual(highestCard(hand), (3, 'C'))
 
     def testB_Pair(self):
-        '''a pairt'''
+        '''a pair'''
         hand = [(3, 'C'), (3, 'D')]
         self.assertEqual(pair(hand), hand)
 

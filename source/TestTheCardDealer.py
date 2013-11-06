@@ -33,8 +33,8 @@ class testDealingCardsToPlayers(unittest.TestCase):
 
         DealsCardsToThePlayers(PredictableDeck(), [p1, p2], PublicAnnouncer()).next()
 
-        p1.cards.assert_called_with((1, 2))
-        p2.cards.assert_called_with((3, 4))
+        p1.cards.assert_called_with([(1, 2)])
+        p2.cards.assert_called_with([(3, 4)])
 
     def testB_shouldDealTheCommunityCardsPublicly(self):
         '''should deal the community cards to each player'''
@@ -51,7 +51,9 @@ class testDealingCardsToPlayers(unittest.TestCase):
         dealer.next()
         dealer.next()
 
-        public.say.assert_called_with((5, 6, 7))
+        p1.cards.assert_called_with([(5, 6, 7)])
+        p2.cards.assert_called_with([(5, 6, 7)])
+        public.say.assert_called_with([(5, 6, 7)])
 
     def testC_shouldDealTheFlopCardPublicly(self):
         '''should deal the flop to each player'''
@@ -69,7 +71,9 @@ class testDealingCardsToPlayers(unittest.TestCase):
         dealer.next()
         dealer.next()
 
-        public.say.assert_called_with((8))
+        p1.cards.assert_called_with([(8)])
+        p2.cards.assert_called_with([(8)])
+        public.say.assert_called_with([(8)])
 
     def testD_shouldDealTheRiverCardPublicly(self):
         '''should deal the river to each player'''
@@ -88,7 +92,9 @@ class testDealingCardsToPlayers(unittest.TestCase):
         dealer.next()
         dealer.next()
 
-        public.say.assert_called_with((9))
+        p1.cards.assert_called_with([(9)])
+        p2.cards.assert_called_with([(9)])
+        public.say.assert_called_with([(9)])
 
     def testE_shouldDealTheTurnCardPublicly(self):
         '''should deal the turn to each player'''
@@ -108,7 +114,9 @@ class testDealingCardsToPlayers(unittest.TestCase):
         dealer.next()
         dealer.next()
 
-        public.say.assert_called_with((10))
+        p1.cards.assert_called_with([(10)])
+        p2.cards.assert_called_with([(10)])
+        public.say.assert_called_with([(10)])
 
     def testF_notPossibleToDealNextWhenNotStagesAreLeft(self):
         '''not possible to deal next when there are not stages left'''
