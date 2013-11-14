@@ -47,20 +47,20 @@ class testPokerGame(unittest.TestCase):
         time.sleep(2)
         m.finish()
 
-    # def testQuittingGameThatNoPlayersHaveJoined(self):
+    def testQuittingGameThatNoPlayersHaveJoined(self):
 
-    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-    #     self.theGame.shouldDisplay('No players joined so quitting\r\n')
+        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.theGame.shouldDisplay('No players joined so quitting\r\n')
 
-    # def testQuittingGameThatOnlyOnePlayerJoins(self):
+    def testQuittingGameThatOnlyOnePlayerJoins(self):
 
-    #     self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
 
-    #     self.aPlayer.says('player1@pokerchat')
-    #     self.aPlayer.hears('Cash 1000')
+        self.aPlayer.says('player1@pokerchat')
+        self.aPlayer.hears('Cash 1000')
 
-    #     self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
-    #     self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
+        self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
+        self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
 
     def testTwoPlayersAllIn(self):
 
