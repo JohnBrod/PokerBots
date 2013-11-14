@@ -7,6 +7,7 @@ parpath = os.path.join(os.path.dirname(sys.argv[0]), os.pardir)
 sys.path.insert(0, os.path.abspath(parpath))
 from ScrapingTheUi import QueueScraper
 
+
 class testScrapeTheQueue(unittest.TestCase):
 
     def testLookForNothingAndGetsNothing(self):
@@ -36,19 +37,6 @@ class testScrapeTheQueue(unittest.TestCase):
 
         self.assertEqual(scraper.expect(lookFor), lookFor)
 
-    def testLookForHelloAndGetsHellX(self):
-
-        lookFor = 'Hello'
-        screen = Queue.Queue()
-        screen.put('H')
-        screen.put('e')
-        screen.put('l')
-        screen.put('l')
-        screen.put('X')
-        scraper = QueueScraper(screen)
-
-        self.assertEqual(scraper.expect(lookFor), 'Hell')
-
     def testMoreTextAfterSearchText(self):
 
         lookFor = 'H'
@@ -60,6 +48,5 @@ class testScrapeTheQueue(unittest.TestCase):
         self.assertEqual(scraper.expect(lookFor), 'H')
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
