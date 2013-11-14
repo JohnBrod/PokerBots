@@ -124,16 +124,6 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         p2.yourGo.assert_called_with([(p1, 1000)])
 
-    def testI_theWinnerGetsThePot(self):
-        '''player that wins the hand receives the pot'''
-        p1 = createPlayer('p1', StubMessenger().bet(10).bet(0))
-        p2 = createPlayer('p2', StubMessenger().bet(20))
-        p2.cash = 20
-
-        Dealer(Deck(), PublicAnnouncer()).deal([p1, p2])
-
-        self.assertEqual(30, p2.cash)
-
     def testI_playerCanBetLessThanMinimumIfTheyGoAllIn(self):
         '''a player can bet less than minimum if they go all in'''
         p1 = createPlayer('p1', StubMessenger().bet(10))
@@ -146,19 +136,6 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(Deck(), PublicAnnouncer()).deal([p1, p2])
 
         self.assertFalse(p2.outOfGame.called)
-
-    def testJ_playerWinningMainPotAndSidePot(self):
-        '''a player winning main pot and a side pot'''
-        p1 = createPlayer('p1', StubMessenger().bet(10))
-        p2 = createPlayer('p2', StubMessenger().bet(5))
-        p1.youWin = MagicMock()
-
-        p1.cash = 10
-        p2.cash = 5
-
-        Dealer(Deck(), PublicAnnouncer()).deal([p1, p2])
-
-        self.assertEqual(15, p1.cash)
 
 
 class testDealingTheCards(unittest.TestCase):
@@ -174,7 +151,7 @@ class testDealingTheCards(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        Dealer(Deck(), ).deal([p1, p2])
+        Dealer(Deck(), PublicAnnouncer()).deal([p1, p2])
 
         self.assertEqual(p1.cards.call_count, 1)
         self.assertEqual(p2.cards.call_count, 1)
@@ -203,8 +180,8 @@ class testDealingTheCards(unittest.TestCase):
         dealer = Dealer(Deck(), PublicAnnouncer())
         dealer.deal([p1, p2])
 
-        self.assertEqual(p1.cards.call_count, 1)
-        self.assertEqual(p2.cards.call_count, 1)
+        self.assertEqual(p1.cards.call_count, 5)
+        self.assertEqual(p2.cards.call_count, 5)
         self.assertFalse(dealer.playing)
 
     def testJ_movingButtonToNextPlayerAfterFirstHand(self):

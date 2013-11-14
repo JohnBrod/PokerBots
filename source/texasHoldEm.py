@@ -87,10 +87,10 @@ class DealsCardsToThePlayers(object):
         return not self.dealStages
 
     def dealCommunityCards(self):
-        communityCards = (self.deck.take(), self.deck.take(), self.deck.take())
-        self.public.say([communityCards])
+        communityCards = [self.deck.take(), self.deck.take(), self.deck.take()]
+        self.public.say(communityCards)
         for player in self.players:
-            player.cards([communityCards])
+            player.cards(communityCards)
 
     def dealTurnCard(self):
         card = self.deck.take()
@@ -100,8 +100,8 @@ class DealsCardsToThePlayers(object):
 
     def dealPrivateCards(self):
         for player in self.players:
-            privateCards = (self.deck.take(), self.deck.take())
-            player.cards([privateCards])
+            privateCards = [self.deck.take(), self.deck.take()]
+            player.cards(privateCards)
 
     def dealRemainingCards(self):
         while len(self.dealStages) > 0:

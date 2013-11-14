@@ -1,5 +1,6 @@
 from EventHandling import Event
 from theHouse import PlayerProxy
+from theHouse import Card
 import unittest
 from theHouse import HandlesBettingBetweenThePlayers
 from theHouse import Pot
@@ -38,8 +39,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2])
 
-        p1.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
-        p2.cards([(2, 'C'), (3, 'D'), (5, 'C'), (9, 'D'), (13, 'S')])
+        p1.cards(cards('14C,14D,2C,3H,4S'))
+        p2.cards(cards('2C,3D,5C,9D,13S'))
 
         dealer.add(p1, 5)
         dealer.add(p2, 5)
@@ -56,8 +57,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2])
 
-        p1.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
-        p2.cards([(2, 'C'), (3, 'D'), (5, 'C'), (9, 'D'), (13, 'S')])
+        p1.cards(cards('14C,14D,2C,3H,4S'))
+        p2.cards(cards('2C,3D,5C,9D,13S'))
 
         dealer.add(p1, 5)
         dealer.add(p2, 10)
@@ -76,9 +77,9 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2, p3])
 
-        p1.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
-        p2.cards([(14, 'C'), (14, 'D'), (2, 'C'), (3, 'H'), (4, 'S')])
-        p3.cards([(2, 'C'), (3, 'D'), (5, 'C'), (9, 'D'), (13, 'S')])
+        p1.cards(cards('14C,14D,2C,3H,4S'))
+        p2.cards(cards('14C,14D,2C,3H,4S'))
+        p3.cards(cards('2C,3D,5C,9D,13S'))
 
         dealer.add(p1, 10)
         dealer.add(p2, 10)
@@ -88,6 +89,25 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         self.assertEqual(p1.cash, 15)
         self.assertEqual(p2.cash, 15)
+
+    def testD_shouldCompareValueWhenRankIsTheSame(self):
+        '''the value of the hand should be compared when the rank is the same'''
+
+        p1 = createPlayer('p1', StubMessenger(), 10)
+        p2 = createPlayer('p2', StubMessenger(), 10)
+
+        dealer = HandlesBettingBetweenThePlayers([p1, p2])
+
+        p1.cards(cards('14C,14D,2C,3H,4S'))
+        p1.cards(cards('13C,13D,2C,3H,4S'))
+
+        dealer.add(p1, 10)
+        dealer.add(p2, 10)
+
+        dealer.distributeWinnings()
+
+        self.assertEqual(p1.cash, 20)
+        self.assertEqual(p2.cash, 0)
 
 
 class testTheTotalOfThePot(unittest.TestCase):
@@ -207,6 +227,10 @@ class StubMessenger(object):
             return
 
         self.evt_messageReceived.fire(self, response)
+
+
+def cards(items):
+    return map(lambda x: Card(int(x[0:-1]), x[-1]), items.split(','))
 
 
 if __name__ == "__main__":

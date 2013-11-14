@@ -84,7 +84,7 @@ class PlayerProxy(object):
         self.c = self.c + cards
 
     def hand(self):
-        return self.c
+        return Hand(self.c)
 
     def outOfGame(self, msg):
         pass
@@ -96,7 +96,6 @@ class PlayerProxy(object):
         self.dealer.sendMessage(self.name, 'Game Result')
 
     def handResult(self, result):
-        print self.name, result
         self.dealer.sendMessage(self.name, 'Hand Result')
 
     def on_messageReceived(self, sender, msg):
@@ -161,8 +160,8 @@ class HandlesBettingBetweenThePlayers(object):
 
     def ranking(self):
 
-        ranks = group(lambda x: rank(x.hand()), self.pot.players())
-        ranks = map(lambda x: x[1], ranks)
+        ranks = sorted(self.pot.players(), key=lambda x: x.hand(), reverse=True)
+        ranks = reduce(ranks, lambda x: x.hand())
 
         return ranks
 
@@ -234,7 +233,7 @@ class Deck(object):
         self.cards = deque()
         for suit in ['C', 'D', 'H', 'S']:
             for num in xrange(2, 15):
-                self.cards.append((num, suit))
+                self.cards.append(Card(num, suit))
 
     def take(self):
         return self.cards.popleft()
@@ -279,39 +278,148 @@ class Table(object):
         return all(x.cash == 0 for x in self.players)
 
 
-def rank(hand):
+class Card(object):
+    def __init__(self, value, suit):
+        self.value = value
+        self.suit = suit
 
-    if pair(hand):
-        return 0
+    def __lt__(self, other):
+        return self.value < other.value
 
-    return 1
+    def __gt__(self, other):
+        return self.value > other.value
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __le__(self, other):
+        return self.value <= other.value
+
+    def __ge__(self, other):
+        return self.value >= other.value
+
+    def __ne__(self, other):
+        return self.value != other.value
+
+
+class Hand(object):
+    """the best can produce with the cards available"""
+    def __init__(self, cards):
+        self.cards = cards
+
+    def __iter__(self):
+        return self.cards.__iter__()
+
+    def next(self):
+        return self.cards.next()
+
+    def __lt__(self, other):
+        return not self.__ge__(other)
+
+    def __gt__(self, other):
+
+        for rank in handRanking:
+            if rank(self) and rank(other):
+                return rank(self) > rank(other)
+
+            if rank(self):
+                return True
+
+            if rank(other):
+                return False
+
+        return False
+
+    def __eq__(self, other):
+
+        for rank in handRanking:
+            if rank(self) and rank(other):
+                if rank(self) == rank(other):
+                    return True
+
+        return False
+
+    def __le__(self, other):
+        return not self.__gt__(other)
+
+    def __ge__(self, other):
+        return self.__gt__(other) or self.__eq__(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 def highestCard(hand):
 
-    return sorted(hand, key=lambda x: x[0])[-1]
+    return sorted(hand, key=lambda card: card.value, reverse=True)[0:5]
 
 
 def pair(hand):
-    values = map(lambda x: x[0], hand)
-    pairs = [card for card in hand if values.count(card[0]) == 2]
+
+    values = map(lambda card: card.value, hand)
+    pairs = [card for card in hand if values.count(card.value) == 2]
 
     if len(pairs) == 2:
         return pairs
 
 
-def trips(hand):
-    values = map(lambda x: x[0], hand)
-    trips = [card for card in hand if values.count(card[0]) == 3]
+def pairHand(hand):
 
-    return trips
+    if pair(hand):
+        remaining = [card for card in hand if card not in pair(hand)]
+
+        return pair(hand) + highestCard(remaining)[0:3]
+
+
+def twoPair(hand):
+
+    values = map(lambda card: card.value, hand)
+    pairs = [card for card in hand if values.count(card.value) == 2]
+
+    if len(pairs) == 4:
+        return pairs
+
+
+def twoPairHand(hand):
+
+    cards = twoPair(hand)
+
+    if cards:
+        remaining = [card for card in hand if card not in cards]
+        return cards + [max(remaining)]
+
+
+def trips(hand):
+
+    values = map(lambda card: card.value, hand)
+    result = [card for card in hand if values.count(card.value) == 3]
+
+    return result
+
+
+def tripHand(hand):
+
+    match = trips(hand)
+    if match:
+        hand = [card for card in hand if card not in match]
+        hand = match + highestCard(hand)[0:2]
+        return hand
 
 
 def poker(hand):
-    values = map(lambda x: x[0], hand)
-    poker = [card for card in hand if values.count(card[0]) == 4]
+    values = map(lambda card: card.value, hand)
+    pokerHand = [card for card in hand if values.count(card.value) == 4]
 
-    return poker
+    return pokerHand
+
+
+def pokerHand(hand):
+
+    match = poker(hand)
+
+    if match:
+        hand = [card for card in hand if card not in match]
+        return match + [highestCard(hand)[0]]
 
 
 def flush(hand):
@@ -319,36 +427,36 @@ def flush(hand):
     flush = flushCards(hand)
 
     if flush:
-        return sorted(hand, key=lambda x: x[0], reverse=True)[0:5]
+        return sorted(flush, key=lambda card: card.value, reverse=True)[0:5]
 
 
 def flushCards(hand):
-    suits = map(lambda x: x[1], hand)
-    flush = [card for card in hand if suits.count(card[1]) >= 5]
+    suits = map(lambda card: card.suit, hand)
+    flush = [card for card in hand if suits.count(card.suit) >= 5]
 
     return flush
 
 
-def distinctFace(cards):
+def distinctValue(cards):
 
-    distinctFaces = defaultdict(list)
+    distinctValue = defaultdict(list)
 
-    for f, s in cards:
-        distinctFaces[f].append((f, s))
+    for card in cards:
+        distinctValue[card.value].append(card)
 
-    cards = [(distinctFaces[k][0]) for k in distinctFaces]
+    cards = [(distinctValue[k][0]) for k in distinctValue]
 
     return cards
 
 
 def straight(cards):
 
-    cards = distinctFace(cards)
-    cards = sorted(cards, key=lambda x: x[0], reverse=True)
+    cards = distinctValue(cards)
+    cards = sorted(cards, key=lambda card: card.value, reverse=True)
 
     while len(cards) >= 5:
 
-        if cards[0][0] - cards[4][0] == 4:
+        if cards[0].value - cards[4].value == 4:
             return cards[0:5]
 
         cards = cards[1:]
@@ -357,11 +465,6 @@ def straight(cards):
 def straightFlush(cards):
 
     return straight(flushCards(cards))
-
-
-def highestHand(cards):
-
-    return straightFlush(cards)
 
 
 def house(cards):
@@ -378,8 +481,30 @@ def house(cards):
     return hand + pair(cards)
 
 
-def group(by, sequence):
+handRanking = [straightFlush, pokerHand, house,
+               flush, straight, tripHand,
+               twoPairHand, pairHand, highestCard]
+
+
+def group(sequence, by):
     keys = list(set(map(lambda x: by(x), sequence)))
     grouping = map(lambda x: (x, filter(lambda y: by(y) == x, sequence)), keys)
 
     return grouping
+
+
+def reduce(sequence, by):
+
+    reduced = []
+    lastItem = None
+    for item in sequence:
+
+        if lastItem and item.hand() == lastItem.hand():
+            reduced[-1].append(item)
+            lastItem = item
+            continue
+
+        reduced.append([item])
+        lastItem = item
+
+    return reduced
