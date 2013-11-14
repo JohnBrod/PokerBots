@@ -8,7 +8,7 @@ from collections import deque
 
 
 def createPlayer(name, messenger):
-    player = PlayerProxy(name, messenger)
+    player = PlayerProxy(name, messenger, 0)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player

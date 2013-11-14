@@ -5,8 +5,7 @@ from EventHandling import Event
 
 
 def createPlayer(cash, amountToBet=0):
-    player = PlayerProxy('name', StubMessenger().bet(amountToBet))
-    player.cash = cash
+    player = PlayerProxy('name', StubMessenger().bet(amountToBet), cash)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player

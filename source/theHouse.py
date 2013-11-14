@@ -45,9 +45,9 @@ class Doorman(object):
 class PlayerProxy(object):
     """allows the game to interact with the player messages """
     """as if they were from an object"""
-    def __init__(self, name, dealer):
+    def __init__(self, name, dealer, cash):
         self._cards = []
-        self.cash = 1000
+        self.cash = cash
         self.name = name
         self.evt_response = Event()
         self.dealer = dealer

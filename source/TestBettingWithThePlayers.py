@@ -193,10 +193,9 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
 
 
 def createPlayer(name, messenger, cash=0):
-    player = PlayerProxy(name, messenger)
+    player = PlayerProxy(name, messenger, cash)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
-    player.cash = cash
 
     return player
 

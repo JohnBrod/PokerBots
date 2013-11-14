@@ -7,6 +7,8 @@ import texasHoldEm
 from Xmpp import XmppMessenger
 import traceback
 
+playerCash = 1000
+
 
 def write(text):
     print text
@@ -24,7 +26,7 @@ dealerMessenger = XmppMessenger('dealer@localhost', 'password')
 dealerMessenger.listen('localhost', 5222)
 
 try:
-    frank = Doorman(5, dealerMessenger, 1000)
+    frank = Doorman(5, dealerMessenger, playerCash)
     frank.evt_playerJoined += onPlayerJoined
     players = frank.greetPlayers()
 except Exception, e:
@@ -37,7 +39,7 @@ elif len(players) == 1:
 else:
 
     try:
-        players = map(lambda x: PlayerProxy(x, dealerMessenger), players)
+        players = map(lambda x: PlayerProxy(x, dealerMessenger, playerCash), players)
         dealer = texasHoldEm.Dealer(PublicAnnouncer())
         dealer.deal(players)
         while dealer.playing:
