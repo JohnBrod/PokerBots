@@ -2,7 +2,7 @@ from EventHandling import Event
 from theHouse import PlayerProxy
 from theHouse import Card
 import unittest
-from theHouse import HandlesBettingBetweenThePlayers
+from texasHoldEm import HandlesBettingBetweenThePlayers
 from theHouse import Pot
 from collections import deque
 

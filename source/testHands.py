@@ -1,15 +1,15 @@
 import unittest
-from theHouse import Hand
+from Hands import Hand
 from theHouse import Card
-from theHouse import highestCard
-from theHouse import pairHand
-from theHouse import twoPairHand
-from theHouse import flush
-from theHouse import straight
-from theHouse import tripHand
-from theHouse import pokerHand
-from theHouse import straightFlush
-from theHouse import house
+from Hands import highestCard
+from Hands import pairHand
+from Hands import twoPairHand
+from Hands import flush
+from Hands import straight
+from Hands import tripHand
+from Hands import pokerHand
+from Hands import straightFlush
+from Hands import house
 
 
 class TestComparingAgainstHighCard(unittest.TestCase):
