@@ -89,9 +89,6 @@ class PlayerProxy(object):
     def outOfGame(self, msg):
         pass
 
-    def youWin(self, amount):
-        pass
-
     def gameResult(self, result):
         self.dealer.sendMessage(self.name, 'Game Result')
 

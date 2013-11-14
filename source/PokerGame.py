@@ -2,21 +2,10 @@ import sys
 import logging
 from theHouse import Doorman
 from theHouse import PlayerProxy
+from theHouse import PublicAnnouncer
 import texasHoldEm
 from Xmpp import XmppMessenger
 import traceback
-
-
-def anyWinner(publicCards, players):
-    return players[0]
-
-
-class AnyDeck():
-    def take(self):
-        pass
-
-    def shuffle(self):
-        pass
 
 
 def write(text):
@@ -49,7 +38,7 @@ else:
 
     try:
         players = map(lambda x: PlayerProxy(x, dealerMessenger), players)
-        dealer = texasHoldEm.Dealer(AnyDeck(), anyWinner)
+        dealer = texasHoldEm.Dealer(PublicAnnouncer())
         dealer.deal(players)
         while dealer.playing:
             pass

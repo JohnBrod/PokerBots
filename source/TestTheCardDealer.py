@@ -14,10 +14,6 @@ def createPlayer(name, messenger):
     return player
 
 
-def p2Wins(publicCards, players):
-    return filter(lambda x: x.name == 'p2', players)[0]
-
-
 class testDealingCardsToPlayers(unittest.TestCase):
 
     def setUp(self):

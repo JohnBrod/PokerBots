@@ -1,15 +1,15 @@
 from theHouse import HandlesBettingBetweenThePlayers
+from theHouse import Deck
 from EventHandling import Event
 from collections import deque
 
 
 class Dealer(object):
     """deals a hand to players"""
-    def __init__(self, deck, public):
+    def __init__(self, public):
         self.public = public
         self.playing = True
         self.evt_handDone = Event()
-        self.deck = deck
 
     def deal(self, players):
         self.players = players
@@ -20,7 +20,7 @@ class Dealer(object):
         self.startHand()
 
     def startHand(self):
-        self.cardDealer = DealsCardsToThePlayers(self.deck, self.players, self.public)
+        self.cardDealer = DealsCardsToThePlayers(Deck(), self.players, self.public)
         self.bettingDealer = HandlesBettingBetweenThePlayers(self.players)
         self.cardDealer.next()
         self.bettingDealer.next()
