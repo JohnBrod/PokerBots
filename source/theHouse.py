@@ -46,7 +46,7 @@ class PlayerProxy(object):
     """allows the game to interact with the player messages """
     """as if they were from an object"""
     def __init__(self, name, dealer):
-        self.c = []
+        self._cards = []
         self.cash = 1000
         self.name = name
         self.evt_response = Event()
@@ -68,19 +68,13 @@ class PlayerProxy(object):
         self.dealer.sendMessage(self.name, msg)
 
     def cards(self, cards):
-        self.c = self.c + cards
+        self._cards = self._cards + cards
 
     def hand(self):
-        return Hand(self.c)
+        return Hand(self._cards)
 
     def outOfGame(self, msg):
         pass
-
-    def gameResult(self, result):
-        self.dealer.sendMessage(self.name, 'Game Result')
-
-    def handResult(self, result):
-        self.dealer.sendMessage(self.name, 'Hand Result')
 
     def on_messageReceived(self, sender, msg):
         if self.fromMe(msg):
