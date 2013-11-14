@@ -2,7 +2,6 @@ from collections import deque
 from theHouse import Pot
 from theHouse import Table
 from EventHandling import Event
-from collections import deque
 import random
 
 

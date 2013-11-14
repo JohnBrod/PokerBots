@@ -1,6 +1,6 @@
 from EventHandling import Event
 from theHouse import PlayerProxy
-from theHouse import Card
+from texasHoldEm import Card
 import unittest
 from texasHoldEm import HandlesBettingBetweenThePlayers
 from theHouse import Pot

@@ -1,6 +1,6 @@
 import unittest
 from Hands import Hand
-from theHouse import Card
+from texasHoldEm import Card
 from Hands import highestCard
 from Hands import pairHand
 from Hands import twoPairHand
