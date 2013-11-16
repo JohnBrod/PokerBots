@@ -1,4 +1,3 @@
-import sys
 import logging
 from theHouse import Doorman
 from theHouse import PlayerProxy
@@ -9,33 +8,28 @@ import traceback
 
 playerCash = 1000
 
-
-def write(text):
-    print text
-    sys.stdout.flush()
-
 logging.basicConfig(filename='poker.log', level=logging.DEBUG)
 
 
 def onPlayerJoined(sender, playerId):
-    write(playerId + ' has joined the game')
-
-write('Game started, waiting for players')
+    dealerMessenger.sendMessage('audience@pokerchat', playerId + ' has joined the game')
 
 dealerMessenger = XmppMessenger('dealer@localhost', 'password')
 dealerMessenger.listen('localhost', 5222)
+
+dealerMessenger.sendMessage('audience@pokerchat', 'Game started, waiting for players')
 
 try:
     frank = Doorman(5, dealerMessenger, playerCash)
     frank.evt_playerJoined += onPlayerJoined
     players = frank.greetPlayers()
 except Exception, e:
-    write(e)
+    dealerMessenger.sendMessage(e)
 
 if not players:
-    write('No players joined so quitting')
+    dealerMessenger.sendMessage('audience@pokerchat', 'No players joined so quitting')
 elif len(players) == 1:
-    write('Not enough players for a game so quitting')
+    dealerMessenger.sendMessage('audience@pokerchat', 'Not enough players for a game so quitting')
 else:
 
     try:
@@ -44,9 +38,8 @@ else:
         dealer.deal(players)
         while dealer.playing:
             pass
-        write('Game Over')
-
+        dealerMessenger.sendMessage('audience@pokerchat', 'Game Over')
     except:
-        write(traceback.format_exc())
+        print traceback.format_exc()
 
 dealerMessenger.finish()

@@ -8,8 +8,10 @@ parpath = os.path.join(os.path.dirname(sys.argv[0]), os.pardir)
 sys.path.insert(0, os.path.abspath(parpath))
 
 from Xmpp import XmppMessenger
-from runningTheApp import PokerGameRunner
 from runningTheApp import FakePlayer
+from runningTheApp import FakeAudience
+import subprocess
+import sys
 
 
 class testPokerGame(unittest.TestCase):
@@ -31,14 +33,15 @@ class testPokerGame(unittest.TestCase):
         logging.disable(logging.ERROR)
 
     def setUp(self):
-        self.theGame = PokerGameRunner(10, self)
         self.aPlayer = FakePlayer('Player1@pokerchat', 'Player1@localhost', 'password', 10, self)
         self.anotherPlayer = FakePlayer('Player2@pokerchat', 'Player2@localhost', 'password', 10, self)
-        self.theGame.start()
+        self.audience = FakeAudience('audience@pokerchat', 'audience@localhost', 'password', 10, self)
+        subprocess.Popen([sys.executable, "..\\PokerGame.py"])
 
     def tearDown(self):
         self.aPlayer.stop()
         self.anotherPlayer.stop()
+        self.audience.stop()
         self.swallowDealerMessages()
 
     def swallowDealerMessages(self):
@@ -49,37 +52,37 @@ class testPokerGame(unittest.TestCase):
 
     def testQuittingGameThatNoPlayersHaveJoined(self):
 
-        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
-        self.theGame.shouldDisplay('No players joined so quitting\r\n')
+        self.audience.hears('Game started, waiting for players')
+        self.audience.hears('No players joined so quitting')
 
     def testQuittingGameThatOnlyOnePlayerJoins(self):
 
-        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.audience.hears('Game started, waiting for players')
 
         self.aPlayer.says('player1@pokerchat')
         self.aPlayer.hears('Cash 1000')
 
-        self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
-        self.theGame.shouldDisplay('Not enough players for a game so quitting\r\n')
+        self.audience.hears('player1@pokerchat has joined the game')
+        self.audience.hears('Not enough players for a game so quitting')
 
     def testTwoPlayersAllIn(self):
 
-        self.theGame.shouldDisplay('Game started, waiting for players\r\n')
+        self.audience.hears('Game started, waiting for players')
 
         self.aPlayer.says('player1@pokerchat')
         self.aPlayer.hears('Cash 1000')
-        self.theGame.shouldDisplay('player1@pokerchat has joined the game\r\n')
+        self.audience.hears('player1@pokerchat has joined the game')
 
         self.anotherPlayer.says('player2@pokerchat')
         self.anotherPlayer.hears('Cash 1000')
-        self.theGame.shouldDisplay('player2@pokerchat has joined the game\r\n')
+        self.audience.hears('player2@pokerchat has joined the game')
 
         self.aPlayer.hears('go')
         self.aPlayer.says('1000')
         self.anotherPlayer.hears('player1@pokerchat 1000')
         self.anotherPlayer.says('1000')
 
-        self.theGame.shouldDisplay('Game Over')
+        self.audience.hears('Game Over')
 
 
 if __name__ == "__main__":
