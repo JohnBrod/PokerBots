@@ -33,19 +33,26 @@ class testPokerGame(unittest.TestCase):
         logging.disable(logging.ERROR)
 
     def setUp(self):
-        self.aPlayer = FakePlayer('Player1@pokerchat', 'Player1@localhost', 'password', 10, self)
-        self.anotherPlayer = FakePlayer('Player2@pokerchat', 'Player2@localhost', 'password', 10, self)
-        self.audience = FakeAudience('audience@pokerchat', 'audience@localhost', 'password', 10, self)
-        subprocess.Popen([sys.executable, "..\\PokerGame.py"])
+        pollDuration = 10
+        self.aPlayer = FakePlayer('Player1@pokerchat/test', 'Player1@localhost', 'password', pollDuration, self)
+        self.anotherPlayer = FakePlayer('Player2@pokerchat/test', 'Player2@localhost', 'password', pollDuration, self)
+        self.audience = FakeAudience('audience@pokerchat/test', 'audience@localhost', 'password', pollDuration, self)
+        self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py"])
 
     def tearDown(self):
         self.aPlayer.stop()
         self.anotherPlayer.stop()
         self.audience.stop()
-        self.swallowDealerMessages()
+        self.swallowMessages()
+        subprocess.Popen("taskkill /F /T /PID %i" % self.handle.pid)
 
-    def swallowDealerMessages(self):
-        m = XmppMessenger('dealer@localhost', 'password')
+    def swallowMessages(self):
+        m = XmppMessenger('dealer@localhost/test', 'password')
+        m.listen('localhost', 5222)
+        time.sleep(2)
+        m.finish()
+
+        m = XmppMessenger('audience@localhost/test', 'password')
         m.listen('localhost', 5222)
         time.sleep(2)
         m.finish()
@@ -77,10 +84,19 @@ class testPokerGame(unittest.TestCase):
         self.anotherPlayer.hears('Cash 1000')
         self.audience.hears('player2@pokerchat has joined the game')
 
+        self.aPlayer.hearsPrivateCards()
+        self.anotherPlayer.hearsPrivateCards()
+
         self.aPlayer.hears('go')
         self.aPlayer.says('1000')
-        self.anotherPlayer.hears('player1@pokerchat 1000')
+
+        self.anotherPlayer.hears('go')
         self.anotherPlayer.says('1000')
+
+        self.audience.hearsCommunityCards()
+        self.audience.hearsTurnCard()
+        self.audience.hearsTurnCard()
+        self.audience.hearsTurnCard()
 
         self.audience.hears('Game Over')
 

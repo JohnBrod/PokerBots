@@ -1,45 +1,80 @@
+import logging
 from collections import deque
 from theHouse import Pot
 from theHouse import Table
+from theHouse import PlayerProxy
 from EventHandling import Event
 import random
 
 
+def chat(msg):
+    return msg['type'] in ('normal', 'chat')
+
+
+def getName(x):
+    return str(x)[:str(x).find('/')]
+
+
 def outMessage(bet, min, max):
     if bet == 0:
-        return 'You folded'
+        return 'You are out, you folded'
 
     if bet < min:
-        return 'You bet %d, minimum bet was %d' % (bet, min)
+        return 'You are out, you bet %d, minimum bet was %d' % (bet, min)
 
     if bet > max:
-        return "You bet %d, you have only %d cash avaiable" % (bet, max)
+        return "You are out, you bet %d, you have only %d cash avaiable" % (bet, max)
+
+
+class XmppMessageInterpreter(object):
+
+    def __init__(self, messenger):
+        self.messenger = messenger
+        self.messenger.evt_messageReceived += self.__on_messageReceived
+        self.evt_playerResponse = Event()
+        self.evt_playerJoin = Event()
+        self.players = []
+
+    def __on_messageReceived(self, sender, msg):
+
+        if chat(msg) and msg['body'].startswith('player'):
+            name = msg['body']
+            player = PlayerProxy(name, self.messenger)
+            self.players.append(player)
+            self.evt_playerJoin(self, player)
+        else:
+            name = getName(msg['from'])
+            player = [p for p in self.players if p.name == name][0]
+            bet = int(msg['body'])
+            self.evt_playerResponse(self, (player, bet))
+
+    def sendMessage(self, jid, msg):
+        self.messenger.sendMessage(jid, msg)
+
+    def broadcast(self, msg):
+        self.messenger.sendMessage('audience@pokerchat', msg)
 
 
 class Dealer(object):
     """deals a hand to players"""
-    def __init__(self, public):
-        self.public = public
+    def __init__(self, messenger):
+        self.messenger = messenger
         self.playing = True
-        self.evt_handDone = Event()
 
     def deal(self, players):
         self.players = players
-
-        for player in self.players:
-            player.evt_response += self.__on_PlayerResponse
-
+        self.messenger.evt_playerResponse += self.__on_PlayerResponse
         self.startHand()
 
     def startHand(self):
-        self.cardDealer = DealsCardsToThePlayers(Deck(), self.players, self.public)
-        self.bettingDealer = HandlesBettingBetweenThePlayers(self.players)
+        self.cardDealer = DealsCardsToThePlayers(Deck(), self.players, self.messenger)
+        self.bettingDealer = HandlesBettingBetweenThePlayers(self.players, self.messenger)
         self.cardDealer.next()
         self.bettingDealer.next()
 
-    def __on_PlayerResponse(self, sender, bet):
+    def __on_PlayerResponse(self, sender, response):
 
-        self.bettingDealer.add(sender, bet)
+        self.bettingDealer.add(player=response[0], amount=response[1])
 
         if self.bettingDealer.allIn():
             self.cardDealer.dealRemainingCards()
@@ -74,8 +109,8 @@ class Dealer(object):
 
 class DealsCardsToThePlayers(object):
     """deals a hand to players"""
-    def __init__(self, deck, players, public):
-        self.public = public
+    def __init__(self, deck, players, messenger):
+        self.messenger = messenger
         self.deck = deck
         self.players = players
         self.dealStages = deque([
@@ -100,19 +135,22 @@ class DealsCardsToThePlayers(object):
 
     def dealCommunityCards(self):
         communityCards = [self.deck.take(), self.deck.take(), self.deck.take()]
-        self.public.say(communityCards)
+        message = ','.join([str(card) for card in communityCards])
+        self.messenger.broadcast(message)
         for player in self.players:
             player.cards(communityCards)
 
     def dealTurnCard(self):
         card = self.deck.take()
-        self.public.say([card])
+        self.messenger.broadcast(str(card))
         for player in self.players:
             player.cards([card])
 
     def dealPrivateCards(self):
         for player in self.players:
             privateCards = [self.deck.take(), self.deck.take()]
+            message = ','.join([str(card) for card in privateCards])
+            self.messenger.sendMessage(player.name, message)
             player.cards(privateCards)
 
     def dealRemainingCards(self):
@@ -122,7 +160,8 @@ class DealsCardsToThePlayers(object):
 
 class HandlesBettingBetweenThePlayers(object):
 
-    def __init__(self, players):
+    def __init__(self, players, messenger):
+        self.messenger = messenger
         self.table = Table(players)
         self.pot = Pot()
         self.transactions = []
@@ -158,6 +197,8 @@ class HandlesBettingBetweenThePlayers(object):
                     opponentChips = chipsFor[opponent] / len(rank)
                     chipsDue = min(winnerChips, opponentChips)
                     winnings = self.pot.takeFrom(opponent, chipsDue)
+
+                    # logging.warning(player.name + ' won ' + str(winnings) + ' with ' + str(player.hand().rank()))
                     player.deposit(winnings)
 
     def add(self, player, amount):
@@ -185,7 +226,7 @@ class HandlesBettingBetweenThePlayers(object):
 
     def kickOut(self, player, bet):
         msg = outMessage(bet, self.getMinimumBet(player), player.cash)
-        player.outOfGame(msg)
+        self.messenger.sendMessage(player.name, msg)
         self.table.removeCurrent()
 
     def getMinimumBet(self, player):
@@ -203,8 +244,7 @@ class HandlesBettingBetweenThePlayers(object):
         return max(map(lambda x: self.pot.total(x), self.pot.players()))
 
     def next(self):
-
-        self.table.dealingTo().yourGo(self.transactions)
+        self.messenger.sendMessage(self.table.dealingTo().name, 'go')
 
 
 class Deck(object):
@@ -243,6 +283,9 @@ class Card(object):
 
     def __ne__(self, other):
         return self.value != other.value
+
+    def __str__(self):
+        return str(self.value) + str(self.suit)
 
 
 def reduce(sequence, by):

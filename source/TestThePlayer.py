@@ -4,8 +4,8 @@ from collections import deque
 from EventHandling import Event
 
 
-def createPlayer(cash, amountToBet=0):
-    player = PlayerProxy('name', StubMessenger().bet(amountToBet), cash)
+def createPlayer(cash):
+    player = PlayerProxy('name', cash)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player

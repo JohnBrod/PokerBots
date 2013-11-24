@@ -47,6 +47,11 @@ class Hand(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def rank(self):
+        for r in handRanking:
+            if r(self):
+                return ','.join([str(card) for card in r(self)])
+
 
 def highestCard(hand):
 

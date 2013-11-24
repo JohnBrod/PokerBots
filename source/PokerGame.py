@@ -1,30 +1,25 @@
 import logging
 from theHouse import Doorman
-from theHouse import PlayerProxy
-from theHouse import PublicAnnouncer
 import texasHoldEm
 from Xmpp import XmppMessenger
 import traceback
 
 playerCash = 1000
+waitForPlayers = 5
 
 logging.basicConfig(filename='poker.log', level=logging.DEBUG)
 
-
-def onPlayerJoined(sender, playerId):
-    dealerMessenger.sendMessage('audience@pokerchat', playerId + ' has joined the game')
-
-dealerMessenger = XmppMessenger('dealer@localhost', 'password')
+dealerMessenger = XmppMessenger('dealer@localhost/real', 'password')
 dealerMessenger.listen('localhost', 5222)
+interpreter = texasHoldEm.XmppMessageInterpreter(dealerMessenger)
 
 dealerMessenger.sendMessage('audience@pokerchat', 'Game started, waiting for players')
 
 try:
-    frank = Doorman(5, dealerMessenger, playerCash)
-    frank.evt_playerJoined += onPlayerJoined
+    frank = Doorman(waitForPlayers, interpreter, playerCash)
     players = frank.greetPlayers()
-except Exception, e:
-    dealerMessenger.sendMessage(e)
+except:
+    print traceback.format_exc()
 
 if not players:
     dealerMessenger.sendMessage('audience@pokerchat', 'No players joined so quitting')
@@ -33,8 +28,7 @@ elif len(players) == 1:
 else:
 
     try:
-        players = map(lambda x: PlayerProxy(x, dealerMessenger, playerCash), players)
-        dealer = texasHoldEm.Dealer(PublicAnnouncer())
+        dealer = texasHoldEm.Dealer(interpreter)
         dealer.deal(players)
         while dealer.playing:
             pass

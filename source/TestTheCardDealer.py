@@ -1,14 +1,15 @@
 import unittest
 from theHouse import PlayerProxy
-from theHouse import PublicAnnouncer
 from texasHoldEm import DealsCardsToThePlayers
 from EventHandling import Event
 from mock import MagicMock
 from collections import deque
+from mock import create_autospec
+from Xmpp import XmppMessenger
 
 
-def createPlayer(name, messenger):
-    player = PlayerProxy(name, messenger, 0)
+def createPlayer(name):
+    player = PlayerProxy(name, 0)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player
@@ -21,68 +22,65 @@ class testDealingCardsToPlayers(unittest.TestCase):
 
     def testA_shouldDealEachPlayerPrivateCardsFirst(self):
         '''should deal each player private cards first'''
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1')
+        p2 = createPlayer('p2')
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        DealsCardsToThePlayers(PredictableDeck(), [p1, p2], PublicAnnouncer()).next()
+        audience = create_autospec(XmppMessenger)
+        DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience).next()
 
         p1.cards.assert_called_with([1, 2])
         p2.cards.assert_called_with([3, 4])
 
     def testB_shouldDealTheCommunityCardsPublicly(self):
         '''should deal the community cards to each player'''
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1')
+        p2 = createPlayer('p2')
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        public = PublicAnnouncer()
-        public.say = MagicMock()
-
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
+        audience = create_autospec(XmppMessenger)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
         dealer.next()
         dealer.next()
 
         p1.cards.assert_called_with([5, 6, 7])
         p2.cards.assert_called_with([5, 6, 7])
-        public.say.assert_called_with([5, 6, 7])
+        audience.broadcast.assert_called_with('5,6,7')
 
     def testC_shouldDealTheFlopCardPublicly(self):
         '''should deal the flop to each player'''
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1')
+        p2 = createPlayer('p2')
 
-        public = PublicAnnouncer()
-        public.say = MagicMock()
+        audience = create_autospec(XmppMessenger)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
         dealer.next()
         dealer.next()
         dealer.next()
 
         p1.cards.assert_called_with([8])
         p2.cards.assert_called_with([8])
-        public.say.assert_called_with([8])
+        audience.broadcast.assert_called_with('8')
 
     def testD_shouldDealTheRiverCardPublicly(self):
         '''should deal the river to each player'''
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1')
+        p2 = createPlayer('p2')
 
-        public = PublicAnnouncer()
-        public.say = MagicMock()
+        audience = create_autospec(XmppMessenger)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
         dealer.next()
         dealer.next()
         dealer.next()
@@ -90,20 +88,19 @@ class testDealingCardsToPlayers(unittest.TestCase):
 
         p1.cards.assert_called_with([9])
         p2.cards.assert_called_with([9])
-        public.say.assert_called_with([9])
+        audience.broadcast.assert_called_with('9')
 
     def testE_shouldDealTheTurnCardPublicly(self):
         '''should deal the turn to each player'''
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1')
+        p2 = createPlayer('p2')
 
-        public = PublicAnnouncer()
-        public.say = MagicMock()
+        audience = create_autospec(XmppMessenger)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
         dealer.next()
         dealer.next()
         dealer.next()
@@ -112,20 +109,19 @@ class testDealingCardsToPlayers(unittest.TestCase):
 
         p1.cards.assert_called_with([10])
         p2.cards.assert_called_with([10])
-        public.say.assert_called_with([10])
+        audience.broadcast.assert_called_with('10')
 
     def testF_notPossibleToDealNextWhenNotStagesAreLeft(self):
         '''not possible to deal next when there are not stages left'''
-        p1 = createPlayer('p1', StubMessenger())
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1')
+        p2 = createPlayer('p2')
 
-        public = PublicAnnouncer()
-        public.say = MagicMock()
+        audience = create_autospec(XmppMessenger)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], public)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
         dealer.dealStages = deque([])
 
         self.assertRaises(Exception, dealer.next)

@@ -3,23 +3,6 @@ from EventHandling import Event
 from Hands import Hand
 
 
-def getName(x):
-    return str(x)[:str(x).find('/')]
-
-
-def chat(msg):
-    return msg['type'] in ('normal', 'chat')
-
-
-def playerMessage(transactions):
-    msg = ','.join(map(lambda x: '%s %s' % (x[0].name, x[1]), transactions))
-
-    if msg == '':
-        return 'go'
-
-    return msg
-
-
 class Doorman(object):
     """greets players and passes their details onto the its boss"""
     def __init__(self, waitFor, messenger, cash):
@@ -27,31 +10,29 @@ class Doorman(object):
         self.cash = cash
         self.waitFor = waitFor
         self.messenger = messenger
-        self.messenger.evt_messageReceived += self.on_messageReceived
-        self.evt_playerJoined = Event()
+        self.messenger.evt_playerJoin += self.on_playerJoin
 
     def greetPlayers(self):
         time.sleep(self.waitFor)
         return self.players
 
-    def on_messageReceived(self, sender, msg):
+    def on_playerJoin(self, sender, player):
 
-        if chat(msg) and msg['body'].startswith('player'):
-            self.players.append(getName(msg['from']))
-            self.evt_playerJoined.fire(self, msg['body'])
-            self.messenger.sendMessage(msg['body'], 'Cash ' + str(self.cash))
+        self.players.append(player)
+        message = player.name + ' has joined the game'
+        self.messenger.sendMessage('audience@pokerchat', message)
+        player.cash = self.cash
+        self.messenger.sendMessage(player.name, 'Cash ' + str(self.cash))
 
 
 class PlayerProxy(object):
     """allows the game to interact with the player messages """
     """as if they were from an object"""
-    def __init__(self, name, dealer, cash):
+    def __init__(self, name, cash=0):
         self._cards = []
         self.cash = cash
         self.name = name
         self.evt_response = Event()
-        self.dealer = dealer
-        self.dealer.evt_messageReceived += self.on_messageReceived
 
     def withdraw(self, amount):
         self.cash -= amount
@@ -61,31 +42,11 @@ class PlayerProxy(object):
     def deposit(self, amount):
         self.cash += amount
 
-    def yourGo(self, transactions):
-        self.dealer.sendMessage(self.name, playerMessage(transactions))
-
-    def send(self, msg):
-        self.dealer.sendMessage(self.name, msg)
-
     def cards(self, cards):
         self._cards = self._cards + cards
 
     def hand(self):
         return Hand(self._cards)
-
-    def outOfGame(self, msg):
-        pass
-
-    def on_messageReceived(self, sender, msg):
-        if self.fromMe(msg):
-            bet = self.parse(msg)
-            self.evt_response.fire(self, bet)
-
-    def parse(self, msg):
-        return int(msg['body'])
-
-    def fromMe(self, msg):
-        return chat(msg) and getName(msg['from']) == self.name
 
 
 class Pot(object):
@@ -119,14 +80,6 @@ class Pot(object):
         return availableChips
 
 
-class PublicAnnouncer(object):
-    def __init__(self):
-        pass
-
-    def say(self, msg):
-        pass
-
-
 class Table(object):
     """players sit around this and get dealt to in order"""
     def __init__(self, players):
@@ -144,6 +97,7 @@ class Table(object):
 
     def removeCurrent(self):
         self.players = filter(lambda x: x != self.dealingTo(), self.players)
+
         if self.dealingToPosition >= len(self.players):
             self.dealingToPosition = 0
 

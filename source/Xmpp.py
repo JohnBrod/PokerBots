@@ -13,6 +13,7 @@ if sys.version_info < (3, 0):
 else:
     raw_input = input
 
+
 class XmppMessenger(sleekxmpp.ClientXMPP):
 
     def __init__(self, jid, password):
@@ -20,6 +21,7 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
         self.evt_messageReceived = Event()
 
     def on_start(self, event):
+
         self.send_presence()
         self.get_roster()
 
@@ -31,10 +33,10 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
         self.add_event_handler("session_start", self.on_start)
         self.add_event_handler("message", self.on_message)
 
-        self.register_plugin('xep_0030') # Service Discovery
-        self.register_plugin('xep_0004') # Data Forms
-        self.register_plugin('xep_0060') # PubSub
-        self.register_plugin('xep_0199') # XMPP Ping
+        self.register_plugin('xep_0030')  # Service Discovery
+        self.register_plugin('xep_0004')  # Data Forms
+        self.register_plugin('xep_0060')  # PubSub
+        self.register_plugin('xep_0199')  # XMPP Ping
 
         if self.connect((domain, port)):
             self.process(block=False)
@@ -47,21 +49,25 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
     def finish(self):
         self.disconnect(wait=True)
 
+    def broadcast(self, msg):
+        self.sendMessage('audience@pokerchat', msg)
+
 # if __name__ == '__main__':
 
 #     # logging.DEBUG
 #     # logging.INFO
 #     # logging.ERROR
-#     logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(message)s')
+#     logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(messag
+    #e)s')
 #     logging.disable(logging.ERROR)
-    
+
 #     # Setup the EchoBot and register plugins. Note that while plugins may
 #     # have interdependencies, the order in which you register them does
 #     # not matter.
 #     player = XmppMessenger('player1@pokerchat', 'password')
 #     dealer = XmppMessenger('dealer@pokerchat', 'password')
 
-#     # ... here I add my own handlers 
+#     # ... here I add my own handlers
 #     # f = open("/tmp/debug","w")          # example handler
 #     # lh = logging.StreamHandler(f)
 #     # logger.addHandler(lh)
