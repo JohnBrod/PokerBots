@@ -7,7 +7,6 @@ parpath = os.path.join(os.path.dirname(sys.argv[0]), os.pardir)
 sys.path.insert(0, os.path.abspath(parpath))
 
 from Xmpp import XmppMessenger
-import logging
 
 
 class FakePlayer():
@@ -69,6 +68,55 @@ class FakePlayer():
 
         print self.jid + ' ' + message
 
+    def hearsCommunityCards(self):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and not message:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+
+        if not message:
+            self.testCase.assertFalse(True, self.jid + " did not hear 'Community Cards'")
+        else:
+            self.testCase.assertTrue(message.count(',') == 2, self.jid + " expected 'Community Cards' but heard '" + message + "'")
+
+        print self.jid + ' ' + message
+
+    def hearsTurnCard(self):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and not message:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+
+        if not message:
+            self.testCase.assertFalse(True, self.jid + " did not hear 'Turn Card'")
+
+        print self.jid + ' ' + message
+
+    def hearsResult(self):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and not message:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+
+        if not message:
+            self.testCase.assertFalse(True, self.jid + " did not hear the result")
+        else:
+            self.testCase.assertTrue('won' in message, self.jid + " expected the result but heard '" + message + "'")
+
+        print self.jid + ' ' + message
+
     def on_messageReceived(self, sender, msg):
         self.q.put(msg['body'])
 
@@ -118,7 +166,7 @@ class FakeAudience():
         else:
             self.testCase.assertTrue(message.count(',') == 2, self.jid + " expected 'Community Cards' but heard '" + message + "'")
 
-        print 'audience hears ' + message
+        print self.jid + ' ' + message
 
     def hearsTurnCard(self):
         end = time.time() + self.pollPeriod
@@ -133,7 +181,41 @@ class FakeAudience():
         if not message:
             self.testCase.assertFalse(True, self.jid + " did not hear 'Turn Card'")
 
-        print 'audience hears ' + message
+        print self.jid + ' ' + message
+
+    def hearsResult(self):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and not message:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+
+        if not message:
+            self.testCase.assertFalse(True, self.jid + " did not hear the result")
+        else:
+            self.testCase.assertTrue('won' in message, self.jid + " expected the result but heard '" + message + "'")
+
+        print self.jid + ' ' + message
+
+    def eventuallyHears(self, shouldHear):
+        end = time.time() + self.pollPeriod
+
+        message = None
+        while time.time() <= end and message != shouldHear:
+            try:
+                message = self.q.get_nowait()
+            except Queue.Empty:
+                pass
+
+        if not message:
+            self.testCase.assertFalse(True, self.jid + " did not hear '" + shouldHear + "'")
+        else:
+            self.testCase.assertEqual(message, shouldHear, self.jid + " expected '" + shouldHear + "' but heard '" + message + "'")
+
+        print self.jid + ' ' + message
 
     def on_messageReceived(self, sender, msg):
         self.q.put(msg['body'])

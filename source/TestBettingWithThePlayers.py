@@ -227,6 +227,9 @@ class StubMessenger(object):
 
         self.evt_messageReceived.fire(self, response)
 
+    def broadcast(self, message):
+        pass
+
 
 def cards(items):
     return map(lambda x: Card(int(x[0:-1]), x[-1]), items.split(','))

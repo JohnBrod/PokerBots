@@ -53,7 +53,9 @@ class XmppMessageInterpreter(object):
 
     def broadcast(self, msg):
         self.messenger.sendMessage('audience@pokerchat', msg)
-
+        for player in self.players:
+            self.messenger.sendMessage(player.name, msg)
+            
 
 class Dealer(object):
     """deals a hand to players"""
@@ -198,7 +200,8 @@ class HandlesBettingBetweenThePlayers(object):
                     chipsDue = min(winnerChips, opponentChips)
                     winnings = self.pot.takeFrom(opponent, chipsDue)
 
-                    # logging.warning(player.name + ' won ' + str(winnings) + ' with ' + str(player.hand().rank()))
+                    self.messenger.broadcast(player.name + ' won ' + str(winnings) + ' with ' + str(player.hand().rank()))
+
                     player.deposit(winnings)
 
     def add(self, player, amount):
