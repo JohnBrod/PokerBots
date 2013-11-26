@@ -10,12 +10,12 @@ from Xmpp import XmppMessenger
 
 
 class FakePlayer():
-    def __init__(self, jid, name, password, pollPeriod, testCase):
+    def __init__(self, jid, password, pollPeriod, testCase):
         self.testCase = testCase
+        self.jid = jid
         self.q = Queue.Queue()
         self.pollPeriod = pollPeriod
-        self.jid = jid
-        self.messenger = XmppMessenger(name, password)
+        self.messenger = XmppMessenger(jid, password)
         self.messenger.evt_messageReceived += self.on_messageReceived
         self.messenger.listen('localhost', 5222)
 
@@ -125,12 +125,12 @@ class FakePlayer():
 
 
 class FakeAudience():
-    def __init__(self, jid, name, password, pollPeriod, testCase):
+    def __init__(self, jid, password, pollPeriod, testCase):
         self.testCase = testCase
         self.q = Queue.Queue()
         self.pollPeriod = pollPeriod
         self.jid = jid
-        self.messenger = XmppMessenger(name, password)
+        self.messenger = XmppMessenger(jid, password)
         self.messenger.evt_messageReceived += self.on_messageReceived
         self.messenger.listen('localhost', 5222)
 

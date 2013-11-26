@@ -34,9 +34,9 @@ class testPokerGame(unittest.TestCase):
 
     def setUp(self):
         pollDuration = 10
-        self.aPlayer = FakePlayer('Player1@pokerchat/test', 'Player1@localhost', 'password', pollDuration, self)
-        self.anotherPlayer = FakePlayer('Player2@pokerchat/test', 'Player2@localhost', 'password', pollDuration, self)
-        self.audience = FakeAudience('audience@pokerchat/test', 'audience@localhost', 'password', pollDuration, self)
+        self.aPlayer = FakePlayer('Player1@localhost', 'password', pollDuration, self)
+        self.anotherPlayer = FakePlayer('Player2@localhost', 'password', pollDuration, self)
+        self.audience = FakeAudience('audience@localhost', 'password', pollDuration, self)
         self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py"])
 
     def tearDown(self):
@@ -44,6 +44,7 @@ class testPokerGame(unittest.TestCase):
         self.anotherPlayer.stop()
         self.audience.stop()
         self.swallowMessages()
+
         subprocess.Popen("taskkill /F /T /PID %i" % self.handle.pid)
 
     def swallowMessages(self):
@@ -72,48 +73,48 @@ class testPokerGame(unittest.TestCase):
         self.audience.hears('player1@pokerchat has joined the game')
         self.audience.hears('Not enough players for a game so quitting')
 
-    def testTwoPlayersAllIn(self):
+    # def testTwoPlayersAllIn(self):
 
-        self.audience.hears('Game started, waiting for players')
+    #     self.audience.hears('Game started, waiting for players')
 
-        self.aPlayer.says('player1@pokerchat')
-        self.aPlayer.hears('Cash 1000')
-        self.audience.hears('player1@pokerchat has joined the game')
+    #     self.aPlayer.says('player1@pokerchat')
+    #     self.aPlayer.hears('Cash 1000')
+    #     self.audience.hears('player1@pokerchat has joined the game')
 
-        self.anotherPlayer.says('player2@pokerchat')
-        self.anotherPlayer.hears('Cash 1000')
-        self.audience.hears('player2@pokerchat has joined the game')
+    #     self.anotherPlayer.says('player2@pokerchat')
+    #     self.anotherPlayer.hears('Cash 1000')
+    #     self.audience.hears('player2@pokerchat has joined the game')
 
-        self.aPlayer.hearsPrivateCards()
-        self.anotherPlayer.hearsPrivateCards()
+    #     self.aPlayer.hearsPrivateCards()
+    #     self.anotherPlayer.hearsPrivateCards()
 
-        self.aPlayer.hears('go')
-        self.aPlayer.says('1000')
+    #     self.aPlayer.hears('go')
+    #     self.aPlayer.says('1000')
 
-        self.anotherPlayer.hears('go')
-        self.anotherPlayer.says('1000')
+    #     self.anotherPlayer.hears('go')
+    #     self.anotherPlayer.says('1000')
 
-        self.audience.hearsCommunityCards()
-        self.aPlayer.hearsCommunityCards()
-        self.anotherPlayer.hearsCommunityCards()
+    #     self.audience.hearsCommunityCards()
+    #     self.aPlayer.hearsCommunityCards()
+    #     self.anotherPlayer.hearsCommunityCards()
 
-        self.audience.hearsTurnCard()
-        self.aPlayer.hearsTurnCard()
-        self.anotherPlayer.hearsTurnCard()
+    #     self.audience.hearsTurnCard()
+    #     self.aPlayer.hearsTurnCard()
+    #     self.anotherPlayer.hearsTurnCard()
 
-        self.audience.hearsTurnCard()
-        self.aPlayer.hearsTurnCard()
-        self.anotherPlayer.hearsTurnCard()
+    #     self.audience.hearsTurnCard()
+    #     self.aPlayer.hearsTurnCard()
+    #     self.anotherPlayer.hearsTurnCard()
 
-        self.audience.hearsTurnCard()
-        self.aPlayer.hearsTurnCard()
-        self.anotherPlayer.hearsTurnCard()
+    #     self.audience.hearsTurnCard()
+    #     self.aPlayer.hearsTurnCard()
+    #     self.anotherPlayer.hearsTurnCard()
 
-        self.audience.hearsResult()
-        self.aPlayer.hearsResult()
-        self.anotherPlayer.hearsResult()
+    #     self.audience.hearsResult()
+    #     self.aPlayer.hearsResult()
+    #     self.anotherPlayer.hearsResult()
 
-        self.audience.eventuallyHears('Game Over')
+    #     self.audience.eventuallyHears('Game Over')
 
 
 if __name__ == "__main__":
