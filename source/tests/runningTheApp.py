@@ -51,6 +51,8 @@ class FakePlayer():
         else:
             self.testCase.assertEqual(message, shouldHear, self.jid + " expected '" + shouldHear + "' but heard '" + message + "'")
 
+        print self.jid + ' ' + message
+
     def hearsPrivateCards(self):
         end = time.time() + self.pollPeriod
 
@@ -150,6 +152,8 @@ class FakeAudience():
             self.testCase.assertTrue(message.startswith(shouldHear[:-3]), self.jid + " expected '" + shouldHear + "' but heard '" + message + "'")
         else:
             self.testCase.assertEqual(message, shouldHear, self.jid + " expected '" + shouldHear + "' but heard '" + message + "'")
+
+        print self.jid + ' ' + message
 
     def hearsCommunityCards(self):
         end = time.time() + self.pollPeriod

@@ -25,7 +25,7 @@ class testTellingThePlayersToTakeTheirGo(unittest.TestCase):
         msngr = StubMessenger()
         Dealer(msngr).deal([p1])
 
-        self.assertEqual(msngr.lastMessage, ('p1', 'go'))
+        self.assertEqual(msngr.lastMessage, ('p1', 'GO'))
 
 
 class testIllegalBetting(unittest.TestCase):
@@ -114,7 +114,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2])
 
-        self.assertEqual(msngr.lastMessage, ('p2', 'go'))
+        self.assertEqual(msngr.lastMessage, ('p2', 'GO'))
 
     def testI_playerCanBetLessThanMinimumIfTheyGoAllIn(self):
         '''a player can bet less than minimum if they go all in'''
@@ -217,7 +217,7 @@ class StubMessenger(object):
         self.sentMessages.append((jid, msg))
         self.lastMessage = (jid, msg)
 
-        if msg != 'go' or len(self.replies) == 0:
+        if msg != 'GO' or len(self.replies) == 0:
             return
 
         response = self.replies.popleft()

@@ -1,4 +1,4 @@
-import logging
+
 from collections import deque
 from theHouse import Pot
 from theHouse import Table
@@ -55,7 +55,7 @@ class XmppMessageInterpreter(object):
         self.messenger.sendMessage('audience@pokerchat', msg)
         for player in self.players:
             self.messenger.sendMessage(player.name, msg)
-            
+
 
 class Dealer(object):
     """deals a hand to players"""
@@ -69,6 +69,7 @@ class Dealer(object):
         self.startHand()
 
     def startHand(self):
+        self.messenger.broadcast('DEALING ' + ' '.join([p.name for p in self.players]))
         self.cardDealer = DealsCardsToThePlayers(Deck(), self.players, self.messenger)
         self.bettingDealer = HandlesBettingBetweenThePlayers(self.players, self.messenger)
         self.cardDealer.next()
@@ -212,6 +213,7 @@ class HandlesBettingBetweenThePlayers(object):
         else:
             self.table.nextPlayer()
 
+        self.messenger.broadcast('BET ' + player.name + ' ' + str(amount))
         if amount > self.getMinimumBet(player):
             self.lastToRaise = player
 
@@ -247,7 +249,7 @@ class HandlesBettingBetweenThePlayers(object):
         return max(map(lambda x: self.pot.total(x), self.pot.players()))
 
     def next(self):
-        self.messenger.sendMessage(self.table.dealingTo().name, 'go')
+        self.messenger.sendMessage(self.table.dealingTo().name, 'GO')
 
 
 class Deck(object):

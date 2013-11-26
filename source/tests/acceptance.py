@@ -33,7 +33,7 @@ class testPokerGame(unittest.TestCase):
         logging.disable(logging.ERROR)
 
     def setUp(self):
-        pollDuration = 10
+        pollDuration = 20
         self.aPlayer = FakePlayer('Player1@localhost', 'password', pollDuration, self)
         self.anotherPlayer = FakePlayer('Player2@localhost', 'password', pollDuration, self)
         self.audience = FakeAudience('audience@localhost', 'password', pollDuration, self)
@@ -66,55 +66,62 @@ class testPokerGame(unittest.TestCase):
     def testQuittingGameThatOnlyOnePlayerJoins(self):
 
         self.audience.hears('Game started, waiting for players')
-
         self.aPlayer.says('player1@pokerchat')
-        self.aPlayer.hears('Cash 1000')
-
-        self.audience.hears('player1@pokerchat has joined the game')
+        self.aPlayer.hears('CHIPS 1000')
         self.audience.hears('Not enough players for a game so quitting')
 
-    # def testTwoPlayersAllIn(self):
+    def testTwoPlayersAllIn(self):
 
-    #     self.audience.hears('Game started, waiting for players')
+        self.audience.hears('Game started, waiting for players')
 
-    #     self.aPlayer.says('player1@pokerchat')
-    #     self.aPlayer.hears('Cash 1000')
-    #     self.audience.hears('player1@pokerchat has joined the game')
+        self.aPlayer.says('player1@pokerchat')
+        self.aPlayer.hears('CHIPS 1000')
 
-    #     self.anotherPlayer.says('player2@pokerchat')
-    #     self.anotherPlayer.hears('Cash 1000')
-    #     self.audience.hears('player2@pokerchat has joined the game')
+        self.anotherPlayer.says('player2@pokerchat')
+        self.anotherPlayer.hears('CHIPS 1000')
 
-    #     self.aPlayer.hearsPrivateCards()
-    #     self.anotherPlayer.hearsPrivateCards()
+        self.audience.hears('DEALING player1@pokerchat player2@pokerchat')
+        self.aPlayer.hears('DEALING player1@pokerchat player2@pokerchat')
+        self.anotherPlayer.hears('DEALING player1@pokerchat player2@pokerchat')
 
-    #     self.aPlayer.hears('go')
-    #     self.aPlayer.says('1000')
+        self.aPlayer.hearsPrivateCards()
+        self.anotherPlayer.hearsPrivateCards()
 
-    #     self.anotherPlayer.hears('go')
-    #     self.anotherPlayer.says('1000')
+        self.aPlayer.hears('GO')
+        self.aPlayer.says('1000')
 
-    #     self.audience.hearsCommunityCards()
-    #     self.aPlayer.hearsCommunityCards()
-    #     self.anotherPlayer.hearsCommunityCards()
+        self.audience.hears('BET player1@pokerchat 1000')
+        self.aPlayer.hears('BET player1@pokerchat 1000')
+        self.anotherPlayer.hears('BET player1@pokerchat 1000')
 
-    #     self.audience.hearsTurnCard()
-    #     self.aPlayer.hearsTurnCard()
-    #     self.anotherPlayer.hearsTurnCard()
+        self.anotherPlayer.hears('GO')
+        self.anotherPlayer.says('1000')
 
-    #     self.audience.hearsTurnCard()
-    #     self.aPlayer.hearsTurnCard()
-    #     self.anotherPlayer.hearsTurnCard()
+        self.audience.hears('BET player2@pokerchat 1000')
+        self.aPlayer.hears('BET player2@pokerchat 1000')
+        self.anotherPlayer.hears('BET player2@pokerchat 1000')
 
-    #     self.audience.hearsTurnCard()
-    #     self.aPlayer.hearsTurnCard()
-    #     self.anotherPlayer.hearsTurnCard()
+        self.audience.hearsCommunityCards()
+        self.aPlayer.hearsCommunityCards()
+        self.anotherPlayer.hearsCommunityCards()
 
-    #     self.audience.hearsResult()
-    #     self.aPlayer.hearsResult()
-    #     self.anotherPlayer.hearsResult()
+        self.audience.hearsTurnCard()
+        self.aPlayer.hearsTurnCard()
+        self.anotherPlayer.hearsTurnCard()
 
-    #     self.audience.eventuallyHears('Game Over')
+        self.audience.hearsTurnCard()
+        self.aPlayer.hearsTurnCard()
+        self.anotherPlayer.hearsTurnCard()
+
+        self.audience.hearsTurnCard()
+        self.aPlayer.hearsTurnCard()
+        self.anotherPlayer.hearsTurnCard()
+
+        self.audience.hearsResult()
+        self.aPlayer.hearsResult()
+        self.anotherPlayer.hearsResult()
+
+        self.audience.eventuallyHears('Game Over')
 
 
 if __name__ == "__main__":

@@ -19,10 +19,8 @@ class Doorman(object):
     def on_playerJoin(self, sender, player):
 
         self.players.append(player)
-        message = player.name + ' has joined the game'
-        self.messenger.sendMessage('audience@pokerchat', message)
         player.cash = self.cash
-        self.messenger.sendMessage(player.name, 'Cash ' + str(self.cash))
+        self.messenger.sendMessage(player.name, 'CHIPS ' + str(self.cash))
 
 
 class PlayerProxy(object):
