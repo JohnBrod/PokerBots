@@ -103,6 +103,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         dealer.deal([p1, p2])
 
         self.assertTrue(('p2', 'You are out, you folded') in msngr.sentMessages)
+
         self.assertTrue(dealer.playing)
 
     def testF_playerBetsTheMax(self):
@@ -228,7 +229,7 @@ class StubMessenger(object):
         self.evt_playerResponse.fire(self, response)
 
     def broadcast(self, msg):
-        pass
+        self.sentMessages.append(msg)
 
 
 if __name__ == "__main__":
