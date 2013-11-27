@@ -5,6 +5,7 @@ import texasHoldEm
 from Xmpp import XmppMessenger
 import traceback
 import time
+import sys
 
 
 def countdown(duration):
@@ -12,8 +13,11 @@ def countdown(duration):
         time.sleep(1)
         print 'start in {0} seconds'.format(duration - i)
 
+if len(sys.argv) != 2:
+    raise Exception('Usage: PokerGame <wait duration in seconds>')
+    
 playerCash = 1000
-waitForPlayers = 100
+waitForPlayers = int(sys.argv[1])
 
 logging.basicConfig(filename='poker.log', level=logging.DEBUG)
 
