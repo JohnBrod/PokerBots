@@ -1,11 +1,19 @@
+from threading import Thread
 import logging
 from theHouse import Doorman
 import texasHoldEm
 from Xmpp import XmppMessenger
 import traceback
+import time
+
+
+def countdown(duration):
+    for i in xrange(duration):
+        time.sleep(1)
+        print 'start in {0} seconds'.format(duration - i)
 
 playerCash = 1000
-waitForPlayers = 5
+waitForPlayers = 100
 
 logging.basicConfig(filename='poker.log', level=logging.DEBUG)
 
@@ -13,25 +21,32 @@ dealerMessenger = XmppMessenger('dealer@localhost/real', 'password')
 dealerMessenger.listen('localhost', 5222)
 interpreter = texasHoldEm.XmppMessageInterpreter(dealerMessenger)
 
-dealerMessenger.sendMessage('audience@pokerchat', 'Game started, waiting for players')
+startMessage = 'Game started, waiting for players'
+dealerMessenger.sendMessage('audience@pokerchat', startMessage)
 
 try:
     frank = Doorman(waitForPlayers, interpreter, playerCash)
+    Thread(target=countdown, args=(waitForPlayers,)).start()
     players = frank.greetPlayers()
 except:
     print traceback.format_exc()
 
 if not players:
-    dealerMessenger.sendMessage('audience@pokerchat', 'No players joined so quitting')
+    msg = 'No players joined so quitting'
+    dealerMessenger.sendMessage('audience@pokerchat', msg)
+    print msg
 elif len(players) == 1:
-    dealerMessenger.sendMessage('audience@pokerchat', 'Not enough players for a game so quitting')
+    msg = 'Not enough players for a game so quitting'
+    dealerMessenger.sendMessage('audience@pokerchat', msg)
+    print msg
 else:
 
     try:
         dealer = texasHoldEm.Dealer(interpreter)
         dealer.deal(players)
         while dealer.playing:
-            pass
+            time.sleep(1)
+
         dealerMessenger.sendMessage('audience@pokerchat', 'Game Over')
     except:
         print traceback.format_exc()
