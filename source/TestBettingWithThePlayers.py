@@ -22,7 +22,7 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
     def testA_playerWinsBackTheirChips(self):
         '''a player wins back their chips if no one else is in'''
 
-        p1 = createPlayer('p1', StubMessenger(), 5)
+        p1 = createPlayer('p1', 5)
         dealer = HandlesBettingBetweenThePlayers([p1], StubMessenger())
 
         dealer.add(p1, 5)
@@ -34,8 +34,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
     def testB_withoutSidePotsTheTopRankedPlayerWinsAll(self):
         '''without side pots the top ranked player wins all'''
 
-        p1 = createPlayer('p1', StubMessenger(), 5)
-        p2 = createPlayer('p2', StubMessenger(), 5)
+        p1 = createPlayer('p1', 5)
+        p2 = createPlayer('p2', 5)
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
 
@@ -52,8 +52,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
     def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
         '''if a player is only in a side pot, that is all they can win'''
 
-        p1 = createPlayer('p1', StubMessenger(), 5)
-        p2 = createPlayer('p2', StubMessenger(), 10)
+        p1 = createPlayer('p1', 5)
+        p2 = createPlayer('p2', 10)
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
 
@@ -71,9 +71,9 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
     def testD_splittingThePot(self):
         '''players will split the pot if they are ranked the same'''
 
-        p1 = createPlayer('p1', StubMessenger(), 10)
-        p2 = createPlayer('p2', StubMessenger(), 10)
-        p3 = createPlayer('p3', StubMessenger(), 10)
+        p1 = createPlayer('p1', 10)
+        p2 = createPlayer('p2', 10)
+        p3 = createPlayer('p3', 10)
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2, p3], StubMessenger())
 
@@ -93,13 +93,13 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
     def testD_shouldCompareValueWhenRankIsTheSame(self):
         '''the value of the hand should be compared when the rank is the same'''
 
-        p1 = createPlayer('p1', StubMessenger(), 10)
-        p2 = createPlayer('p2', StubMessenger(), 10)
+        p1 = createPlayer('p1', 10)
+        p2 = createPlayer('p2', 10)
 
         dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
 
         p1.cards(cards('14C,14D,2C,3H,4S'))
-        p1.cards(cards('13C,13D,2C,3H,4S'))
+        p2.cards(cards('13C,13D,2C,3H,4S'))
 
         dealer.add(p1, 10)
         dealer.add(p2, 10)
@@ -108,6 +108,27 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         self.assertEqual(p1.cash, 20)
         self.assertEqual(p2.cash, 0)
+
+    def testE_shouldOnlyDistributeToPlayersInTheGame(self):
+        '''should only distribute the winnings to players that are in the game'''
+
+        p1 = createPlayer('p1', 10)
+        p2 = createPlayer('p2', 5)
+
+        messenger = StubMessenger()
+        dealer = HandlesBettingBetweenThePlayers([p1, p2], messenger)
+
+        p1.cards(cards('14C,14D,2C,3H,4S'))
+        p2.cards(cards('14C,14D,2C,3H,4S'))
+
+        dealer.add(p1, 5)
+        dealer.add(p2, 0)
+
+        dealer.distributeWinnings()
+
+        print messenger.sentMessages
+
+        self.assertFalse(len([msg for msg in messenger.broadcastMessages if msg.startswith('p2 won')]) > 0)
 
 
 class testTheTotalOfThePot(unittest.TestCase):
@@ -126,7 +147,7 @@ class testTheTotalOfThePot(unittest.TestCase):
         '''increments when chips are added'''
 
         p = Pot()
-        p1 = createPlayer('p1', StubMessenger())
+        p1 = createPlayer('p1')
 
         p.add(p1, 5)
 
@@ -136,7 +157,7 @@ class testTheTotalOfThePot(unittest.TestCase):
         '''increments when more chips are added'''
 
         p = Pot()
-        p1 = createPlayer('p1', StubMessenger())
+        p1 = createPlayer('p1')
 
         p.add(p1, 5)
         p.add(p1, 10)
@@ -152,15 +173,15 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
     def testA_ZeroWhenThereIsNothingInThePot(self):
         '''zero when there is nothing in the pot'''
 
-        p1 = createPlayer('p1', StubMessenger())
+        p1 = createPlayer('p1')
         dealer = HandlesBettingBetweenThePlayers([p1], StubMessenger())
 
         self.assertEqual(0, dealer.getMinimumBet(p1))
 
     def testB_SecondPlayerMustBetAtLeastTheFirstBet(self):
         '''second player should pay at least the first bet'''
-        p1 = createPlayer('p1', StubMessenger(), 5)
-        p2 = createPlayer('p2', StubMessenger())
+        p1 = createPlayer('p1', 5)
+        p2 = createPlayer('p2')
         dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
 
         dealer.add(p1, 5)
@@ -169,8 +190,8 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
 
     def testC_ZeroBecauseAllAreEven(self):
         '''zero when all players are even'''
-        p1 = createPlayer('p1', StubMessenger(), 5)
-        p2 = createPlayer('p2', StubMessenger(), 5)
+        p1 = createPlayer('p1', 5)
+        p2 = createPlayer('p2', 5)
         dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
 
         dealer.add(p1, 5)
@@ -182,8 +203,8 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
     def testD_ShouldPayTheDifferenceWhenRaised(self):
         '''player should pay the difference when raised'''
 
-        p1 = createPlayer('p1', StubMessenger(), 5)
-        p2 = createPlayer('p2', StubMessenger(), 10)
+        p1 = createPlayer('p1', 5)
+        p2 = createPlayer('p2', 10)
         dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
 
         dealer.add(p1, 5)
@@ -192,7 +213,7 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
         self.assertEqual(5, dealer.getMinimumBet(p1))
 
 
-def createPlayer(name, messenger, cash=0):
+def createPlayer(name, cash=0):
     player = PlayerProxy(name, cash)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
@@ -202,22 +223,25 @@ def createPlayer(name, messenger, cash=0):
 
 class StubMessenger(object):
     def __init__(self):
-        self.evt_messageReceived = Event()
+        self.evt_playerResponse = Event()
         self.replies = deque()
+        self.sentMessages = []
+        self.broadcastMessages = []
 
     def skipBlind(self):
         self.replies.append('skip')
         return self
 
-    def bet(self, amount):
-        self.replies.append(amount)
+    def bet(self, player, amount):
+        self.replies.append((player, amount))
         return self
 
     def sendMessage(self, jid, msg):
 
-        self.lastMessage = msg
+        self.sentMessages.append((jid, msg))
+        self.lastMessage = (jid, msg)
 
-        if len(self.replies) == 0:
+        if msg != 'GO' or len(self.replies) == 0:
             return
 
         response = self.replies.popleft()
@@ -225,10 +249,10 @@ class StubMessenger(object):
         if response == 'skip':
             return
 
-        self.evt_messageReceived.fire(self, response)
+        self.evt_playerResponse.fire(self, response)
 
-    def broadcast(self, message):
-        pass
+    def broadcast(self, msg):
+        self.broadcastMessages.append(msg)
 
 
 def cards(items):

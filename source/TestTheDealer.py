@@ -204,6 +204,7 @@ class StubMessenger(object):
         self.evt_playerResponse = Event()
         self.replies = deque()
         self.sentMessages = []
+        self.broadcastMessages = []
 
     def skipBlind(self):
         self.replies.append('skip')
@@ -229,7 +230,7 @@ class StubMessenger(object):
         self.evt_playerResponse.fire(self, response)
 
     def broadcast(self, msg):
-        self.sentMessages.append(msg)
+        self.broadcastMessages.append(msg)
 
 
 if __name__ == "__main__":

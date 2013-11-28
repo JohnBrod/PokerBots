@@ -181,7 +181,7 @@ class HandlesBettingBetweenThePlayers(object):
 
     def ranking(self):
 
-        ranks = sorted(self.pot.players(), key=lambda x: x.hand(), reverse=True)
+        ranks = sorted(self.table.players, key=lambda x: x.hand(), reverse=True)
         ranks = reduce(ranks, lambda x: x.hand())
 
         return ranks
@@ -201,7 +201,9 @@ class HandlesBettingBetweenThePlayers(object):
                     chipsDue = min(winnerChips, opponentChips)
                     winnings = self.pot.takeFrom(opponent, chipsDue)
 
-                    self.messenger.broadcast(player.name + ' won ' + str(winnings) + ' with ' + str(player.hand().rank()))
+                    message = '{0} won {1} with {2}'.format(player.name, winnings, player.hand().rank())
+
+                    self.messenger.broadcast(message)
 
                     player.deposit(winnings)
 
