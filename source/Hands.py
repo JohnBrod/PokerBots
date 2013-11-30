@@ -31,6 +31,9 @@ class Hand(object):
 
     def __eq__(self, other):
 
+        if self.cards == [] and other.cards == []:
+            return True
+
         for rank in handRanking:
             if rank(self) and rank(other):
                 if rank(self) == rank(other):

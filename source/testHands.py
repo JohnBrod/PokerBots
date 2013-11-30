@@ -12,6 +12,16 @@ from Hands import straightFlush
 from Hands import house
 
 
+class TestComparingEmptyHands(unittest.TestCase):
+
+    def setUp(self):
+        print 'Comparing two empty hands,', self.shortDescription()
+
+    def testA_theyAreEqual(self):
+        '''they are equal'''
+        self.assertEqual(Hand([]), Hand([]))
+
+
 class TestComparingAgainstHighCard(unittest.TestCase):
 
     def setUp(self):
