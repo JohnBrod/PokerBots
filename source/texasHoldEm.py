@@ -116,6 +116,8 @@ class DealsCardsToThePlayers(object):
         self.messenger = messenger
         self.deck = deck
         self.players = players
+        for player in players:
+            player.dropCards()
         self.dealStages = deque([
             self.dealPrivateCards,
             self.dealCommunityCards,
@@ -266,6 +268,28 @@ class Deck(object):
 
     def shuffle(self):
         random.shuffle(self.cards)
+
+
+class RiggedDeck(object):
+    def __init__(self):
+        self.cards = deque([Card(14, 'H'), Card(14, 'D'),
+                            Card(2, 'D'), Card(5, 'H'),
+                            Card(14, 'C'), Card(14, 'S'), Card(6, 'H'),
+                            Card(2, 'C'), Card(10, 'S'), Card(12, 'S'),
+                            Card(14, 'H'), Card(14, 'D'),
+                            Card(2, 'D'), Card(5, 'H'),
+                            Card(14, 'C'), Card(14, 'S'), Card(6, 'H'),
+                            Card(2, 'C'), Card(10, 'S'), Card(12, 'S'),
+                            Card(14, 'H'), Card(14, 'D'),
+                            Card(2, 'D'), Card(5, 'H'),
+                            Card(14, 'C'), Card(14, 'S'), Card(6, 'H'),
+                            Card(2, 'C'), Card(10, 'S'), Card(12, 'S')])
+
+    def take(self):
+        return self.cards.popleft()
+
+    def shuffle(self):
+        pass
 
 
 class Card(object):

@@ -1,6 +1,8 @@
 import unittest
 from theHouse import PlayerProxy
+from texasHoldEm import Card
 from texasHoldEm import DealsCardsToThePlayers
+from Hands import Hand
 from EventHandling import Event
 from mock import MagicMock
 from collections import deque
@@ -125,6 +127,17 @@ class testDealingCardsToPlayers(unittest.TestCase):
         dealer.dealStages = deque([])
 
         self.assertRaises(Exception, dealer.next)
+
+    def testG_shouldTakeCardsFromPlayersBeforeDealing(self):
+        '''should take any cards the player may have before dealing'''
+        p1 = createPlayer('p1')
+
+        p1.cards([Card(2, 'H')])
+
+        audience = create_autospec(XmppMessenger)
+        DealsCardsToThePlayers(PredictableDeck(), [p1], audience)
+
+        self.assertEqual(p1.hand(), Hand([]))
 
 
 class PredictableDeck():

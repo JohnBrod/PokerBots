@@ -46,6 +46,9 @@ class PlayerProxy(object):
     def hand(self):
         return Hand(self._cards)
 
+    def dropCards(self):
+        self._cards = []
+
 
 class Pot(object):
 

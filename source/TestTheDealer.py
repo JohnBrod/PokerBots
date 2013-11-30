@@ -171,17 +171,12 @@ class testDealingTheCards(unittest.TestCase):
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
 
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
-
         msngr = StubMessenger().bet(p1, 1000).bet(p2, 1000)
 
         dealer = Dealer(msngr)
         dealer.deal([p1, p2])
 
-        self.assertEqual(p1.cards.call_count, 5)
-        self.assertEqual(p2.cards.call_count, 5)
-        self.assertFalse(dealer.playing)
+        self.assertFalse('DEALING p2 p1' in msngr.broadcastMessages)
 
     def testJ_movingButtonToNextPlayerAfterFirstHand(self):
         '''moving the button to the next player after a hand'''
