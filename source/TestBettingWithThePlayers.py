@@ -115,7 +115,7 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
         p2 = createPlayer('p2', 10)
 
         messenger = StubMessenger()
-        dealer = HandlesBettingBetweenThePlayers([p1], messenger)
+        dealer = HandlesBettingBetweenThePlayers([p1, p2], messenger)
 
         p1.cards(cards('14C,14D,2C,3H,4S'))
         p2.cards(cards('6S,4H,3C,2D,2C'))
@@ -127,6 +127,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         self.assertTrue('WON p1 p1 10 with 14C,14D,4S,3H,2C' in messenger.broadcastMessages)
         self.assertTrue('WON p1 p2 10 with 14C,14D,4S,3H,2C' in messenger.broadcastMessages)
+        self.assertTrue('WON p2 p2 0 with 2D,2C,6S,4H,3C' in messenger.broadcastMessages)
+        self.assertTrue('WON p2 p1 0 with 2D,2C,6S,4H,3C' in messenger.broadcastMessages)
 
     def testF_shouldOnlyDistributeToPlayersInTheGame(self):
         '''should only distribute the winnings to players that are in the game'''
