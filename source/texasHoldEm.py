@@ -203,7 +203,9 @@ class HandlesBettingBetweenThePlayers(object):
                     chipsDue = min(winnerChips, opponentChips)
                     winnings = self.pot.takeFrom(opponent, chipsDue)
 
-                    message = '{0} won {1} with {2}'.format(player.name, winnings, player.hand().rank())
+                    message = 'WON {0} {1} {2} with {3}'.format(
+                        player.name, opponent.name, winnings,
+                        player.hand().rank())
 
                     self.messenger.broadcast(message)
 

@@ -109,7 +109,27 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
         self.assertEqual(p1.cash, 20)
         self.assertEqual(p2.cash, 0)
 
-    def testE_shouldOnlyDistributeToPlayersInTheGame(self):
+    def testE_shouldAnnounceTheWinners(self):
+        '''should announce the winners of the game'''
+
+        p1 = createPlayer('p1', 10)
+        p2 = createPlayer('p2', 10)
+
+        messenger = StubMessenger()
+        dealer = HandlesBettingBetweenThePlayers([p1], messenger)
+
+        p1.cards(cards('14C,14D,2C,3H,4S'))
+        p2.cards(cards('6S,4H,3C,2D,2C'))
+
+        dealer.add(p1, 10)
+        dealer.add(p2, 10)
+
+        dealer.distributeWinnings()
+
+        self.assertTrue('WON p1 p1 10 with 14C,14D,4S,3H,2C' in messenger.broadcastMessages)
+        self.assertTrue('WON p1 p2 10 with 14C,14D,4S,3H,2C' in messenger.broadcastMessages)
+
+    def testF_shouldOnlyDistributeToPlayersInTheGame(self):
         '''should only distribute the winnings to players that are in the game'''
 
         p1 = createPlayer('p1', 10)
@@ -125,8 +145,6 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
         dealer.add(p2, 0)
 
         dealer.distributeWinnings()
-
-        print messenger.sentMessages
 
         self.assertFalse(len([msg for msg in messenger.broadcastMessages if msg.startswith('p2 won')]) > 0)
 
