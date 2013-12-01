@@ -17,13 +17,13 @@ def getName(x):
 
 def outMessage(bet, min, max):
     if bet == 0:
-        return 'OUT, you folded'
+        return 'OUT you folded'
 
     if bet < min:
-        return 'OUT, you bet %d, minimum bet was %d' % (bet, min)
+        return 'OUT you bet %d, minimum bet was %d' % (bet, min)
 
     if bet > max:
-        return "OUT, you bet %d, you have only %d cash avaiable" % (bet, max)
+        return "OUT you bet %d, you have only %d cash avaiable" % (bet, max)
 
 
 class XmppMessageInterpreter(object):

@@ -146,7 +146,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer.distributeWinnings()
 
-        self.assertFalse(len([msg for msg in messenger.broadcastMessages if msg.startswith('p2 won')]) > 0)
+        p2WonMsg = [msg for msg in messenger.broadcastMessages if msg.startswith('p2 won')]
+        self.assertFalse(len(p2WonMsg) > 0)
 
 
 class testTheTotalOfThePot(unittest.TestCase):

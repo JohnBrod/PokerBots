@@ -69,7 +69,8 @@ class testIllegalBetting(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2, p3])
 
-        self.assertTrue(('p1', 'OUT you bet 1001, you have only 1000 cash avaiable') in msngr.sentMessages)
+        p1Out = ('p1', 'OUT you bet 1001, you have only 1000 cash avaiable')
+        self.assertTrue(p1Out in msngr.sentMessages)
 
     def testH_playerBetsMoreThanTheyHaveInTwoParts(self):
         '''player betting more than they have in two parts'''
@@ -81,7 +82,8 @@ class testIllegalBetting(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2])
 
-        self.assertTrue(('p1', 'OUT you bet 991, you have only 990 cash avaiable') in msngr.sentMessages)
+        p1Out = ('p1', 'OUT you bet 991, you have only 990 cash avaiable')
+        self.assertTrue(p1Out in msngr.sentMessages)
 
 
 class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
@@ -130,7 +132,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(msngr).deal([p1, p2])
 
         for msg in msngr.sentMessages:
-            self.assertFalse(msg[0] == 'p2' and msg[1].startswith('OUT))
+            self.assertFalse(msg[0] == 'p2' and msg[1].startswith('OUT'))
 
 
 class testDealingTheCards(unittest.TestCase):
