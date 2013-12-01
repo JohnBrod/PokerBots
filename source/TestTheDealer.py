@@ -43,7 +43,7 @@ class testIllegalBetting(unittest.TestCase):
         dealer = Dealer(msngr)
         dealer.deal([p1, p2])
 
-        self.assertTrue(('p2', 'You are out, you bet 1, minimum bet was 2') in msngr.sentMessages)
+        self.assertTrue(('p2', 'OUT you bet 1, minimum bet was 2') in msngr.sentMessages)
         self.assertTrue(dealer.playing)
 
     def testE_firstPlayerBetsLessThanMinimum(self):
@@ -56,7 +56,7 @@ class testIllegalBetting(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2, p3])
 
-        self.assertTrue(('p1', 'You are out, you bet 4, minimum bet was 5') in msngr.sentMessages)
+        self.assertTrue(('p1', 'OUT you bet 4, minimum bet was 5') in msngr.sentMessages)
 
     def testG_playerBetsMoreThanTheyHave(self):
         '''a player betting more than they have'''
@@ -69,7 +69,7 @@ class testIllegalBetting(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2, p3])
 
-        self.assertTrue(('p1', 'You are out, you bet 1001, you have only 1000 cash avaiable') in msngr.sentMessages)
+        self.assertTrue(('p1', 'OUT you bet 1001, you have only 1000 cash avaiable') in msngr.sentMessages)
 
     def testH_playerBetsMoreThanTheyHaveInTwoParts(self):
         '''player betting more than they have in two parts'''
@@ -81,7 +81,7 @@ class testIllegalBetting(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2])
 
-        self.assertTrue(('p1', 'You are out, you bet 991, you have only 990 cash avaiable') in msngr.sentMessages)
+        self.assertTrue(('p1', 'OUT you bet 991, you have only 990 cash avaiable') in msngr.sentMessages)
 
 
 class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
@@ -102,7 +102,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         dealer = Dealer(msngr)
         dealer.deal([p1, p2])
 
-        self.assertTrue(('p2', 'You are out, you folded') in msngr.sentMessages)
+        self.assertTrue(('p2', 'OUT you folded') in msngr.sentMessages)
 
         self.assertTrue(dealer.playing)
 
@@ -130,7 +130,7 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         Dealer(msngr).deal([p1, p2])
 
         for msg in msngr.sentMessages:
-            self.assertFalse(msg[0] == 'p2' and msg[1].startswith('You are out'))
+            self.assertFalse(msg[0] == 'p2' and msg[1].startswith('OUT))
 
 
 class testDealingTheCards(unittest.TestCase):
