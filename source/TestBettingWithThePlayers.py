@@ -29,7 +29,7 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer.distributeWinnings()
 
-        self.assertEqual(p1.cash, 5)
+        self.assertEqual(p1.chips, 5)
 
     def testB_withoutSidePotsTheTopRankedPlayerWinsAll(self):
         '''without side pots the top ranked player wins all'''
@@ -47,7 +47,7 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer.distributeWinnings()
 
-        self.assertEqual(p1.cash, 10)
+        self.assertEqual(p1.chips, 10)
 
     def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
         '''if a player is only in a side pot, that is all they can win'''
@@ -65,8 +65,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer.distributeWinnings()
 
-        self.assertEqual(p1.cash, 10)
-        self.assertEqual(p2.cash, 5)
+        self.assertEqual(p1.chips, 10)
+        self.assertEqual(p2.chips, 5)
 
     def testD_splittingThePot(self):
         '''players will split the pot if they are ranked the same'''
@@ -87,8 +87,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer.distributeWinnings()
 
-        self.assertEqual(p1.cash, 15)
-        self.assertEqual(p2.cash, 15)
+        self.assertEqual(p1.chips, 15)
+        self.assertEqual(p2.chips, 15)
 
     def testD_shouldCompareValueWhenRankIsTheSame(self):
         '''the value of the hand should be compared when the rank is the same'''
@@ -106,8 +106,8 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         dealer.distributeWinnings()
 
-        self.assertEqual(p1.cash, 20)
-        self.assertEqual(p2.cash, 0)
+        self.assertEqual(p1.chips, 20)
+        self.assertEqual(p2.chips, 0)
 
     def testE_shouldAnnounceTheWinners(self):
         '''should announce the winners of the game'''
@@ -232,8 +232,8 @@ class testTheMinimumBetForPlayer(unittest.TestCase):
         self.assertEqual(5, dealer.getMinimumBet(p1))
 
 
-def createPlayer(name, cash=0):
-    player = PlayerProxy(name, cash)
+def createPlayer(name, chips=0):
+    player = PlayerProxy(name, chips)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
 

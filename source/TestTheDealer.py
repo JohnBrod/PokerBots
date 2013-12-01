@@ -6,8 +6,8 @@ from mock import MagicMock
 from collections import deque
 
 
-def createPlayer(name, cash=1000):
-    player = PlayerProxy(name, cash)
+def createPlayer(name, chips=1000):
+    player = PlayerProxy(name, chips)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player
@@ -69,7 +69,7 @@ class testIllegalBetting(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2, p3])
 
-        p1Out = ('p1', 'OUT you bet 1001, you have only 1000 cash avaiable')
+        p1Out = ('p1', 'OUT you bet 1001, you have only 1000 chips avaiable')
         self.assertTrue(p1Out in msngr.sentMessages)
 
     def testH_playerBetsMoreThanTheyHaveInTwoParts(self):
@@ -82,7 +82,7 @@ class testIllegalBetting(unittest.TestCase):
 
         Dealer(msngr).deal([p1, p2])
 
-        p1Out = ('p1', 'OUT you bet 991, you have only 990 cash avaiable')
+        p1Out = ('p1', 'OUT you bet 991, you have only 990 chips avaiable')
         self.assertTrue(p1Out in msngr.sentMessages)
 
 
@@ -124,8 +124,8 @@ class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
 
-        p1.cash = 10
-        p2.cash = 5
+        p1.chips = 10
+        p2.chips = 5
 
         msngr = StubMessenger().bet(p1, 10).bet(p2, 5)
 

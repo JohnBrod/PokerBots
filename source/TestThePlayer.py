@@ -4,8 +4,8 @@ from collections import deque
 from EventHandling import Event
 
 
-def createPlayer(cash):
-    player = PlayerProxy('name', cash)
+def createPlayer(chips):
+    player = PlayerProxy('name', chips)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
     return player
@@ -14,15 +14,15 @@ def createPlayer(cash):
 class testThePlayersCash(unittest.TestCase):
 
     def setUp(self):
-        print 'The players cash,', self.shortDescription()
+        print 'The players chips,', self.shortDescription()
 
     def testA_shouldBeIncreasedWhenTheyWin(self):
         '''is increased when the player wins'''
-        p = createPlayer(cash=100)
+        p = createPlayer(chips=100)
 
         p.deposit(50)
 
-        self.assertEqual(p.cash, 150)
+        self.assertEqual(p.chips, 150)
 
 
 class StubMessenger(object):

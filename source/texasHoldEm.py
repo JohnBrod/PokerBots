@@ -23,7 +23,7 @@ def outMessage(bet, min, max):
         return 'OUT you bet %d, minimum bet was %d' % (bet, min)
 
     if bet > max:
-        return "OUT you bet %d, you have only %d cash avaiable" % (bet, max)
+        return "OUT you bet %d, you have only %d chips avaiable" % (bet, max)
 
 
 class XmppMessageInterpreter(object):
@@ -97,7 +97,8 @@ class Dealer(object):
             self.bettingDealer.next()
 
     def gameOver(self):
-        return len(filter(lambda x: x.cash > 0, self.players)) == 1
+        playersWithChips = [p for p in self.players if p.chips > 0]
+        return len(playersWithChips) == 1
 
     def handDone(self):
         bettingDone = self.bettingDealer.done()
@@ -190,7 +191,7 @@ class HandlesBettingBetweenThePlayers(object):
 
     def distributeWinnings(self):
 
-        chips = map(lambda x: self.pot.total(x), self.pot.players())
+        chips = [self.pot.total(p) for p in self.pot.players()]
         chipsFor = dict(zip(self.pot.players(), chips))
 
         for rank in self.ranking():
@@ -230,13 +231,13 @@ class HandlesBettingBetweenThePlayers(object):
 
     def legal(self, bet, sender):
         minimum = self.getMinimumBet(sender)
-        maximum = sender.cash + 1
-        allIn = sender.cash - bet == 0
+        maximum = sender.chips + 1
+        allIn = sender.chips - bet == 0
 
         return bet in range(minimum, maximum) or allIn
 
     def kickOut(self, player, bet):
-        msg = outMessage(bet, self.getMinimumBet(player), player.cash)
+        msg = outMessage(bet, self.getMinimumBet(player), player.chips)
         self.messenger.sendMessage(player.name, msg)
         self.table.removeCurrent()
 
@@ -252,7 +253,8 @@ class HandlesBettingBetweenThePlayers(object):
         return self.highestContribution() - playerContribution
 
     def highestContribution(self):
-        return max(map(lambda x: self.pot.total(x), self.pot.players()))
+        playerTotals = [self.pot.total(p) for p in self.pot.players()]
+        return max(playerTotals)
 
     def next(self):
         self.messenger.sendMessage(self.table.dealingTo().name, 'GO')

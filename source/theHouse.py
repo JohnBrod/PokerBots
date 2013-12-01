@@ -5,9 +5,9 @@ from Hands import Hand
 
 class Doorman(object):
     """greets players and passes their details onto the its boss"""
-    def __init__(self, waitFor, messenger, cash):
+    def __init__(self, waitFor, messenger, chips):
         self.players = []
-        self.cash = cash
+        self.chips = chips
         self.waitFor = waitFor
         self.messenger = messenger
         self.messenger.evt_playerJoin += self.on_playerJoin
@@ -19,26 +19,26 @@ class Doorman(object):
     def on_playerJoin(self, sender, player):
 
         self.players.append(player)
-        player.cash = self.cash
-        self.messenger.sendMessage(player.name, 'CHIPS ' + str(self.cash))
+        player.chips = self.chips
+        self.messenger.sendMessage(player.name, 'CHIPS ' + str(self.chips))
 
 
 class PlayerProxy(object):
     """allows the game to interact with the player messages """
     """as if they were from an object"""
-    def __init__(self, name, cash=0):
+    def __init__(self, name, chips=0):
         self._cards = []
-        self.cash = cash
+        self.chips = chips
         self.name = name
         self.evt_response = Event()
 
     def withdraw(self, amount):
-        self.cash -= amount
-        if self.cash < 0:
-            raise Exception('Overdrawn cash')
+        self.chips -= amount
+        if self.chips < 0:
+            raise Exception('Overdrawn chips')
 
     def deposit(self, amount):
-        self.cash += amount
+        self.chips += amount
 
     def cards(self, cards):
         self._cards = self._cards + cards
@@ -97,7 +97,7 @@ class Table(object):
         return self.players[self.dealingToPosition]
 
     def removeCurrent(self):
-        self.players = filter(lambda x: x != self.dealingTo(), self.players)
+        self.players = [p for p in self.players if p != self.dealingTo()]
 
         if self.dealingToPosition >= len(self.players):
             self.dealingToPosition = 0
@@ -107,4 +107,4 @@ class Table(object):
             return self.players[0]
 
     def allIn(self):
-        return all(x.cash == 0 for x in self.players)
+        return all(x.chips == 0 for x in self.players)
