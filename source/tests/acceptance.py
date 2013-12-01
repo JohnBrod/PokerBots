@@ -8,8 +8,7 @@ parpath = os.path.join(os.path.dirname(sys.argv[0]), os.pardir)
 sys.path.insert(0, os.path.abspath(parpath))
 
 from Xmpp import XmppMessenger
-from runningTheApp import FakePlayer
-from runningTheApp import FakeAudience
+from runningTheApp import FakeParticipant
 import subprocess
 import sys
 
@@ -34,9 +33,9 @@ class testPokerGame(unittest.TestCase):
 
     def setUp(self):
         pollDuration = 20
-        self.aPlayer = FakePlayer('Player1@localhost', 'password', pollDuration, self)
-        self.anotherPlayer = FakePlayer('Player2@localhost', 'password', pollDuration, self)
-        self.audience = FakeAudience('audience@localhost', 'password', pollDuration, self)
+        self.aPlayer = FakeParticipant('Player1@localhost', 'password', pollDuration, self)
+        self.anotherPlayer = FakeParticipant('Player2@localhost', 'password', pollDuration, self)
+        self.audience = FakeParticipant('audience@localhost', 'password', pollDuration, self)
         self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py", "5"])
 
     def tearDown(self):
