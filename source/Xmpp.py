@@ -44,7 +44,7 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
             logging.error('failed to connect to ' + domain + port)
 
     def sendMessage(self, jid, message):
-        self.send_message(mto=jid, mbody=message, mtype='chat')
+        self.send_message(mto=jid, mbody=str(message), mtype='chat')
 
     def finish(self):
         self.disconnect(wait=True)
