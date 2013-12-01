@@ -115,7 +115,7 @@ class FakePlayer():
         if not message:
             self.testCase.assertFalse(True, self.jid + " did not hear the result")
         else:
-            self.testCase.assertTrue('won' in message, self.jid + " expected the result but heard '" + message + "'")
+            self.testCase.assertTrue(message.startswith('WON'), self.jid + " expected the result but heard '" + message + "'")
 
         print self.jid + ' ' + message
 
@@ -200,7 +200,7 @@ class FakeAudience():
         if not message:
             self.testCase.assertFalse(True, self.jid + " did not hear the result")
         else:
-            self.testCase.assertTrue('won' in message, self.jid + " expected the result but heard '" + message + "'")
+            self.testCase.assertTrue(message.startswith('WON'), self.jid + " expected the result but heard '" + message + "'")
 
         print self.jid + ' ' + message
 
@@ -217,7 +217,8 @@ class FakeAudience():
         if not message:
             self.testCase.assertFalse(True, self.jid + " did not hear '" + shouldHear + "'")
         else:
-            self.testCase.assertEqual(message, shouldHear, self.jid + " expected '" + shouldHear + "' but heard '" + message + "'")
+            failMessage = self.jid + " expected '" + shouldHear + "' but heard '" + message + "'"
+            self.testCase.assertEqual(message, shouldHear, failMessage)
 
         print self.jid + ' ' + message
 
