@@ -21,7 +21,7 @@ waitForPlayers = int(sys.argv[1])
 
 logging.basicConfig(filename='poker.log', level=logging.DEBUG)
 
-dealerMessenger = XmppMessenger('dealer@localhost/real', 'password')
+dealerMessenger = XmppMessenger('dealer@pokerchat', 'password')
 dealerMessenger.listen('localhost', 5222)
 interpreter = texasHoldEm.XmppMessageInterpreter(dealerMessenger)
 

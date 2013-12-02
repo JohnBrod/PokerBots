@@ -33,9 +33,9 @@ class testPokerGame(unittest.TestCase):
 
     def setUp(self):
         pollDuration = 20
-        self.aPlayer = FakeParticipant('Player1@localhost', 'password', pollDuration, self)
-        self.anotherPlayer = FakeParticipant('Player2@localhost', 'password', pollDuration, self)
-        self.audience = FakeParticipant('audience@localhost', 'password', pollDuration, self)
+        self.aPlayer = FakeParticipant('Player1@pokerchat', 'password', pollDuration, self)
+        self.anotherPlayer = FakeParticipant('Player2@pokerchat', 'password', pollDuration, self)
+        self.audience = FakeParticipant('audience@pokerchat', 'password', pollDuration, self)
         self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py", "5"])
 
     def tearDown(self):
@@ -47,12 +47,12 @@ class testPokerGame(unittest.TestCase):
         subprocess.Popen("taskkill /F /T /PID %i" % self.handle.pid)
 
     def swallowMessages(self):
-        m = XmppMessenger('dealer@localhost/test', 'password')
+        m = XmppMessenger('dealer@pokerchat', 'password')
         m.listen('localhost', 5222)
         time.sleep(2)
         m.finish()
 
-        m = XmppMessenger('audience@localhost/test', 'password')
+        m = XmppMessenger('audience@pokerchat', 'password')
         m.listen('localhost', 5222)
         time.sleep(2)
         m.finish()
