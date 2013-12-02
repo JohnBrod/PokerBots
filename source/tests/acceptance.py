@@ -87,8 +87,8 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('DEALING player1@pokerchat player2@pokerchat')
         self.anotherPlayer.hears('DEALING player1@pokerchat player2@pokerchat')
 
-        self.aPlayer.hearsPrivateCards()
-        self.anotherPlayer.hearsPrivateCards()
+        self.aPlayer.hears('CARD...')
+        self.anotherPlayer.hears('CARD...')
 
         self.aPlayer.hears('GO')
         self.aPlayer.says('1000')
@@ -104,21 +104,21 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('BET player2@pokerchat 1000')
         self.anotherPlayer.hears('BET player2@pokerchat 1000')
 
-        self.audience.hearsCommunityCards()
-        self.aPlayer.hearsCommunityCards()
-        self.anotherPlayer.hearsCommunityCards()
+        self.audience.hears('CARD...')
+        self.aPlayer.hears('CARD...')
+        self.anotherPlayer.hears('CARD...')
 
-        self.audience.hearsTurnCard()
-        self.aPlayer.hearsTurnCard()
-        self.anotherPlayer.hearsTurnCard()
+        self.audience.hears('CARD...')
+        self.aPlayer.hears('CARD...')
+        self.anotherPlayer.hears('CARD...')
 
-        self.audience.hearsTurnCard()
-        self.aPlayer.hearsTurnCard()
-        self.anotherPlayer.hearsTurnCard()
+        self.audience.hears('CARD...')
+        self.aPlayer.hears('CARD...')
+        self.anotherPlayer.hears('CARD...')
 
-        self.audience.hearsTurnCard()
-        self.aPlayer.hearsTurnCard()
-        self.anotherPlayer.hearsTurnCard()
+        self.audience.hears('CARD...')
+        self.aPlayer.hears('CARD...')
+        self.anotherPlayer.hears('CARD...')
 
         self.audience.hearsResult()
         self.aPlayer.hearsResult()

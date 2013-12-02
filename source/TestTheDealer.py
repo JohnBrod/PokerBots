@@ -167,7 +167,7 @@ class testDealingTheCards(unittest.TestCase):
         self.assertEqual(p1.cards.call_count, 2)
         self.assertEqual(p2.cards.call_count, 2)
 
-    def testG_shouldNotDealAnotherHandAfterTheGameIsWon(self):
+    def testC_shouldNotDealAnotherHandAfterTheGameIsWon(self):
         '''should not deal another hand after the game is won'''
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
@@ -179,7 +179,7 @@ class testDealingTheCards(unittest.TestCase):
 
         self.assertFalse('DEALING p2 p1' in msngr.broadcastMessages)
 
-    def testJ_movingButtonToNextPlayerAfterFirstHand(self):
+    def testD_movingButtonToNextPlayerAfterFirstHand(self):
         '''moving the button to the next player after a hand'''
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')

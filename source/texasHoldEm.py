@@ -142,21 +142,21 @@ class DealsCardsToThePlayers(object):
 
     def dealCommunityCards(self):
         communityCards = [self.deck.take(), self.deck.take(), self.deck.take()]
-        message = ','.join([str(card) for card in communityCards])
+        message = 'CARD ' + ' '.join([str(card) for card in communityCards])
         self.messenger.broadcast(message)
         for player in self.players:
             player.cards(communityCards)
 
     def dealTurnCard(self):
         card = self.deck.take()
-        self.messenger.broadcast(str(card))
+        self.messenger.broadcast('CARD ' + str(card))
         for player in self.players:
             player.cards([card])
 
     def dealPrivateCards(self):
         for player in self.players:
             privateCards = [self.deck.take(), self.deck.take()]
-            message = ','.join([str(card) for card in privateCards])
+            message = 'CARD ' + ' '.join([str(card) for card in privateCards])
             self.messenger.sendMessage(player.name, message)
             player.cards(privateCards)
 
@@ -273,28 +273,6 @@ class Deck(object):
 
     def shuffle(self):
         random.shuffle(self.cards)
-
-
-class RiggedDeck(object):
-    def __init__(self):
-        self.cards = deque([Card(14, 'H'), Card(14, 'D'),
-                            Card(2, 'D'), Card(5, 'H'),
-                            Card(14, 'C'), Card(14, 'S'), Card(6, 'H'),
-                            Card(2, 'C'), Card(10, 'S'), Card(12, 'S'),
-                            Card(14, 'H'), Card(14, 'D'),
-                            Card(2, 'D'), Card(5, 'H'),
-                            Card(14, 'C'), Card(14, 'S'), Card(6, 'H'),
-                            Card(2, 'C'), Card(10, 'S'), Card(12, 'S'),
-                            Card(14, 'H'), Card(14, 'D'),
-                            Card(2, 'D'), Card(5, 'H'),
-                            Card(14, 'C'), Card(14, 'S'), Card(6, 'H'),
-                            Card(2, 'C'), Card(10, 'S'), Card(12, 'S')])
-
-    def take(self):
-        return self.cards.popleft()
-
-    def shuffle(self):
-        pass
 
 
 class Card(object):

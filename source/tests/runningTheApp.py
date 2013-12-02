@@ -49,33 +49,14 @@ class FakeParticipant():
 
         print self.jid + ' ' + message
 
-    def hearsPrivateCards(self):
+    def hearsCards(self):
         message = self._getMessage()
 
         if not message:
-            self.testCase.assertFalse(True, self.jid + " did not hear 'Private Cards'")
+            self.testCase.assertFalse(True, self.jid + " did not hear cards")
         else:
-            failMessage = self.jid + " expected 'Private Cards' but heard '" + message + "'"
-            self.testCase.assertTrue(message.count(',') == 1, failMessage)
-
-        print self.jid + ' ' + message
-
-    def hearsCommunityCards(self):
-        message = self._getMessage()
-
-        if not message:
-            self.testCase.assertFalse(True, self.jid + " did not hear 'Community Cards'")
-        else:
-            failMessage = self.jid + " expected 'Community Cards' but heard '" + message + "'"
-            self.testCase.assertTrue(message.count(',') == 2, failMessage)
-
-        print self.jid + ' ' + message
-
-    def hearsTurnCard(self):
-        message = self._getMessage()
-
-        if not message:
-            self.testCase.assertFalse(True, self.jid + " did not hear 'Turn Card'")
+            failMessage = self.jid + " expected cards but heard '" + message + "'"
+            self.testCase.assertTrue(message.startswith('CARD'), failMessage)
 
         print self.jid + ' ' + message
 
