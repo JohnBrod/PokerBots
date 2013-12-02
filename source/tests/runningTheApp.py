@@ -2,7 +2,7 @@ import Queue
 import time
 import os
 import sys
-# these two lines do some freaky stuff so I can import from the parent directory
+# these two lines do some stuff so I can import from the parent directory
 parpath = os.path.join(os.path.dirname(sys.argv[0]), os.pardir)
 sys.path.insert(0, os.path.abspath(parpath))
 
@@ -10,7 +10,8 @@ from Xmpp import XmppMessenger
 
 
 class FakeParticipant():
-    def __init__(self, jid, password, pollPeriod, testCase):
+    def __init__(self, jid, password, pollPeriod, dealerjid, testCase):
+        self.dealerjid = dealerjid
         self.testCase = testCase
         self.jid = jid
         self.q = Queue.Queue()
@@ -20,7 +21,7 @@ class FakeParticipant():
         self.messenger.listen('localhost', 5222)
 
     def says(self, said):
-        self.messenger.sendMessage('dealer@pokerchat', said)
+        self.messenger.sendMessage(self.dealerjid, said)
 
     def _getMessage(self):
         end = time.time() + self.pollPeriod
@@ -38,38 +39,7 @@ class FakeParticipant():
 
         message = self._getMessage()
 
-        if not message:
-            self.testCase.assertFalse(True, self.jid + " did not hear '" + shouldHear + "'")
-        elif shouldHear.endswith('...'):
-            failMessage = self.jid + " expected '" + shouldHear + "' but heard '" + message + "'"
-            self.testCase.assertTrue(message.startswith(shouldHear[:-3]), )
-        else:
-            failMessage = self.jid + " expected '" + shouldHear + "' but heard '" + message + "'"
-            self.testCase.assertEqual(message, shouldHear, failMessage)
-
-        print self.jid + ' ' + message
-
-    def hearsCards(self):
-        message = self._getMessage()
-
-        if not message:
-            self.testCase.assertFalse(True, self.jid + " did not hear cards")
-        else:
-            failMessage = self.jid + " expected cards but heard '" + message + "'"
-            self.testCase.assertTrue(message.startswith('CARD'), failMessage)
-
-        print self.jid + ' ' + message
-
-    def hearsResult(self):
-        message = self._getMessage()
-
-        if not message:
-            self.testCase.assertFalse(True, self.jid + " did not hear the result")
-        else:
-            failMessage = self.jid + " expected the result but heard '" + message + "'"
-            self.testCase.assertTrue(message.startswith('WON'), failMessage)
-
-        print self.jid + ' ' + message
+        self.assertMessage(message, shouldHear)
 
     def eventuallyHears(self, shouldHear):
         end = time.time() + self.pollPeriod
@@ -81,8 +51,14 @@ class FakeParticipant():
             except Queue.Empty:
                 pass
 
+        self.assertMessage(message, shouldHear)
+
+    def assertMessage(self, message, shouldHear):
         if not message:
             self.testCase.assertFalse(True, self.jid + " did not hear '" + shouldHear + "'")
+        elif shouldHear.endswith('...'):
+            failMessage = self.jid + " expected '" + shouldHear + "' but heard '" + message + "'"
+            self.testCase.assertTrue(message.startswith(shouldHear[:-3]), )
         else:
             failMessage = self.jid + " expected '" + shouldHear + "' but heard '" + message + "'"
             self.testCase.assertEqual(message, shouldHear, failMessage)

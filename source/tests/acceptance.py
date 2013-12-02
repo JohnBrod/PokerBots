@@ -33,9 +33,12 @@ class testPokerGame(unittest.TestCase):
 
     def setUp(self):
         pollDuration = 20
-        self.aPlayer = FakeParticipant('Player1@pokerchat', 'password', pollDuration, self)
-        self.anotherPlayer = FakeParticipant('Player2@pokerchat', 'password', pollDuration, self)
-        self.audience = FakeParticipant('audience@pokerchat', 'password', pollDuration, self)
+        self.aPlayer = FakeParticipant('Player1@pokerchat', 'password', pollDuration,
+                                       'dealer@pokerchat', self)
+        self.anotherPlayer = FakeParticipant('Player2@pokerchat', 'password', pollDuration,
+                                             'dealer@pokerchat', self)
+        self.audience = FakeParticipant('audience@pokerchat', 'password', pollDuration,
+                                        'dealer@pokerchat', self)
         self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py",
                                         "-ddealer@pokerchat", "-ppassword",
                                         "-aaudience@pokerchat",
@@ -120,9 +123,9 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('CARD...')
         self.anotherPlayer.hears('CARD...')
 
-        self.audience.hearsResult()
-        self.aPlayer.hearsResult()
-        self.anotherPlayer.hearsResult()
+        self.audience.hears('WON...')
+        self.aPlayer.hears('WON...')
+        self.anotherPlayer.hears('WON...')
 
         self.audience.eventuallyHears('Game Over')
 
