@@ -49,9 +49,6 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
     def finish(self):
         self.disconnect(wait=True)
 
-    def broadcast(self, msg):
-        self.sendMessage('audience@pokerchat', msg)
-
 # if __name__ == '__main__':
 
 #     # logging.DEBUG

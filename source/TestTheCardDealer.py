@@ -2,11 +2,11 @@ import unittest
 from theHouse import PlayerProxy
 from texasHoldEm import Card
 from texasHoldEm import DealsCardsToThePlayers
+from texasHoldEm import XmppMessageInterpreter
 from Hands import Hand
 from mock import MagicMock
 from collections import deque
 from mock import create_autospec
-from Xmpp import XmppMessenger
 
 
 def createPlayer(name):
@@ -29,8 +29,8 @@ class testDealingCardsToPlayers(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        audience = create_autospec(XmppMessenger)
-        DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience).next()
+        interpreter = create_autospec(XmppMessageInterpreter)
+        DealsCardsToThePlayers(PredictableDeck(), [p1, p2], interpreter).next()
 
         p1.cards.assert_called_with([1, 2])
         p2.cards.assert_called_with([3, 4])
@@ -43,45 +43,45 @@ class testDealingCardsToPlayers(unittest.TestCase):
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        audience = create_autospec(XmppMessenger)
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
+        interpreter = create_autospec(XmppMessageInterpreter)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], interpreter)
         dealer.next()
         dealer.next()
 
         p1.cards.assert_called_with([5, 6, 7])
         p2.cards.assert_called_with([5, 6, 7])
-        audience.broadcast.assert_called_with('5,6,7')
+        interpreter.broadcast.assert_called_with('5,6,7')
 
     def testC_shouldDealTheFlopCardPublicly(self):
         '''should deal the flop to each player'''
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
 
-        audience = create_autospec(XmppMessenger)
+        interpreter = create_autospec(XmppMessageInterpreter)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], interpreter)
         dealer.next()
         dealer.next()
         dealer.next()
 
         p1.cards.assert_called_with([8])
         p2.cards.assert_called_with([8])
-        audience.broadcast.assert_called_with('8')
+        interpreter.broadcast.assert_called_with('8')
 
     def testD_shouldDealTheRiverCardPublicly(self):
         '''should deal the river to each player'''
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
 
-        audience = create_autospec(XmppMessenger)
+        interpreter = create_autospec(XmppMessageInterpreter)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], interpreter)
         dealer.next()
         dealer.next()
         dealer.next()
@@ -89,19 +89,19 @@ class testDealingCardsToPlayers(unittest.TestCase):
 
         p1.cards.assert_called_with([9])
         p2.cards.assert_called_with([9])
-        audience.broadcast.assert_called_with('9')
+        interpreter.broadcast.assert_called_with('9')
 
     def testE_shouldDealTheTurnCardPublicly(self):
         '''should deal the turn to each player'''
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
 
-        audience = create_autospec(XmppMessenger)
+        interpreter = create_autospec(XmppMessageInterpreter)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], interpreter)
         dealer.next()
         dealer.next()
         dealer.next()
@@ -110,19 +110,19 @@ class testDealingCardsToPlayers(unittest.TestCase):
 
         p1.cards.assert_called_with([10])
         p2.cards.assert_called_with([10])
-        audience.broadcast.assert_called_with('10')
+        interpreter.broadcast.assert_called_with('10')
 
     def testF_notPossibleToDealNextWhenNotStagesAreLeft(self):
         '''not possible to deal next when there are not stages left'''
         p1 = createPlayer('p1')
         p2 = createPlayer('p2')
 
-        audience = create_autospec(XmppMessenger)
+        interpreter = create_autospec(XmppMessageInterpreter)
 
         p1.cards = MagicMock()
         p2.cards = MagicMock()
 
-        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], audience)
+        dealer = DealsCardsToThePlayers(PredictableDeck(), [p1, p2], interpreter)
         dealer.dealStages = deque([])
 
         self.assertRaises(Exception, dealer.next)
@@ -133,8 +133,8 @@ class testDealingCardsToPlayers(unittest.TestCase):
 
         p1.cards([Card(2, 'H')])
 
-        audience = create_autospec(XmppMessenger)
-        DealsCardsToThePlayers(PredictableDeck(), [p1], audience)
+        interpreter = create_autospec(XmppMessageInterpreter)
+        DealsCardsToThePlayers(PredictableDeck(), [p1], interpreter)
 
         self.assertEqual(p1.hand(), Hand([]))
 

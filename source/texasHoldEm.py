@@ -28,11 +28,12 @@ def outMessage(bet, min, max):
 
 class XmppMessageInterpreter(object):
 
-    def __init__(self, messenger):
+    def __init__(self, messenger, audience):
         self.messenger = messenger
         self.messenger.evt_messageReceived += self.__on_messageReceived
         self.evt_playerResponse = Event()
         self.evt_playerJoin = Event()
+        self.audience = audience
         self.players = []
 
     def __on_messageReceived(self, sender, msg):
@@ -52,7 +53,7 @@ class XmppMessageInterpreter(object):
         self.messenger.sendMessage(jid, msg)
 
     def broadcast(self, msg):
-        self.messenger.sendMessage('audience@pokerchat', msg)
+        self.messenger.sendMessage(self.audience, msg)
         for player in self.players:
             self.messenger.sendMessage(player.name, msg)
 

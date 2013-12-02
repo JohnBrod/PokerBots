@@ -36,7 +36,11 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer = FakeParticipant('Player1@pokerchat', 'password', pollDuration, self)
         self.anotherPlayer = FakeParticipant('Player2@pokerchat', 'password', pollDuration, self)
         self.audience = FakeParticipant('audience@pokerchat', 'password', pollDuration, self)
-        self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py", "5"])
+        self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py",
+                                        "-ddealer@pokerchat", "-ppassword",
+                                        "-aaudience@pokerchat",
+                                        "-c1000",
+                                        "-w5"])
 
     def tearDown(self):
         self.aPlayer.stop()
