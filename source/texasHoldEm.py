@@ -275,6 +275,29 @@ class Deck(object):
         random.shuffle(self.cards)
 
 
+class RiggedDeck(object):
+    def __init__(self):
+        self.cards = deque([Card(11, 'H'), Card(10, 'D'),
+                            Card(4, 'S'), Card(14, 'D'),
+                            Card(8, 'D'), Card(6, 'H'), Card(10, 'H'),
+                            Card(8, 'S'),
+                            Card(9, 'C'),
+                            Card(9, 'D'),
+                            Card(11, 'H'), Card(10, 'D'),
+                            Card(4, 'S'), Card(14, 'D'),
+                            Card(8, 'D'), Card(6, 'H'), Card(10, 'H'),
+                            Card(8, 'S'),
+                            Card(9, 'C'),
+                            Card(9, 'D')
+                            ])
+
+    def take(self):
+        return self.cards.popleft()
+
+    def shuffle(self):
+        pass
+
+
 class Card(object):
     def __init__(self, value, suit):
         self.value = value

@@ -4,6 +4,7 @@ from texasHoldEm import Card
 from Hands import highestCard
 from Hands import pairHand
 from Hands import twoPairHand
+from Hands import twoPair
 from Hands import flush
 from Hands import straight
 from Hands import tripHand
@@ -317,8 +318,14 @@ class TestRecognizingHandRank(unittest.TestCase):
 
     def testL_twoPair(self):
         '''two pair'''
-        hand = cards('1H,1C,2D,2H,5H')
+        hand = cards('2D,2H,1H,1C,5H')
         self.assertEqual(twoPairHand(hand), hand)
+
+    def testM_HighestOfTwoPairs(self):
+        '''should pick the highest two pairs'''
+        hand = cards('10D,10H,8D,8S,9C,9D')
+
+        self.assertEqual(twoPair(hand), cards('10D,10H,9C,9D'))
 
 
 def cards(items):

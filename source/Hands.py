@@ -18,13 +18,13 @@ class Hand(object):
     def __gt__(self, other):
 
         for rank in handRanking:
-            if rank(self) and rank(other):
-                return rank(self) > rank(other)
+            if rank(self.cards) and rank(other.cards):
+                return rank(self.cards) > rank(other.cards)
 
-            if rank(self):
+            if rank(self.cards):
                 return True
 
-            if rank(other):
+            if rank(other.cards):
                 return False
 
         return False
@@ -35,8 +35,8 @@ class Hand(object):
             return True
 
         for rank in handRanking:
-            if rank(self) and rank(other):
-                if rank(self) == rank(other):
+            if rank(self.cards) and rank(other.cards):
+                if rank(self.cards) == rank(other.cards):
                     return True
 
         return False
@@ -52,8 +52,8 @@ class Hand(object):
 
     def rank(self):
         for r in handRanking:
-            if r(self):
-                return ','.join([str(card) for card in r(self)])
+            if r(self.cards):
+                return ','.join([str(card) for card in r(self.cards)])
 
 
 def highestCard(hand):
@@ -80,11 +80,11 @@ def pairHand(hand):
 
 def twoPair(hand):
 
-    values = map(lambda card: card.value, hand)
-    pairs = [card for card in hand if values.count(card.value) == 2]
+    pairs = [card for card in hand if hand.count(card) == 2]
+    pairs = sorted(pairs, reverse=True)
 
-    if len(pairs) == 4:
-        return pairs
+    if len(pairs) >= 4:
+        return pairs[0:4]
 
 
 def twoPairHand(hand):
