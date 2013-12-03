@@ -9,9 +9,6 @@ class Hand(object):
     def __iter__(self):
         return self.cards.__iter__()
 
-    def next(self):
-        return self.cards.next()
-
     def __lt__(self, other):
         return not self.__ge__(other)
 
