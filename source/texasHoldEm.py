@@ -258,7 +258,7 @@ class TakesBets(object):
 
     def _add(self, player, amount):
 
-        if amount == 0:
+        if amount < self.getMinimumBet(player):
             player.dropCards()
             self.messenger.sendMessage(player.name, 'OUT you folded')
         elif not self._legal(amount, player):

@@ -149,8 +149,8 @@ class testPlayerFolding(unittest.TestCase):
     def setUp(self):
         print 'A player folding,', self.shortDescription()
 
-    def testA_playerFoldsByBettingZero(self):
-        '''a player folds by betting 0'''
+    def testA_playerFoldsByBettingLessThanMinimum(self):
+        '''a player folds by betting less than minimum'''
 
         p1 = createPlayer('p1', 2, ['any cards'])
         p2 = createPlayer('p2', 2, ['any cards'])
@@ -181,22 +181,7 @@ class testKickingOutPlayer(unittest.TestCase):
     def setUp(self):
         print 'Kick out a player,', self.shortDescription()
 
-    def testA_playerBetsLessThanMinimum(self):
-        '''when a player bets less than minimum'''
-        p1 = createPlayer('p1', 2, ['any cards'])
-        p2 = createPlayer('p2', 2, ['any cards'])
-
-        msngr = StubMessenger().bet(p1, 2).bet(p2, 1)
-        tb = TakesBets(msngr)
-
-        tb.fromPlayers([p1, p2])
-
-        outMessage = 'OUT you bet 1, minimum bet was 2'
-        self.assertTrue(('p2', outMessage) in msngr.sentMessages)
-        self.assertEqual(p2.chips, 0)
-        self.assertEqual(p2._cards, [])
-
-    def testB_playerBetsMoreThanTheyHave(self):
+    def testA_playerBetsMoreThanTheyHave(self):
         '''when a player bets more than they have'''
         p1 = createPlayer('p1', 1, ['any cards'])
         p2 = createPlayer('p2', 1, ['any cards'])
