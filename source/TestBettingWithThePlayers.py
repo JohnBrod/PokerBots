@@ -1,248 +1,224 @@
 from theHouse import PlayerProxy
-from texasHoldEm import Card
 import unittest
-from texasHoldEm import HandlesBettingBetweenThePlayers
-from theHouse import Pot
+from texasHoldEm import TakesBets
 from FakeMessaging import StubMessenger
 
 
-def shouldMatch(test, a, b):
-    a = map(lambda x: (x[0].name, x[1]), a)
-    b = map(lambda x: (x[0].name, x[1]), b)
-
-    test.assertEqual(a, b)
-
-
-class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
+class testA_TellingThePlayersToBet(unittest.TestCase):
 
     def setUp(self):
-        print 'Splitting up the pot between the winners,', self.shortDescription()
+        print 'Telling the players to bet,', self.shortDescription()
 
-    def testA_playerWinsBackTheirChips(self):
-        '''a player wins back their chips if no one else is in'''
+    def testA_tellTheFirstPlayerToTakeTheirGo(self):
+        '''tell the first player to take their go'''
+        p1 = createPlayer('p1', 100, ['any cards'])
 
-        p1 = createPlayer('p1', 5)
-        dealer = HandlesBettingBetweenThePlayers([p1], StubMessenger())
+        msngr = StubMessenger()
+        tb = TakesBets(msngr)
 
-        dealer.add(p1, 5)
+        tb.fromPlayers([p1])
 
-        dealer.distributeWinnings()
+        self.assertEqual(('p1', 'GO'), msngr.lastMessage)
 
-        self.assertEqual(p1.chips, 5)
+    def testB_tellTheSecondPlayerToTakeTheirGo(self):
+        '''tell the second player to take their go'''
+        p1 = createPlayer('p1', 100, ['any cards'])
+        p2 = createPlayer('p2', 100, ['any cards'])
 
-    def testB_withoutSidePotsTheTopRankedPlayerWinsAll(self):
-        '''without side pots the top ranked player wins all'''
+        msngr = StubMessenger().bet(p1, 10)
+        tb = TakesBets(msngr)
 
-        p1 = createPlayer('p1', 5)
-        p2 = createPlayer('p2', 5)
+        tb.fromPlayers([p1, p2])
 
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
+        self.assertEqual(('p2', 'GO'), msngr.lastMessage)
 
-        p1.cards(cards('14C,14D,2C,3H,4S'))
-        p2.cards(cards('2C,3D,5C,9D,13S'))
+    def testC_backToFirstPlayerAfterTheLast(self):
+        '''moves back to the first player after the last'''
+        p1 = createPlayer('p1', 100, ['any cards'])
+        p2 = createPlayer('p2', 100, ['any cards'])
 
-        dealer.add(p1, 5)
-        dealer.add(p2, 5)
+        msngr = StubMessenger().bet(p1, 10).bet(p2, 20)
+        tb = TakesBets(msngr)
 
-        dealer.distributeWinnings()
+        tb.fromPlayers([p1, p2])
 
-        self.assertEqual(p1.chips, 10)
+        self.assertEqual(('p1', 'GO'), msngr.lastMessage)
 
-    def testC_theTopRankedPlayerCannotWinMoreThanAllowed(self):
-        '''if a player is only in a side pot, that is all they can win'''
+    def testD_skipsPlayerThatHasNoCards(self):
+        '''skips player that does not have cards'''
+        p1 = createPlayer('p1', 100, [])
+        p2 = createPlayer('p2', 100, ['any cards'])
 
-        p1 = createPlayer('p1', 5)
-        p2 = createPlayer('p2', 10)
+        msngr = StubMessenger()
+        tb = TakesBets(msngr)
 
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
+        tb.fromPlayers([p1, p2])
 
-        p1.cards(cards('14C,14D,2C,3H,4S'))
-        p2.cards(cards('2C,3D,5C,9D,13S'))
+        self.assertEqual(('p2', 'GO'), msngr.lastMessage)
 
-        dealer.add(p1, 5)
-        dealer.add(p2, 10)
 
-        dealer.distributeWinnings()
+class testDecidingWhenAllBetsAreTaken(unittest.TestCase):
 
-        self.assertEqual(p1.chips, 10)
-        self.assertEqual(p2.chips, 5)
+    def onBetsTaken(self, sender, args=None):
+        self.betsTaken = True
 
-    def testD_splittingThePot(self):
-        '''players will split the pot if they are ranked the same'''
+    def setUp(self):
+        print 'deciding when all bets are taken,', self.shortDescription()
+        self.betsTaken = False
 
-        p1 = createPlayer('p1', 10)
-        p2 = createPlayer('p2', 10)
-        p3 = createPlayer('p3', 10)
+    def testA_takenIfBetIsCalledByAll(self):
+        '''not if a player has raised'''
+        p1 = createPlayer('p1', 20, ['any cards'])
+        p2 = createPlayer('p2', 20, ['any cards'])
 
-        dealer = HandlesBettingBetweenThePlayers([p1, p2, p3], StubMessenger())
+        msngr = StubMessenger().bet(p1, 10).bet(p2, 10)
+        tb = TakesBets(msngr)
+        tb.evt_betsTaken += self.onBetsTaken
 
-        p1.cards(cards('14C,14D,2C,3H,4S'))
-        p2.cards(cards('14C,14D,2C,3H,4S'))
-        p3.cards(cards('2C,3D,5C,9D,13S'))
+        tb.fromPlayers([p1, p2])
 
-        dealer.add(p1, 10)
-        dealer.add(p2, 10)
-        dealer.add(p3, 10)
+        self.assertTrue(self.betsTaken)
 
-        dealer.distributeWinnings()
+    def testB_notIfPlayerHasRaised(self):
+        '''not if a player has raised'''
+        p1 = createPlayer('p1', 20, ['any cards'])
+        p2 = createPlayer('p2', 20, ['any cards'])
 
-        self.assertEqual(p1.chips, 15)
-        self.assertEqual(p2.chips, 15)
+        msngr = StubMessenger().bet(p1, 10).bet(p2, 20)
+        tb = TakesBets(msngr)
+        tb.evt_betsTaken += self.onBetsTaken
 
-    def testD_shouldCompareValueWhenRankIsTheSame(self):
-        '''the value of the hand should be compared when the rank is the same'''
+        tb.fromPlayers([p1, p2])
 
-        p1 = createPlayer('p1', 10)
-        p2 = createPlayer('p2', 10)
+        self.assertFalse(self.betsTaken)
 
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
+    def testC_doneIfRaiseIsCalled(self):
+        '''done if raise is called by all others'''
+        p1 = createPlayer('p1', 20, ['any cards'])
+        p2 = createPlayer('p2', 20, ['any cards'])
 
-        p1.cards(cards('14C,14D,2C,3H,4S'))
-        p2.cards(cards('13C,13D,2C,3H,4S'))
+        msngr = StubMessenger().bet(p1, 10).bet(p2, 20).bet(p1, 10)
+        tb = TakesBets(msngr)
+        tb.evt_betsTaken += self.onBetsTaken
 
-        dealer.add(p1, 10)
-        dealer.add(p2, 10)
+        tb.fromPlayers([p1, p2])
 
-        dealer.distributeWinnings()
+        self.assertTrue(self.betsTaken)
 
-        self.assertEqual(p1.chips, 20)
+    def testD_doneWhenOnlyOnePlayerLeftWithCards(self):
+        '''done when only one player left with cards'''
+        p1 = createPlayer('p1', 20, ['any cards'])
+        p2 = createPlayer('p2', 20, [])
+
+        msngr = StubMessenger().bet(p1, 10)
+        tb = TakesBets(msngr)
+        tb.evt_betsTaken += self.onBetsTaken
+
+        tb.fromPlayers([p1, p2])
+
+        self.assertTrue(self.betsTaken)
+
+    def testE_doneWhenNoPlayerHasChipsLeft(self):
+        '''done when only one player has chips left'''
+        p1 = createPlayer('p1', 10, ['any cards'])
+        p2 = createPlayer('p2', 20, ['any cards'])
+
+        msngr = StubMessenger().bet(p1, 10).bet(p2, 20)
+        tb = TakesBets(msngr)
+        tb.evt_betsTaken += self.onBetsTaken
+
+        tb.fromPlayers([p1, p2])
+
+        self.assertTrue(self.betsTaken)
+
+    def testF_doneImmediatelyIfNoneOfThePlayersHadChips(self):
+        '''done immediately of none of the players had chips'''
+        p1 = createPlayer('p1', 0, ['any cards'])
+        p2 = createPlayer('p2', 0, ['any cards'])
+
+        tb = TakesBets(StubMessenger())
+        tb.evt_betsTaken += self.onBetsTaken
+
+        tb.fromPlayers([p1, p2])
+
+        self.assertTrue(self.betsTaken)
+
+
+class testPlayerFolding(unittest.TestCase):
+
+    def setUp(self):
+        print 'A player folding,', self.shortDescription()
+
+    def testA_playerFoldsByBettingZero(self):
+        '''a player folds by betting 0'''
+
+        p1 = createPlayer('p1', 2, ['any cards'])
+        p2 = createPlayer('p2', 2, ['any cards'])
+
+        msngr = StubMessenger().bet(p1, 2).bet(p2, 0)
+        tb = TakesBets(msngr)
+
+        tb.fromPlayers([p1, p2])
+
+        self.assertTrue(('p2', 'OUT you folded') in msngr.sentMessages)
+
+    def testB_takePlayersCards(self):
+        '''take the players cards'''
+
+        p1 = createPlayer('p1', 2, ['any cards'])
+        p2 = createPlayer('p2', 2, ['any cards'])
+
+        msngr = StubMessenger().bet(p1, 2).bet(p2, 0)
+        tb = TakesBets(msngr)
+
+        tb.fromPlayers([p1, p2])
+
+        self.assertEqual(p2._cards, [])
+
+
+class testKickingOutPlayer(unittest.TestCase):
+
+    def setUp(self):
+        print 'Kick out a player,', self.shortDescription()
+
+    def testA_playerBetsLessThanMinimum(self):
+        '''when a player bets less than minimum'''
+        p1 = createPlayer('p1', 2, ['any cards'])
+        p2 = createPlayer('p2', 2, ['any cards'])
+
+        msngr = StubMessenger().bet(p1, 2).bet(p2, 1)
+        tb = TakesBets(msngr)
+
+        tb.fromPlayers([p1, p2])
+
+        outMessage = 'OUT you bet 1, minimum bet was 2'
+        self.assertTrue(('p2', outMessage) in msngr.sentMessages)
         self.assertEqual(p2.chips, 0)
+        self.assertEqual(p2._cards, [])
 
-    def testE_shouldAnnounceTheWinners(self):
-        '''should announce the winners of the game'''
+    def testB_playerBetsMoreThanTheyHave(self):
+        '''when a player bets more than they have'''
+        p1 = createPlayer('p1', 1, ['any cards'])
+        p2 = createPlayer('p2', 1, ['any cards'])
 
-        p1 = createPlayer('p1', 10)
-        p2 = createPlayer('p2', 10)
+        msngr = StubMessenger().bet(p1, 2)
+        tb = TakesBets(msngr)
 
-        messenger = StubMessenger()
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], messenger)
+        tb.fromPlayers([p1, p2])
 
-        p1.cards(cards('14C,14D,2C,3H,4S'))
-        p2.cards(cards('6S,4H,3C,2D,2C'))
-
-        dealer.add(p1, 10)
-        dealer.add(p2, 10)
-
-        dealer.distributeWinnings()
-
-        self.assertTrue('WON p1 p1 10 14C,14D,4S,3H,2C' in messenger.broadcastMessages)
-        self.assertTrue('WON p1 p2 10 14C,14D,4S,3H,2C' in messenger.broadcastMessages)
-        self.assertTrue('WON p2 p2 0 2D,2C,6S,4H,3C' in messenger.broadcastMessages)
-        self.assertTrue('WON p2 p1 0 2D,2C,6S,4H,3C' in messenger.broadcastMessages)
-
-    def testF_shouldOnlyDistributeToPlayersInTheGame(self):
-        '''should only distribute the winnings to players that are in the game'''
-
-        p1 = createPlayer('p1', 10)
-        p2 = createPlayer('p2', 5)
-
-        messenger = StubMessenger()
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], messenger)
-
-        p1.cards(cards('14C,14D,2C,3H,4S'))
-        p2.cards(cards('14C,14D,2C,3H,4S'))
-
-        dealer.add(p1, 5)
-        dealer.add(p2, 0)
-
-        dealer.distributeWinnings()
-
-        p2WonMsg = [msg for msg in messenger.broadcastMessages if msg.startswith('p2 won')]
-        self.assertFalse(len(p2WonMsg) > 0)
+        outMessage = 'OUT you bet 2, you have only 1 chips avaiable'
+        self.assertTrue(('p1', outMessage) in msngr.sentMessages)
+        self.assertEqual(p1.chips, 0)
+        self.assertEqual(p1._cards, [])
 
 
-class testTheTotalOfThePot(unittest.TestCase):
-
-    def setUp(self):
-        print 'The total of the pot,', self.shortDescription()
-
-    def testA_ZeroWhenThereIsNothingInThePot(self):
-        '''zero when there is nothing in the pot'''
-
-        p = Pot()
-
-        self.assertEqual(0, p.total())
-
-    def testB_IncrementsWhenChipsAreAdded(self):
-        '''increments when chips are added'''
-
-        p = Pot()
-        p1 = createPlayer('p1')
-
-        p.add(p1, 5)
-
-        self.assertEqual(5, p.total())
-
-    def testC_IncrementsWhenMoreChipsAreAdded(self):
-        '''increments when more chips are added'''
-
-        p = Pot()
-        p1 = createPlayer('p1')
-
-        p.add(p1, 5)
-        p.add(p1, 10)
-
-        self.assertEqual(15, p.total())
-
-
-class testTheMinimumBetForPlayer(unittest.TestCase):
-
-    def setUp(self):
-        print 'The minimum bet for a player,', self.shortDescription()
-
-    def testA_ZeroWhenThereIsNothingInThePot(self):
-        '''zero when there is nothing in the pot'''
-
-        p1 = createPlayer('p1')
-        dealer = HandlesBettingBetweenThePlayers([p1], StubMessenger())
-
-        self.assertEqual(0, dealer.getMinimumBet(p1))
-
-    def testB_SecondPlayerMustBetAtLeastTheFirstBet(self):
-        '''second player should pay at least the first bet'''
-        p1 = createPlayer('p1', 5)
-        p2 = createPlayer('p2')
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
-
-        dealer.add(p1, 5)
-
-        self.assertEqual(5, dealer.getMinimumBet(p2))
-
-    def testC_ZeroBecauseAllAreEven(self):
-        '''zero when all players are even'''
-        p1 = createPlayer('p1', 5)
-        p2 = createPlayer('p2', 5)
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
-
-        dealer.add(p1, 5)
-        dealer.add(p2, 5)
-
-        self.assertEqual(0, dealer.getMinimumBet(p1))
-        self.assertEqual(0, dealer.getMinimumBet(p2))
-
-    def testD_ShouldPayTheDifferenceWhenRaised(self):
-        '''player should pay the difference when raised'''
-
-        p1 = createPlayer('p1', 5)
-        p2 = createPlayer('p2', 10)
-        dealer = HandlesBettingBetweenThePlayers([p1, p2], StubMessenger())
-
-        dealer.add(p1, 5)
-        dealer.add(p2, 10)
-
-        self.assertEqual(5, dealer.getMinimumBet(p1))
-
-
-def createPlayer(name, chips=0):
+def createPlayer(name, chips=0, cards=[]):
     player = PlayerProxy(name, chips)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
+    player.cards(cards)
 
     return player
-
-
-def cards(items):
-    return map(lambda x: Card(int(x[0:-1]), x[-1]), items.split(','))
 
 
 if __name__ == "__main__":

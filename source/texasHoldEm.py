@@ -1,4 +1,3 @@
-
 from collections import deque
 from theHouse import Pot
 from theHouse import Table
@@ -16,9 +15,6 @@ def getName(x):
 
 
 def outMessage(bet, min, max):
-    if bet == 0:
-        return 'OUT you folded'
-
     if bet < min:
         return 'OUT you bet %d, minimum bet was %d' % (bet, min)
 
@@ -58,62 +54,56 @@ class XmppMessageInterpreter(object):
             self.messenger.sendMessage(player.name, msg)
 
 
-class Dealer(object):
-    """deals a hand to players"""
+class HostsGame(object):
     def __init__(self, messenger):
         self.messenger = messenger
         self.playing = True
 
-    def deal(self, players):
+    def start(self, players):
+        self.takesBets = TakesBets(self.messenger)
         self.players = players
-        self.messenger.evt_playerResponse += self.__on_PlayerResponse
-        self.startHand()
+        self.dealHand()
 
-    def startHand(self):
-        self.messenger.broadcast('DEALING ' + ' '.join([p.name for p in self.players]))
-        self.cardDealer = DealsCardsToThePlayers(Deck(), self.players, self.messenger)
-        self.bettingDealer = HandlesBettingBetweenThePlayers(self.players, self.messenger)
-        self.cardDealer.next()
-        self.bettingDealer.next()
+    def dealHand(self):
+        names = ' '.join([p.name for p in self.players])
+        self.messenger.broadcast('DEALING ' + names)
 
-    def __on_PlayerResponse(self, sender, response):
+        self.dealsCards = DealsCards(Deck(), self.players, self.messenger)
 
-        self.bettingDealer.add(player=response[0], amount=response[1])
+        self.dealsCards.evt_cardsDealt += self._setupFinish
+        self.takesBets.evt_betsTaken += self._nextRound
 
-        if self.bettingDealer.allIn():
-            self.cardDealer.dealRemainingCards()
+        self._nextRound(self)
 
-        if self.handDone():
-            self.bettingDealer.distributeWinnings()
+    def _setupFinish(self, sender, args=None):
+        self.dealsCards.evt_cardsDealt -= self._setupFinish
+        self.takesBets.evt_betsTaken -= self._nextRound
+        self.takesBets.evt_betsTaken += self._finishHand
 
-            if not self.gameOver():
-                self.rotateButton()
-                self.startHand()
-            else:
-                self.playing = False
-        else:
-            if self.bettingDealer.done():
-                self.cardDealer.next()
+    def _finishHand(self, sender, args=None):
+        self.takesBets.evt_betsTaken -= self._finishHand
+        self.takesBets.distributeWinnings()
 
-            self.bettingDealer.next()
+        if self._gameOver():
+            self.playing = False
+            return
 
-    def gameOver(self):
+        self._rotateButton()
+        self.dealHand()
+
+    def _nextRound(self, sender, args=None):
+        self.dealsCards.go()
+        self.takesBets.fromPlayers(self.players)
+
+    def _gameOver(self):
         playersWithChips = [p for p in self.players if p.chips > 0]
         return len(playersWithChips) == 1
 
-    def handDone(self):
-        bettingDone = self.bettingDealer.done()
-        dealingDone = self.cardDealer.done()
-        lastPlayer = self.bettingDealer.lastPlayer() is not None
-
-        return (bettingDone and dealingDone) or lastPlayer
-
-    def rotateButton(self):
+    def _rotateButton(self):
         self.players = self.players[1:] + self.players[:1]
 
 
-class DealsCardsToThePlayers(object):
-    """deals a hand to players"""
+class DealsCards(object):
     def __init__(self, deck, players, messenger):
         self.messenger = messenger
         self.deck = deck
@@ -121,84 +111,80 @@ class DealsCardsToThePlayers(object):
         for player in players:
             player.dropCards()
         self.dealStages = deque([
-            self.dealPrivateCards,
-            self.dealCommunityCards,
-            self.dealTurnCard,
-            self.dealTurnCard,
-            self.dealTurnCard])
+            self._dealPrivateCards,
+            self._dealThreeCards,
+            self._dealOneCard,
+            self._dealOneCard])
+        self.evt_cardsDealt = Event()
 
         self.deck.shuffle()
 
-    def next(self):
+    def go(self):
 
         if not self.dealStages:
             raise Exception("No more stages left to deal")
 
-        stage = self.dealStages.popleft()
-        stage()
+        if len([player for player in self.players if player.chips > 0]) <= 1:
+            self._dealRemainingCards()
+        else:
+            self.dealStages.popleft()()
 
-    def done(self):
+        if self._done():
+            self.evt_cardsDealt.fire(self)
+
+    def _done(self):
         return not self.dealStages
 
-    def dealCommunityCards(self):
-        communityCards = [self.deck.take(), self.deck.take(), self.deck.take()]
-        message = 'CARD ' + ' '.join([str(card) for card in communityCards])
+    def _dealThreeCards(self):
+        cards = [self.deck.take(), self.deck.take(), self.deck.take()]
+        message = 'CARD ' + ' '.join([str(card) for card in cards])
         self.messenger.broadcast(message)
         for player in self.players:
-            player.cards(communityCards)
+            player.cards(cards)
 
-    def dealTurnCard(self):
+    def _dealOneCard(self):
         card = self.deck.take()
         self.messenger.broadcast('CARD ' + str(card))
         for player in self.players:
             player.cards([card])
 
-    def dealPrivateCards(self):
+    def _dealPrivateCards(self):
         for player in self.players:
             privateCards = [self.deck.take(), self.deck.take()]
             message = 'CARD ' + ' '.join([str(card) for card in privateCards])
             self.messenger.sendMessage(player.name, message)
             player.cards(privateCards)
 
-    def dealRemainingCards(self):
+    def _dealRemainingCards(self):
         while len(self.dealStages) > 0:
             self.dealStages.popleft()()
 
 
-class HandlesBettingBetweenThePlayers(object):
+class TakesBets(object):
 
-    def __init__(self, players, messenger):
+    def __init__(self, messenger):
         self.messenger = messenger
-        self.table = Table(players)
         self.pot = Pot()
-        self.transactions = []
+        self.evt_betsTaken = Event()
+
+    def fromPlayers(self, players):
+        self.messenger.evt_playerResponse += self._on_PlayerResponse
+        self.table = Table(players)
         self.lastToRaise = self.table.dealingTo()
 
-    def lastPlayer(self):
-        return self.table.lastPlayer()
-
-    def allIn(self):
-        return self.table.allIn()
-
-    def done(self):
-        return self.lastToRaise == self.table.dealingTo()
-
-    def ranking(self):
-
-        ranks = sorted(self.table.players, key=lambda x: x.hand(), reverse=True)
-        ranks = reduce(ranks, lambda x: x.hand())
-
-        return ranks
+        if self._noPlayerHasChips():
+            self._finish()
+        else:
+            self._go()
 
     def distributeWinnings(self):
 
         chips = [self.pot.total(p) for p in self.pot.players()]
         chipsFor = dict(zip(self.pot.players(), chips))
 
-        for rank in self.ranking():
+        for rank in self._ranking():
 
             for player in rank:
-
                 for opponent in self.pot.players():
                     winnerChips = chipsFor[player] / len(rank)
                     opponentChips = chipsFor[opponent] / len(rank)
@@ -213,52 +199,95 @@ class HandlesBettingBetweenThePlayers(object):
 
                     player.deposit(winnings)
 
-    def add(self, player, amount):
-
-        if not self.legal(amount, player):
-            self.kickOut(player, amount)
-            amount = 0
-        else:
-            self.table.nextPlayer()
-
-        self.messenger.broadcast('BET ' + player.name + ' ' + str(amount))
-        if amount > self.getMinimumBet(player):
-            self.lastToRaise = player
-
-        self.transactions.append((player, amount))
-
-        player.withdraw(amount)
-        self.pot.add(player, amount)
-
-    def legal(self, bet, sender):
-        minimum = self.getMinimumBet(sender)
-        maximum = sender.chips + 1
-        allIn = sender.chips - bet == 0
-
-        return bet in range(minimum, maximum) or allIn
-
-    def kickOut(self, player, bet):
-        msg = outMessage(bet, self.getMinimumBet(player), player.chips)
-        self.messenger.sendMessage(player.name, msg)
-        self.table.removeCurrent()
-
     def getMinimumBet(self, player):
         playerContribution = self.pot.total(player)
 
         if not self.pot.players():
             return 0
 
-        if playerContribution == self.highestContribution():
+        if playerContribution == self._highestContribution():
             return 0
 
-        return self.highestContribution() - playerContribution
+        return self._highestContribution() - playerContribution
 
-    def highestContribution(self):
+    def _noPlayerHasChips(self):
+        playersWithChips = len([p for p in self.table.players if p.chips > 0])
+        return playersWithChips == 0
+
+    def _on_PlayerResponse(self, sender, response):
+
+        self._add(player=response[0], amount=response[1])
+
+        if self._done():
+            self._finish()
+        else:
+            self._go()
+
+    def _finish(self):
+        self.messenger.evt_playerResponse -= self._on_PlayerResponse
+        self.evt_betsTaken.fire(self)
+
+    def _done(self):
+
+        playersWithCards = len([p for p in self.table.players if p._cards])
+        if playersWithCards == 1:
+            return True
+
+        playersWithChips = len([p for p in self.table.players if p.chips > 0])
+        if playersWithChips == 0:
+            return True
+
+        return self.lastToRaise == self.table.dealingTo()
+
+    def _go(self):
+
+        if len(self.table.dealingTo()._cards) > 0:
+            dealTo = self.table.dealingTo()
+            self.table.nextPlayer()
+            self.messenger.sendMessage(dealTo.name, 'GO')
+        else:
+            self.table.nextPlayer()
+            self._go()
+
+    def _ranking(self):
+
+        ranks = sorted(self.table.players, key=lambda x: x.hand(), reverse=True)
+        ranks = reduce(ranks, lambda x: x.hand())
+
+        return ranks
+
+    def _add(self, player, amount):
+
+        if amount == 0:
+            player.dropCards()
+            self.messenger.sendMessage(player.name, 'OUT you folded')
+        elif not self._legal(amount, player):
+            self._kickOut(player, amount)
+            amount = 0
+
+        self.messenger.broadcast('BET ' + player.name + ' ' + str(amount))
+        if amount > self.getMinimumBet(player):
+            self.lastToRaise = player
+
+        player.withdraw(amount)
+        self.pot.add(player, amount)
+
+    def _legal(self, bet, sender):
+        minimum = self.getMinimumBet(sender)
+        maximum = sender.chips + 1
+        allIn = sender.chips - bet == 0
+
+        return bet in range(minimum, maximum) or allIn
+
+    def _kickOut(self, player, bet):
+        msg = outMessage(bet, self.getMinimumBet(player), player.chips)
+        self.messenger.sendMessage(player.name, msg)
+        player.chips = 0
+        player.dropCards()
+
+    def _highestContribution(self):
         playerTotals = [self.pot.total(p) for p in self.pot.players()]
         return max(playerTotals)
-
-    def next(self):
-        self.messenger.sendMessage(self.table.dealingTo().name, 'GO')
 
 
 class Deck(object):

@@ -1,198 +1,197 @@
 import unittest
 from theHouse import PlayerProxy
-from texasHoldEm import Dealer
-from mock import MagicMock
+from texasHoldEm import HostsGame
 from FakeMessaging import StubMessenger
+from mock import MagicMock
 
 
-def createPlayer(name, chips=1000):
+def createPlayer(name, chips, cards=[]):
     player = PlayerProxy(name, chips)
     player.parse = lambda x: x
     player.fromMe = lambda x: True
+    player.cards(cards)
     return player
 
 
-class testTellingThePlayersToTakeTheirGo(unittest.TestCase):
+class testA_StartingTheTournament(unittest.TestCase):
 
     def setUp(self):
-        print 'Telling the players to take their go,', self.shortDescription()
+        print 'Starting the tournament,', self.shortDescription()
 
-    def testA_tellTheFirstPlayerToTakeTheirGo(self):
-        '''tell the first player to take their go'''
-        p1 = createPlayer('p1')
+    def testA_gameIsBeingPlayer(self):
+        '''a game is being played'''
+
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
 
         msngr = StubMessenger()
-        Dealer(msngr).deal([p1])
 
-        self.assertEqual(msngr.lastMessage, ('p1', 'GO'))
-
-
-class testIllegalBetting(unittest.TestCase):
-
-    def setUp(self):
-        print 'Illegal betting,', self.shortDescription()
-
-    def testD_playerBetsLessThanMinimum(self):
-        '''a player betting less than minimum'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
-
-        msngr = StubMessenger().bet(p1, 2).bet(p2, 1)
-
-        dealer = Dealer(msngr)
-        dealer.deal([p1, p2])
-
-        self.assertTrue(('p2', 'OUT you bet 1, minimum bet was 2') in msngr.sentMessages)
-        self.assertTrue(dealer.playing)
-
-    def testE_firstPlayerBetsLessThanMinimum(self):
-        '''the first player gets kicked out for betting less than minimum'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
-        p3 = createPlayer('p3')
-
-        msngr = StubMessenger().bet(p1, 1).bet(p2, 6).bet(p3, 6).bet(p1, 4)
-
-        Dealer(msngr).deal([p1, p2, p3])
-
-        self.assertTrue(('p1', 'OUT you bet 4, minimum bet was 5') in msngr.sentMessages)
-
-    def testG_playerBetsMoreThanTheyHave(self):
-        '''a player betting more than they have'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
-        p3 = createPlayer('p3')
-        p2.yourGo = MagicMock()
-
-        msngr = StubMessenger().bet(p1, 1001)
-
-        Dealer(msngr).deal([p1, p2, p3])
-
-        p1Out = ('p1', 'OUT you bet 1001, you have only 1000 chips avaiable')
-        self.assertTrue(p1Out in msngr.sentMessages)
-
-    def testH_playerBetsMoreThanTheyHaveInTwoParts(self):
-        '''player betting more than they have in two parts'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
-        p2.handResult = MagicMock()
-
-        msngr = StubMessenger().bet(p1, 10).bet(p2, 10).bet(p1, 991)
-
-        Dealer(msngr).deal([p1, p2])
-
-        p1Out = ('p1', 'OUT you bet 991, you have only 990 chips avaiable')
-        self.assertTrue(p1Out in msngr.sentMessages)
-
-
-class testBettingBetweenTheDealerAndPlayers(unittest.TestCase):
-
-    def setUp(self):
-        print 'Betting between dealers and players,', self.shortDescription()
-
-    def testC_playerFoldsByBettingZero(self):
-        '''a player folds by betting 0'''
-
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
-
-        p1.handResult = MagicMock()
-
-        msngr = StubMessenger().bet(p1, 1).bet(p2, 0)
-
-        dealer = Dealer(msngr)
-        dealer.deal([p1, p2])
-
-        self.assertTrue(('p2', 'OUT you folded') in msngr.sentMessages)
+        dealer = HostsGame(msngr)
+        dealer.start([p1, p2])
 
         self.assertTrue(dealer.playing)
 
-    def testF_playerBetsTheMax(self):
-        '''a player betting the max'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
+    def testB_thePlayersAreAnnounced(self):
+        '''the players are announced'''
 
-        msngr = StubMessenger().bet(p1, 1000)
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
 
-        Dealer(msngr).deal([p1, p2])
+        msngr = StubMessenger()
 
-        self.assertEqual(msngr.lastMessage, ('p2', 'GO'))
+        HostsGame(msngr).start([p1, p2])
 
-    def testI_playerCanBetLessThanMinimumIfTheyGoAllIn(self):
-        '''a player can bet less than minimum if they go all in'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
+        self.assertEqual(msngr.dealingMessages, ['DEALING p1 p2'])
 
-        p1.chips = 10
-        p2.chips = 5
+    def testC_cardsAreDealt(self):
+        '''cards are dealt'''
 
-        msngr = StubMessenger().bet(p1, 10).bet(p2, 5)
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
 
-        Dealer(msngr).deal([p1, p2])
+        msngr = StubMessenger()
 
-        for msg in msngr.sentMessages:
-            self.assertFalse(msg[0] == 'p2' and msg[1].startswith('OUT'))
+        HostsGame(msngr).start([p1, p2])
+
+        self.assertEqual(msngr.cardMessages, [('p1', 'CARD'), ('p2', 'CARD')])
+
+    def testD_betsAreBeingTaken(self):
+        '''bets are being taken'''
+
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
+
+        msngr = StubMessenger()
+
+        HostsGame(msngr).start([p1, p2])
+
+        self.assertEqual(msngr.goMessages, [('p1', 'GO')])
 
 
-class testDealingTheCards(unittest.TestCase):
+class testB_RoundOfBettingFinished(unittest.TestCase):
 
     def setUp(self):
-        print 'Dealing the cards,', self.shortDescription()
+        print 'When a round of betting is finished,', self.shortDescription()
 
-    def testA_shouldDealCardsToPlayersAtTheStart(self):
-        '''should deal cards to the players at the start'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
+    def testA_dealsTheNextRoundAndMoreBetsAreTaken(self):
+        '''the next round is dealt and more bets are taken'''
 
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
 
-        Dealer(StubMessenger()).deal([p1, p2])
+        msngr = StubMessenger().bet(p1, 10).bet(p2, 10)
 
-        self.assertEqual(p1.cards.call_count, 1)
-        self.assertEqual(p2.cards.call_count, 1)
+        HostsGame(msngr).start([p1, p2])
 
-    def testB_shouldDealCardsAfterRoundOfBetting(self):
-        '''should deal after round of betting'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
+        self.assertEqual(msngr.allMessages, ['DEALING p1 p2',
+                                             ('p1', 'CARD'), ('p2', 'CARD'),
+                                             ('p1', 'GO'), 'BET p1 10',
+                                             ('p2', 'GO'), 'BET p2 10',
+                                             'CARD',
+                                             ('p1', 'GO')])
 
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
 
-        msngr = StubMessenger().bet(p1, 5).bet(p2, 0)
+class testC_FinishingTheHand(unittest.TestCase):
 
-        Dealer(msngr).deal([p1, p2])
+    def setUp(self):
+        print 'Finishing the hand,', self.shortDescription()
 
-        self.assertEqual(p1.cards.call_count, 2)
-        self.assertEqual(p2.cards.call_count, 2)
+    def testA_distributeTheWinnings(self):
+        '''distribute the winnings'''
 
-    def testC_shouldNotDealAnotherHandAfterTheGameIsWon(self):
-        '''should not deal another hand after the game is won'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
 
-        msngr = StubMessenger().bet(p1, 1000).bet(p2, 1000)
+        msngr = StubMessenger()
 
-        dealer = Dealer(msngr)
-        dealer.deal([p1, p2])
+        p1.deposit = MagicMock()
+        p2.deposit = MagicMock()
 
-        self.assertFalse('DEALING p2 p1' in msngr.broadcastMessages)
+        msngr.bet(p1, 10).bet(p2, 10)  # private
+        msngr.bet(p1, 10).bet(p2, 10)  # flop
+        msngr.bet(p1, 10).bet(p2, 10)  # turn
+        msngr.bet(p1, 10).bet(p2, 10)  # river
 
-    def testD_movingButtonToNextPlayerAfterFirstHand(self):
-        '''moving the button to the next player after a hand'''
-        p1 = createPlayer('p1')
-        p2 = createPlayer('p2')
+        HostsGame(msngr).start([p1, p2])
 
-        p1.cards = MagicMock()
-        p2.cards = MagicMock()
+        self.assertTrue(p1.deposit.called)
+        self.assertTrue(p2.deposit.called)
 
-        msngr = StubMessenger().bet(p1, 10).bet(p2, 20).bet(p1, 0)
+    def testB_announceTheWinner(self):
+        '''announce the winner'''
 
-        Dealer(msngr).deal([p1, p2])
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
 
-        self.assertEqual(p1.cards.call_count, 2)
-        self.assertEqual(p2.cards.call_count, 2)
+        msngr = StubMessenger()
+
+        msngr.bet(p1, 10).bet(p2, 10)  # private
+        msngr.bet(p1, 10).bet(p2, 10)  # flop
+        msngr.bet(p1, 10).bet(p2, 10)  # turn
+        msngr.bet(p1, 10).bet(p2, 10)  # river
+
+        HostsGame(msngr).start([p1, p2])
+
+        self.assertTrue(msngr.wonMessages)
+
+    def testC_rotateTheButtonAndStartTheNextHand(self):
+        '''rotate the button and start the next hand'''
+
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
+
+        msngr = StubMessenger()
+
+        msngr.bet(p1, 10).bet(p2, 10)  # private
+        msngr.bet(p1, 10).bet(p2, 10)  # flop
+        msngr.bet(p1, 10).bet(p2, 10)  # turn
+        msngr.bet(p1, 10).bet(p2, 10)  # river
+
+        HostsGame(msngr).start([p1, p2])
+
+        twoGames = ['DEALING p1 p2', 'DEALING p2 p1']
+        self.assertEqual(msngr.dealingMessages, twoGames)
+
+
+class testD_FinishingTheTournament(unittest.TestCase):
+
+    def setUp(self):
+        print 'Finishing the tournament,', self.shortDescription()
+
+    def testA_dealerIsNoLongerPlaying(self):
+        '''the dealer is no longer playing'''
+
+        p1 = createPlayer('p1', 40)
+        p2 = createPlayer('p2', 40)
+
+        msngr = StubMessenger()
+        msngr.bet(p1, 10).bet(p2, 10)  # private
+        msngr.bet(p1, 10).bet(p2, 10)  # flop
+        msngr.bet(p1, 10).bet(p2, 10)  # turn
+        msngr.bet(p1, 10).bet(p2, 10)  # river
+
+        dealer = HostsGame(msngr)
+        dealer.start([p1, p2])
+
+        self.assertEqual(False, dealer.playing, 'Will fail if a draw occurs')
+
+    def testB_noMoreHandsAreDealt(self):
+        '''no more hands are dealt'''
+
+        p1 = createPlayer('p1', 40)
+        p2 = createPlayer('p2', 40)
+
+        msngr = StubMessenger()
+        msngr.bet(p1, 10).bet(p2, 10)  # private
+        msngr.bet(p1, 10).bet(p2, 10)  # flop
+        msngr.bet(p1, 10).bet(p2, 10)  # turn
+        msngr.bet(p1, 10).bet(p2, 10)  # river
+
+        dealer = HostsGame(msngr)
+        dealer.start([p1, p2])
+
+        failMessage = 'Will fail if a draw occurs'
+        self.assertEqual(msngr.dealingMessages, ['DEALING p1 p2'], failMessage)
 
 
 if __name__ == "__main__":

@@ -119,10 +119,6 @@ class testPokerGame(unittest.TestCase):
         self.aPlayer.hears('CARD...')
         self.anotherPlayer.hears('CARD...')
 
-        self.audience.hears('CARD...')
-        self.aPlayer.hears('CARD...')
-        self.anotherPlayer.hears('CARD...')
-
         self.audience.hears('WON...')
         self.aPlayer.hears('WON...')
         self.anotherPlayer.hears('WON...')

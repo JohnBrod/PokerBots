@@ -93,18 +93,11 @@ class Table(object):
             self.dealingToPosition = 0
 
     def dealingTo(self):
-
         return self.players[self.dealingToPosition]
-
-    def removeCurrent(self):
-        self.players = [p for p in self.players if p != self.dealingTo()]
-
-        if self.dealingToPosition >= len(self.players):
-            self.dealingToPosition = 0
 
     def lastPlayer(self):
         if len(self.players) == 1:
             return self.players[0]
 
     def allIn(self):
-        return all(x.chips == 0 for x in self.players)
+        return len([x for x in self.players if x.chips > 0]) <= 1
