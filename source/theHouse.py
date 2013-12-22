@@ -29,6 +29,7 @@ class PlayerProxy(object):
     def __init__(self, name, chips=0):
         self._cards = []
         self.chips = chips
+        self.pot = 0
         self.name = name
         self.evt_response = Event()
 
@@ -36,6 +37,11 @@ class PlayerProxy(object):
         self.chips -= amount
         if self.chips < 0:
             raise Exception('Overdrawn chips')
+        self.pot += amount
+
+    def transferTo(self, player, amount):
+        self.pot -= amount
+        player.deposit(amount)
 
     def deposit(self, amount):
         self.chips += amount
@@ -48,37 +54,6 @@ class PlayerProxy(object):
 
     def dropCards(self):
         self._cards = []
-
-
-class Pot(object):
-
-    def __init__(self):
-        self.transactions = {}
-
-    def add(self, player, amount):
-
-        if player not in self.transactions:
-            self.transactions[player] = 0
-
-        self.transactions[player] += amount
-
-    def total(self, player=None):
-
-        if player and player not in self.transactions:
-            return 0
-
-        if player:
-            return self.transactions[player]
-
-        return sum(self.transactions.values())
-
-    def players(self):
-        return self.transactions.keys()
-
-    def takeFrom(self, player, chips):
-        availableChips = min(self.total(), chips)
-        self.add(player, -availableChips)
-        return availableChips
 
 
 class Table(object):
@@ -101,3 +76,7 @@ class Table(object):
 
     def allIn(self):
         return len([x for x in self.players if x.chips > 0]) <= 1
+
+    def playing(self):
+        playing = [p for p in self.players if p._cards]
+        return playing

@@ -53,7 +53,7 @@ class StubMessenger(object):
             msg = 'CARD'
 
         if msg.startswith('WON'):
-            self.wonMessages.append('WON')
+            self.wonMessages.append(msg)
             msg = 'WON'
 
         if msg.startswith('DEALING'):

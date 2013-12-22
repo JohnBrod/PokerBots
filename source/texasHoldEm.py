@@ -1,5 +1,4 @@
 from collections import deque
-from theHouse import Pot
 from theHouse import Table
 from theHouse import PlayerProxy
 from EventHandling import Event
@@ -96,8 +95,8 @@ class HostsGame(object):
         self.takesBets.fromPlayers(self.players)
 
     def _gameOver(self):
-        playersWithChips = [p for p in self.players if p.chips > 0]
-        return len(playersWithChips) == 1
+        hasChips = [p for p in self.players if p.chips > 0]
+        return len(hasChips) == 1
 
     def _rotateButton(self):
         self.players = self.players[1:] + self.players[:1]
@@ -164,10 +163,10 @@ class TakesBets(object):
 
     def __init__(self, messenger):
         self.messenger = messenger
-        self.pot = Pot()
         self.evt_betsTaken = Event()
 
     def fromPlayers(self, players):
+        self.players = players
         self.messenger.evt_playerResponse += self._on_PlayerResponse
         self.table = Table(players)
         self.lastToRaise = self.table.dealingTo()
@@ -179,40 +178,29 @@ class TakesBets(object):
 
     def distributeWinnings(self):
 
-        chips = [self.pot.total(p) for p in self.pot.players()]
-        chipsFor = dict(zip(self.pot.players(), chips))
-
         for rank in self._ranking():
-
             for player in rank:
-                for opponent in self.pot.players():
-                    winnerChips = chipsFor[player] / len(rank)
-                    opponentChips = chipsFor[opponent] / len(rank)
-                    chipsDue = min(winnerChips, opponentChips)
-                    winnings = self.pot.takeFrom(opponent, chipsDue)
+                otherRanks = [p for p in self.players if p not in rank]
+                for opponent in otherRanks:
+                    winnings = min(player.pot, opponent.pot / len(rank))
+                    self.transfer(opponent, player, winnings)
 
-                    message = 'WON {0} {1} {2} {3}'.format(
-                        player.name, opponent.name, winnings,
-                        player.hand().rank())
+                self.transfer(player, player, player.pot)
 
-                    self.messenger.broadcast(message)
-
-                    player.deposit(winnings)
+    def transfer(self, source, target, amount):
+        message = 'WON {0} {1} {2} {3}'.format(
+            target.name, source.name, amount,
+            target.hand().rank())
+        self.messenger.broadcast(message)
+        source.transferTo(target, amount)
 
     def getMinimumBet(self, player):
-        playerContribution = self.pot.total(player)
-
-        if not self.pot.players():
-            return 0
-
-        if playerContribution == self._highestContribution():
-            return 0
-
-        return self._highestContribution() - playerContribution
+        highestContribution = max([p.pot for p in self.table.playing()])
+        return highestContribution - player.pot
 
     def _noPlayerHasChips(self):
-        playersWithChips = len([p for p in self.table.players if p.chips > 0])
-        return playersWithChips == 0
+        hasChips = len([p for p in self.table.playing() if p.chips > 0])
+        return hasChips == 0
 
     def _on_PlayerResponse(self, sender, response):
 
@@ -229,12 +217,11 @@ class TakesBets(object):
 
     def _done(self):
 
-        playersWithCards = len([p for p in self.table.players if p._cards])
+        playersWithCards = len([p for p in self.table.playing() if p._cards])
         if playersWithCards == 1:
             return True
 
-        playersWithChips = len([p for p in self.table.players if p.chips > 0])
-        if playersWithChips == 0:
+        if self._noPlayerHasChips():
             return True
 
         return self.lastToRaise == self.table.dealingTo()
@@ -251,7 +238,8 @@ class TakesBets(object):
 
     def _ranking(self):
 
-        ranks = sorted(self.table.players, key=lambda x: x.hand(), reverse=True)
+        playing = self.table.playing()
+        ranks = sorted(playing, key=lambda x: x.hand(), reverse=True)
         ranks = reduce(ranks, lambda x: x.hand())
 
         return ranks
@@ -270,7 +258,6 @@ class TakesBets(object):
             self.lastToRaise = player
 
         player.withdraw(amount)
-        self.pot.add(player, amount)
 
     def _legal(self, bet, sender):
         minimum = self.getMinimumBet(sender)
@@ -284,10 +271,6 @@ class TakesBets(object):
         self.messenger.sendMessage(player.name, msg)
         player.chips = 0
         player.dropCards()
-
-    def _highestContribution(self):
-        playerTotals = [self.pot.total(p) for p in self.pot.players()]
-        return max(playerTotals)
 
 
 class Deck(object):
