@@ -158,8 +158,8 @@ class testD_FinishingTheTournament(unittest.TestCase):
     def setUp(self):
         print 'Finishing the tournament,', self.shortDescription()
 
-    def testA_dealerIsNoLongerPlaying(self):
-        '''the dealer is no longer playing'''
+    def testA_finishedIfOnePlayerHasAllChips(self):
+        '''finished if one player has all the chips'''
 
         p1 = createPlayer('p1', 40)
         p2 = createPlayer('p2', 40)
