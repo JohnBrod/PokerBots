@@ -203,6 +203,64 @@ class testE_PlayerBetsMoreThanTheyHave(unittest.TestCase):
         self.assertEqual(self.p1.chips, 0)
 
 
+class testF_PlayerPlacesBetOutOfTurn(unittest.TestCase):
+
+    def setUp(self):
+        print 'a player places a bet out of turn,', self.shortDescription()
+        p1 = createPlayer('p1', 5, cards('14C,14D,2C,3H,4S'))
+        self.p2 = createPlayer('p2', 5, cards('2C,3D,5C,9D,13S'))
+
+        self.msngr = StubMessenger().bet(self.p2, 5)
+        tb = TakesBets(self.msngr)
+
+        tb.fromPlayers([p1, self.p2])
+
+    def testA_theBetShouldBeIgnored(self):
+        '''the bet should be ignored'''
+        self.assertFalse('BET p2 5' in self.msngr.allMessages)
+
+    def testB_takeThePlayersCards(self):
+        '''take the players cards'''
+        self.assertFalse(self.p2.isPlaying())
+
+    def testC_takeThePlayersChips(self):
+        '''take the players chips'''
+        self.assertEqual(self.p2.chips, 0)
+
+    def testD_kickOutThePlayer(self):
+        '''kick out the player'''
+        self.assertTrue(('p2', 'OUT OUT_OF_TURN') in self.msngr.allMessages)
+
+
+class testG_PlayerSendsNonNumericMessage(unittest.TestCase):
+
+    def setUp(self):
+        print 'a player sends a non numeric message,', self.shortDescription()
+        self.p1 = createPlayer('p1', 5, ['any cards'])
+        p2 = createPlayer('p2', 5, ['any cards'])
+
+        self.msngr = StubMessenger().bet(self.p1, 'XX')
+        tb = TakesBets(self.msngr)
+
+        tb.fromPlayers([self.p1, p2])
+
+    def testA_theBetShouldBeIgnored(self):
+        '''the bet should be ignored'''
+        self.assertFalse('BET p1 XX' in self.msngr.allMessages)
+
+    def testB_takeThePlayersCards(self):
+        '''take the players cards'''
+        self.assertFalse(self.p1.isPlaying())
+
+    def testC_takeThePlayersChips(self):
+        '''take the players chips'''
+        self.assertEqual(self.p1.chips, 0)
+
+    def testD_kickOutThePlayer(self):
+        '''kick out the player'''
+        self.assertTrue(('p1', 'OUT NOT_A_NUMBER') in self.msngr.allMessages)
+
+
 class testF_SplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
     def setUp(self):

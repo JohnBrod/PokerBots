@@ -33,8 +33,7 @@ class XmppMessageInterpreter(object):
         else:
             name = getName(msg['from'])
             player = [p for p in self.players if p.name == name][0]
-            bet = int(msg['body'])
-            self.evt_playerResponse(self, (player, bet))
+            self.evt_playerResponse(self, (player, msg['body']))
 
     def sendMessage(self, jid, msg):
         self.messenger.sendMessage(jid, msg)
@@ -203,7 +202,20 @@ class TakesBets(object):
 
     def _on_PlayerResponse(self, sender, response):
 
-        self._add(player=response[0], amount=response[1])
+        player = response[0]
+        amount = response[1]
+
+        if player != self.table.dealingTo():
+            self._kickOutOfGame(player, 'OUT_OF_TURN')
+            return
+
+        if not amount.isdigit():
+            self._kickOutOfGame(player, 'NOT_A_NUMBER')
+            return
+
+        self._add(player, int(amount))
+
+        self.table.nextPlayer()
 
         if self._done():
             self._finish()
@@ -228,7 +240,6 @@ class TakesBets(object):
 
         if self.table.dealingTo().isPlaying():
             dealTo = self.table.dealingTo()
-            self.table.nextPlayer()
             self.messenger.sendMessage(dealTo.name, 'GO')
         else:
             self.table.nextPlayer()
@@ -251,7 +262,7 @@ class TakesBets(object):
         if amount < self.getMinimumBet(player):
             self._fold(player)
         elif amount > player.chips:
-            self._kickOutOfGame(player, amount)
+            self._kickOutOfGame(player, 'OVERDRAWN')
             amount = 0
 
         self.messenger.broadcast('BET ' + player.name + ' ' + str(amount))
@@ -264,8 +275,8 @@ class TakesBets(object):
         player.dropCards()
         self.messenger.sendMessage(player.name, 'OUT FOLD')
 
-    def _kickOutOfGame(self, player, bet):
-        self.messenger.sendMessage(player.name, "OUT OVERDRAWN")
+    def _kickOutOfGame(self, player, reason):
+        self.messenger.sendMessage(player.name, "OUT " + reason)
         player.chips = 0
         player.dropCards()
 

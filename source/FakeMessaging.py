@@ -20,7 +20,7 @@ class StubMessenger(object):
         return self
 
     def bet(self, player, amount):
-        self.replies.append((player, amount))
+        self.replies.append((player, str(amount)))
         return self
 
     def sendMessage(self, jid, msg):
