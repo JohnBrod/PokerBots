@@ -13,14 +13,6 @@ def getName(x):
     return str(x)[:str(x).find('/')]
 
 
-def outMessage(bet, min, max):
-    if bet < min:
-        return 'OUT you bet %d, minimum bet was %d' % (bet, min)
-
-    if bet > max:
-        return "OUT you bet %d, you have only %d chips avaiable" % (bet, max)
-
-
 class XmppMessageInterpreter(object):
 
     def __init__(self, messenger, audience):
@@ -233,7 +225,7 @@ class TakesBets(object):
 
         if self._onePlayerLeft():
             self._finish()
-        
+
         if self.table.dealingTo().isPlaying():
             dealTo = self.table.dealingTo()
             self.table.nextPlayer()
@@ -257,10 +249,9 @@ class TakesBets(object):
     def _add(self, player, amount):
 
         if amount < self.getMinimumBet(player):
-            player.dropCards()
-            self.messenger.sendMessage(player.name, 'OUT you folded')
-        elif not self._legal(amount, player):
-            self._kickOut(player, amount)
+            self._fold(player)
+        elif amount > player.chips:
+            self._kickOutOfGame(player, amount)
             amount = 0
 
         self.messenger.broadcast('BET ' + player.name + ' ' + str(amount))
@@ -269,16 +260,12 @@ class TakesBets(object):
 
         player.withdraw(amount)
 
-    def _legal(self, bet, sender):
-        minimum = self.getMinimumBet(sender)
-        maximum = sender.chips + 1
-        allIn = sender.chips - bet == 0
+    def _fold(self, player):
+        player.dropCards()
+        self.messenger.sendMessage(player.name, 'OUT FOLD')
 
-        return bet in range(minimum, maximum) or allIn
-
-    def _kickOut(self, player, bet):
-        msg = outMessage(bet, self.getMinimumBet(player), player.chips)
-        self.messenger.sendMessage(player.name, msg)
+    def _kickOutOfGame(self, player, bet):
+        self.messenger.sendMessage(player.name, "OUT OVERDRAWN")
         player.chips = 0
         player.dropCards()
 

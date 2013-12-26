@@ -60,7 +60,7 @@ class testA_TellingThePlayersToBet(unittest.TestCase):
         self.assertEqual(('p2', 'GO'), msngr.lastMessage)
 
 
-class testDecidingWhenAllBetsAreTaken(unittest.TestCase):
+class testB_DecidingWhenAllBetsAreTaken(unittest.TestCase):
 
     def onBetsTaken(self, sender, args=None):
         self.betsTaken = True
@@ -134,7 +134,7 @@ class testDecidingWhenAllBetsAreTaken(unittest.TestCase):
         self.assertTrue(self.betsTaken)
 
 
-class testD_WhenDownToOnePlayer(unittest.TestCase):
+class testC_WhenDownToOnePlayer(unittest.TestCase):
 
     def onBetsTaken(self, sender, args=None):
         self.betsTaken = True
@@ -142,9 +142,6 @@ class testD_WhenDownToOnePlayer(unittest.TestCase):
     def setUp(self):
         print 'When down to one player,', self.shortDescription()
         self.betsTaken = False
-
-    def testA_allBetsAreTaken(self):
-        '''all bets are taken'''
         p1 = createPlayer('p1', 20, ['any cards'])
         p2 = createPlayer('p2', 20, [])
 
@@ -154,63 +151,59 @@ class testD_WhenDownToOnePlayer(unittest.TestCase):
 
         tb.fromPlayers([p1, p2])
 
+    def testA_allBetsAreTaken(self):
+        '''all bets are taken'''
         self.assertTrue(self.betsTaken)
 
 
-class testPlayerFolding(unittest.TestCase):
+class testD_PlayerFolding(unittest.TestCase):
 
     def setUp(self):
         print 'A player folding,', self.shortDescription()
+        p1 = createPlayer('p1', 2, ['any cards'])
+        self.p2 = createPlayer('p2', 2, ['any cards'])
+
+        self.msngr = StubMessenger().bet(p1, 2).bet(self.p2, 0)
+        tb = TakesBets(self.msngr)
+
+        tb.fromPlayers([p1, self.p2])
 
     def testA_playerFoldsByBettingLessThanMinimum(self):
         '''a player folds by betting less than minimum'''
-
-        p1 = createPlayer('p1', 2, ['any cards'])
-        p2 = createPlayer('p2', 2, ['any cards'])
-
-        msngr = StubMessenger().bet(p1, 2).bet(p2, 0)
-        tb = TakesBets(msngr)
-
-        tb.fromPlayers([p1, p2])
-
-        self.assertTrue(('p2', 'OUT you folded') in msngr.sentMessages)
+        self.assertTrue(('p2', 'OUT FOLD') in self.msngr.sentMessages)
 
     def testB_takePlayersCards(self):
         '''take the players cards'''
-
-        p1 = createPlayer('p1', 2, ['any cards'])
-        p2 = createPlayer('p2', 2, ['any cards'])
-
-        msngr = StubMessenger().bet(p1, 2).bet(p2, 0)
-        tb = TakesBets(msngr)
-
-        tb.fromPlayers([p1, p2])
-
-        self.assertEqual(p2._cards, [])
+        self.assertEqual(self.p2._cards, [])
 
 
-class testKickingOutPlayer(unittest.TestCase):
+class testE_PlayerBetsMoreThanTheyHave(unittest.TestCase):
 
     def setUp(self):
-        print 'Kick out a player,', self.shortDescription()
-
-    def testA_playerBetsMoreThanTheyHave(self):
-        '''when a player bets more than they have'''
-        p1 = createPlayer('p1', 1, ['any cards'])
+        print 'Player bets more than they have,', self.shortDescription()
+        self.p1 = createPlayer('p1', 1, ['any cards'])
         p2 = createPlayer('p2', 1, ['any cards'])
 
-        msngr = StubMessenger().bet(p1, 2)
-        tb = TakesBets(msngr)
+        self.msngr = StubMessenger().bet(self.p1, 2)
+        tb = TakesBets(self.msngr)
 
-        tb.fromPlayers([p1, p2])
+        tb.fromPlayers([self.p1, p2])
 
-        outMessage = 'OUT you bet 2, you have only 1 chips avaiable'
-        self.assertTrue(('p1', outMessage) in msngr.sentMessages)
-        self.assertEqual(p1.chips, 0)
-        self.assertEqual(p1._cards, [])
+    def testA_kickThePlayerOut(self):
+        '''kick the player out'''
+        outMessage = 'OUT OVERDRAWN'
+        self.assertTrue(('p1', outMessage) in self.msngr.sentMessages)
+
+    def testB_takePlayersCards(self):
+        '''take the players cards'''
+        self.assertEqual(self.p1._cards, [])
+
+    def testC_takePlayersChips(self):
+        '''take the players chips'''
+        self.assertEqual(self.p1.chips, 0)
 
 
-class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
+class testF_SplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
     def setUp(self):
         print 'Splitting the pot between the winners,', self.shortDescription()
