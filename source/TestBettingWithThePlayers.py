@@ -13,11 +13,12 @@ class testA_TellingThePlayersToBet(unittest.TestCase):
     def testA_tellTheFirstPlayerToTakeTheirGo(self):
         '''tell the first player to take their go'''
         p1 = createPlayer('p1', 100, ['any cards'])
+        p2 = createPlayer('p2', 100, ['any cards'])
 
         msngr = StubMessenger()
         tb = TakesBets(msngr)
 
-        tb.fromPlayers([p1])
+        tb.fromPlayers([p1, p2])
 
         self.assertEqual(('p1', 'GO'), msngr.lastMessage)
 
@@ -49,11 +50,12 @@ class testA_TellingThePlayersToBet(unittest.TestCase):
         '''skips player that does not have cards'''
         p1 = createPlayer('p1', 100, [])
         p2 = createPlayer('p2', 100, ['any cards'])
+        p3 = createPlayer('p3', 100, ['any cards'])
 
         msngr = StubMessenger()
         tb = TakesBets(msngr)
 
-        tb.fromPlayers([p1, p2])
+        tb.fromPlayers([p1, p2, p3])
 
         self.assertEqual(('p2', 'GO'), msngr.lastMessage)
 
@@ -106,20 +108,7 @@ class testDecidingWhenAllBetsAreTaken(unittest.TestCase):
 
         self.assertTrue(self.betsTaken)
 
-    def testD_doneWhenOnlyOnePlayerLeftWithCards(self):
-        '''done when only one player left with cards'''
-        p1 = createPlayer('p1', 20, ['any cards'])
-        p2 = createPlayer('p2', 20, [])
-
-        msngr = StubMessenger().bet(p1, 10)
-        tb = TakesBets(msngr)
-        tb.evt_betsTaken += self.onBetsTaken
-
-        tb.fromPlayers([p1, p2])
-
-        self.assertTrue(self.betsTaken)
-
-    def testE_doneWhenNoPlayerHasChipsLeft(self):
+    def testD_doneWhenNoPlayerHasChipsLeft(self):
         '''done when only one player has chips left'''
         p1 = createPlayer('p1', 10, ['any cards'])
         p2 = createPlayer('p2', 20, ['any cards'])
@@ -132,12 +121,35 @@ class testDecidingWhenAllBetsAreTaken(unittest.TestCase):
 
         self.assertTrue(self.betsTaken)
 
-    def testF_doneImmediatelyIfNoneOfThePlayersHadChips(self):
-        '''done immediately of none of the players had chips'''
+    def testE_doneImmediatelyIfNoneOfThePlayersHasChips(self):
+        '''done immediately of none of the players has chips'''
         p1 = createPlayer('p1', 0, ['any cards'])
         p2 = createPlayer('p2', 0, ['any cards'])
 
         tb = TakesBets(StubMessenger())
+        tb.evt_betsTaken += self.onBetsTaken
+
+        tb.fromPlayers([p1, p2])
+
+        self.assertTrue(self.betsTaken)
+
+
+class testD_WhenDownToOnePlayer(unittest.TestCase):
+
+    def onBetsTaken(self, sender, args=None):
+        self.betsTaken = True
+
+    def setUp(self):
+        print 'When down to one player,', self.shortDescription()
+        self.betsTaken = False
+
+    def testA_allBetsAreTaken(self):
+        '''all bets are taken'''
+        p1 = createPlayer('p1', 20, ['any cards'])
+        p2 = createPlayer('p2', 20, [])
+
+        msngr = StubMessenger()
+        tb = TakesBets(msngr)
         tb.evt_betsTaken += self.onBetsTaken
 
         tb.fromPlayers([p1, p2])
@@ -238,18 +250,18 @@ class testSplittingUpThePotBetweenTheWinners(unittest.TestCase):
     def testC_splittingThePot(self):
         '''players will split the pot if they are ranked the same'''
 
-        tiedWinnerA = createPlayer('tiedWinnerA', 10, cards('14C,14D,2C,3H,4S'))
-        tiedWinnerB = createPlayer('tiedWinnerB', 10, cards('14C,14D,2C,3H,4S'))
+        tiedA = createPlayer('tiedA', 10, cards('14C,14D,2C,3H,4S'))
+        tiedB = createPlayer('tiedB', 10, cards('14C,14D,2C,3H,4S'))
 
-        msngr = StubMessenger().bet(tiedWinnerA, 10).bet(tiedWinnerB, 10)
+        msngr = StubMessenger().bet(tiedA, 10).bet(tiedB, 10)
         tb = TakesBets(msngr)
 
-        tb.fromPlayers([tiedWinnerA, tiedWinnerB])
+        tb.fromPlayers([tiedA, tiedB])
 
         tb.distributeWinnings()
 
-        self.assertEqual(tiedWinnerA.chips, 10)
-        self.assertEqual(tiedWinnerB.chips, 10)
+        self.assertEqual(tiedA.chips, 10)
+        self.assertEqual(tiedB.chips, 10)
 
     def testD_shouldAnnounceTheWinners(self):
         '''should announce the winners of the game'''

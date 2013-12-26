@@ -55,6 +55,9 @@ class PlayerProxy(object):
     def dropCards(self):
         self._cards = []
 
+    def isPlaying(self):
+        return len(self._cards) > 0
+
 
 class Table(object):
     """players sit around this and get dealt to in order"""

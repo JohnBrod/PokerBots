@@ -123,16 +123,23 @@ class DealsCards(object):
         if not self.dealStages:
             raise Exception("No more stages left to deal")
 
-        if len([player for player in self.players if player.chips > 0]) <= 1:
+        if self._onePlayerLeft():
+            self.evt_cardsDealt.fire(self)
+        elif self._allInGame():
             self._dealRemainingCards()
         else:
             self.dealStages.popleft()()
 
-        if self._done():
+        if not self.dealStages:
             self.evt_cardsDealt.fire(self)
 
-    def _done(self):
-        return not self.dealStages
+    def _allInGame(self):
+        hasChips = [player for player in self.players if player.chips > 0]
+        return len(hasChips) <= 1
+
+    def _onePlayerLeft(self):
+        playersWithCards = len([p for p in self.players if p.isPlaying()])
+        return playersWithCards == 1
 
     def _dealThreeCards(self):
         cards = [self.deck.take(), self.deck.take(), self.deck.take()]
@@ -217,10 +224,6 @@ class TakesBets(object):
 
     def _done(self):
 
-        playersWithCards = len([p for p in self.table.playing() if p._cards])
-        if playersWithCards == 1:
-            return True
-
         if self._noPlayerHasChips():
             return True
 
@@ -228,13 +231,20 @@ class TakesBets(object):
 
     def _go(self):
 
-        if len(self.table.dealingTo()._cards) > 0:
+        if self._onePlayerLeft():
+            self._finish()
+        
+        if self.table.dealingTo().isPlaying():
             dealTo = self.table.dealingTo()
             self.table.nextPlayer()
             self.messenger.sendMessage(dealTo.name, 'GO')
         else:
             self.table.nextPlayer()
             self._go()
+
+    def _onePlayerLeft(self):
+        playersWithCards = len([p for p in self.players if p.isPlaying()])
+        return playersWithCards == 1
 
     def _ranking(self):
 
