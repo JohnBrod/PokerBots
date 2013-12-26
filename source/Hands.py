@@ -48,13 +48,18 @@ class Hand(object):
         return not self.__eq__(other)
 
     def rank(self):
-        for r in handRanking:
-            if r(self.cards):
-                return ','.join([str(card) for card in r(self.cards)])
+        match = first(handRanking, self.cards)
+        hand = ','.join([str(card) for card in match(self.cards)])
+        return hand + ' ' + match.__name__
+
+
+def first(conditions, cards):
+    for c in conditions:
+        if c(cards):
+            return c
 
 
 def highestCard(hand):
-
     return sorted(hand, key=lambda card: card.value, reverse=True)[0:5]
 
 

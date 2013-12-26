@@ -327,10 +327,11 @@ class testF_SplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         tb.distributeWinnings()
 
-        self.assertEqual(msngr.wonMessages, ['WON p1 p2 10 14C,14D,4S,3H,2C',
-                                             'WON p1 p1 10 14C,14D,4S,3H,2C',
-                                             'WON p2 p1 0 2D,2C,6S,4H,3C',
-                                             'WON p2 p2 0 2D,2C,6S,4H,3C'])
+        self.assertEqual(msngr.wonMessages,
+                         ['WON p1 p2 10 14C,14D,4S,3H,2C pairHand',
+                          'WON p1 p1 10 14C,14D,4S,3H,2C pairHand',
+                          'WON p2 p1 0 2D,2C,6S,4H,3C pairHand',
+                          'WON p2 p2 0 2D,2C,6S,4H,3C pairHand'])
 
     def testE_shouldOnlyDistributeToPlayersInTheGame(self):
         '''should only distribute the winnings to players in the game'''
@@ -345,8 +346,9 @@ class testF_SplittingUpThePotBetweenTheWinners(unittest.TestCase):
 
         tb.distributeWinnings()
 
-        self.assertEqual(msngr.wonMessages, ['WON p1 p2 0 14C,14D,4S,3H,2C',
-                                             'WON p1 p1 5 14C,14D,4S,3H,2C'])
+        self.assertEqual(msngr.wonMessages,
+                         ['WON p1 p2 0 14C,14D,4S,3H,2C pairHand',
+                          'WON p1 p1 5 14C,14D,4S,3H,2C pairHand'])
 
 
 def createPlayer(name, chips=0, cards=[]):
