@@ -17,55 +17,30 @@ class testA_StartingTheTournament(unittest.TestCase):
 
     def setUp(self):
         print 'Starting the tournament,', self.shortDescription()
+        p1 = createPlayer('p1', 100)
+        p2 = createPlayer('p2', 100)
+
+        self.msngr = StubMessenger()
+
+        self.dealer = HostsGame(self.msngr)
+        self.dealer.start([p1, p2])
 
     def testA_gameIsBeingPlayer(self):
         '''a game is being played'''
-
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
-        msngr = StubMessenger()
-
-        dealer = HostsGame(msngr)
-        dealer.start([p1, p2])
-
-        self.assertTrue(dealer.playing)
+        self.assertTrue(self.dealer.playing)
 
     def testB_thePlayersAreAnnounced(self):
         '''the players are announced'''
-
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
-        msngr = StubMessenger()
-
-        HostsGame(msngr).start([p1, p2])
-
-        self.assertEqual(msngr.dealingMessages, ['DEALING p1 p2'])
+        self.assertEqual(self.msngr.dealingMessages, ['DEALING p1 p2'])
 
     def testC_cardsAreDealt(self):
         '''cards are dealt'''
-
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
-        msngr = StubMessenger()
-
-        HostsGame(msngr).start([p1, p2])
-
-        self.assertEqual(msngr.cardMessages, [('p1', 'CARD'), ('p2', 'CARD')])
+        expected = [('p1', 'CARD'), ('p2', 'CARD')]
+        self.assertEqual(self.msngr.cardMessages, expected)
 
     def testD_betsAreBeingTaken(self):
         '''bets are being taken'''
-
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
-        msngr = StubMessenger()
-
-        HostsGame(msngr).start([p1, p2])
-
-        self.assertEqual(msngr.goMessages, [('p1', 'GO')])
+        self.assertEqual(self.msngr.goMessages, [('p1', 'GO')])
 
 
 class testB_RoundOfBettingFinished(unittest.TestCase):
@@ -95,62 +70,33 @@ class testC_FinishingTheHand(unittest.TestCase):
 
     def setUp(self):
         print 'Finishing the hand,', self.shortDescription()
+        self.p1 = createPlayer('p1', 100)
+        self.p2 = createPlayer('p2', 100)
+
+        self.p1.deposit = MagicMock()
+        self.p2.deposit = MagicMock()
+
+        self.msngr = StubMessenger()
+        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # private
+        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # flop
+        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # turn
+        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # river
+
+        HostsGame(self.msngr).start([self.p1, self.p2])
 
     def testA_distributeTheWinnings(self):
         '''distribute the winnings'''
-
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
-        msngr = StubMessenger()
-
-        p1.deposit = MagicMock()
-        p2.deposit = MagicMock()
-
-        msngr.bet(p1, 10).bet(p2, 10)  # private
-        msngr.bet(p1, 10).bet(p2, 10)  # flop
-        msngr.bet(p1, 10).bet(p2, 10)  # turn
-        msngr.bet(p1, 10).bet(p2, 10)  # river
-
-        HostsGame(msngr).start([p1, p2])
-
-        self.assertTrue(p1.deposit.called)
-        self.assertTrue(p2.deposit.called)
+        self.assertTrue(self.p1.deposit.called)
+        self.assertTrue(self.p2.deposit.called)
 
     def testB_announceTheWinner(self):
         '''announce the winner'''
-
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
-        msngr = StubMessenger()
-
-        msngr.bet(p1, 10).bet(p2, 10)  # private
-        msngr.bet(p1, 10).bet(p2, 10)  # flop
-        msngr.bet(p1, 10).bet(p2, 10)  # turn
-        msngr.bet(p1, 10).bet(p2, 10)  # river
-
-        HostsGame(msngr).start([p1, p2])
-
-        self.assertTrue(msngr.wonMessages)
+        self.assertTrue(self.msngr.wonMessages)
 
     def testC_rotateTheButtonAndStartTheNextHand(self):
         '''rotate the button and start the next hand'''
-
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
-        msngr = StubMessenger()
-
-        msngr.bet(p1, 10).bet(p2, 10)  # private
-        msngr.bet(p1, 10).bet(p2, 10)  # flop
-        msngr.bet(p1, 10).bet(p2, 10)  # turn
-        msngr.bet(p1, 10).bet(p2, 10)  # river
-
-        HostsGame(msngr).start([p1, p2])
-
         twoGames = ['DEALING p1 p2', 'DEALING p2 p1']
-        self.assertEqual(msngr.dealingMessages, twoGames)
+        self.assertEqual(self.msngr.dealingMessages, twoGames)
 
 
 class testD_FinishingTheTournament(unittest.TestCase):
