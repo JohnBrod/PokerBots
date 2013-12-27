@@ -59,6 +59,9 @@ class StubMessenger(object):
         if msg.startswith('DEALING'):
             self.dealingMessages.append(msg)
 
+        if msg.startswith('WINNER'):
+            msg = 'WINNER'
+
         self.allMessages.append(msg)
         self.broadcastMessages.append(msg)
         self.lastMessage = msg

@@ -75,11 +75,16 @@ class HostsGame(object):
         self.takesBets.distributeWinnings()
 
         if self._gameOver():
-            self.playing = False
-            return
+            self._finishTournament()
+        else:
+            self._rotateButton()
+            self.dealHand()
 
-        self._rotateButton()
-        self.dealHand()
+    def _finishTournament(self):
+        self.playing = False
+        winner = [p for p in self.players if p.chips > 0][0]
+        message = 'WINNER {0} {1}'.format(winner.name, winner.chips)
+        self.messenger.broadcast(message)
 
     def _nextRound(self, sender, args=None):
         self.dealsCards.go()

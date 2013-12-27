@@ -156,42 +156,31 @@ class testC_FinishingTheHand(unittest.TestCase):
 class testD_FinishingTheTournament(unittest.TestCase):
 
     def setUp(self):
-        print 'Finishing the tournament,', self.shortDescription()
+        description = 'Finishing the tournament (tests will fail on draw),'
+        print description, self.shortDescription()
+        p1 = createPlayer('p1', 40)
+        p2 = createPlayer('p2', 40)
+
+        self.msngr = StubMessenger()
+        self.msngr.bet(p1, 10).bet(p2, 10)  # private
+        self.msngr.bet(p1, 10).bet(p2, 10)  # flop
+        self.msngr.bet(p1, 10).bet(p2, 10)  # turn
+        self.msngr.bet(p1, 10).bet(p2, 10)  # river
+
+        self.dealer = HostsGame(self.msngr)
+        self.dealer.start([p1, p2])
 
     def testA_finishedIfOnePlayerHasAllChips(self):
         '''finished if one player has all the chips'''
-
-        p1 = createPlayer('p1', 40)
-        p2 = createPlayer('p2', 40)
-
-        msngr = StubMessenger()
-        msngr.bet(p1, 10).bet(p2, 10)  # private
-        msngr.bet(p1, 10).bet(p2, 10)  # flop
-        msngr.bet(p1, 10).bet(p2, 10)  # turn
-        msngr.bet(p1, 10).bet(p2, 10)  # river
-
-        dealer = HostsGame(msngr)
-        dealer.start([p1, p2])
-
-        self.assertEqual(False, dealer.playing, 'Will fail if a draw occurs')
+        self.assertEqual(False, self.dealer.playing)
 
     def testB_noMoreHandsAreDealt(self):
         '''no more hands are dealt'''
+        self.assertEqual(self.msngr.dealingMessages, ['DEALING p1 p2'])
 
-        p1 = createPlayer('p1', 40)
-        p2 = createPlayer('p2', 40)
-
-        msngr = StubMessenger()
-        msngr.bet(p1, 10).bet(p2, 10)  # private
-        msngr.bet(p1, 10).bet(p2, 10)  # flop
-        msngr.bet(p1, 10).bet(p2, 10)  # turn
-        msngr.bet(p1, 10).bet(p2, 10)  # river
-
-        dealer = HostsGame(msngr)
-        dealer.start([p1, p2])
-
-        failMessage = 'Will fail if a draw occurs'
-        self.assertEqual(msngr.dealingMessages, ['DEALING p1 p2'], failMessage)
+    def testC_theWinnerIsAnnounced(self):
+        '''the winner is announced'''
+        self.assertTrue('WINNER' in self.msngr.broadcastMessages)
 
 
 if __name__ == "__main__":
