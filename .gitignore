@@ -39,3 +39,4 @@ nosetests.xml
 SingleTest.py
 
 DumbPlayer.py
+*.bat

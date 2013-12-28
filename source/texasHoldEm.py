@@ -3,6 +3,7 @@ from theHouse import Table
 from theHouse import PlayerProxy
 from EventHandling import Event
 import random
+import logging
 
 
 def chat(msg):
@@ -14,7 +15,7 @@ def getName(x):
 
 
 class XmppMessageInterpreter(object):
-
+    '''interprets XMPP messages between the dealer and the players'''
     def __init__(self, messenger, audience):
         self.messenger = messenger
         self.messenger.evt_messageReceived += self.__on_messageReceived
@@ -181,6 +182,7 @@ class TakesBets(object):
 
     def distributeWinnings(self):
 
+        self._logRanking()
         for rank in self._ranking():
             for player in rank:
                 otherRanks = [p for p in self.players if p not in rank]
@@ -189,6 +191,15 @@ class TakesBets(object):
                     self.transfer(opponent, player, winnings)
 
                 self.transfer(player, player, player.pot)
+
+    def _logRanking(self):
+        for rank in self._ranking():
+            info = ''
+            for player in rank:
+                cards = [str(c) for c in sorted(player._cards)]
+                info += '{0} {1} {2}|'.format(player.name, cards,
+                                              player.hand().rank())
+            logging.debug(info)
 
     def transfer(self, source, target, amount):
         message = 'WON {0} {1} {2} {3}'.format(
