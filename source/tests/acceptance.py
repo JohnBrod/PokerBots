@@ -72,7 +72,7 @@ class testPokerGame(unittest.TestCase):
     def testQuittingGameThatOnlyOnePlayerJoins(self):
 
         self.audience.hears('Game started, waiting for players')
-        self.aPlayer.says('player1@pokerchat')
+        self.aPlayer.says('JOIN')
         self.aPlayer.hears('CHIPS 1000')
         self.audience.hears('Not enough players for a game so quitting')
 
@@ -80,10 +80,10 @@ class testPokerGame(unittest.TestCase):
 
         self.audience.hears('Game started, waiting for players')
 
-        self.aPlayer.says('player1@pokerchat')
+        self.aPlayer.says('JOIN')
         self.aPlayer.hears('CHIPS 1000')
 
-        self.anotherPlayer.says('player2@pokerchat')
+        self.anotherPlayer.says('JOIN')
         self.anotherPlayer.hears('CHIPS 1000')
 
         self.audience.hears('DEALING player1@pokerchat player2@pokerchat')

@@ -14,6 +14,14 @@ else:
     raw_input = input
 
 
+def chat(msg):
+    return msg['type'] in ('normal', 'chat')
+
+
+def getName(x):
+    return str(x)[:str(x).find('/')]
+
+
 class XmppMessenger(sleekxmpp.ClientXMPP):
 
     def __init__(self, jid, password):
@@ -26,6 +34,10 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
         self.get_roster()
 
     def on_message(self, msg):
+        if not chat(msg):
+            return
+
+        msg = (getName(msg['from']), msg['body'])
         self.evt_messageReceived.fire(self, msg)
 
     def listen(self, domain, port):

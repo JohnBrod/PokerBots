@@ -1,7 +1,7 @@
 from threading import Thread
 import logging
 from theHouse import Doorman
-from texasHoldEm import XmppMessageInterpreter
+from texasHoldEm import MessageInterpreter
 from texasHoldEm import HostsGame
 from Xmpp import XmppMessenger
 import traceback
@@ -54,15 +54,14 @@ if __name__ == '__main__':
     opts, args = optp.parse_args()
 
     logging.basicConfig(filename='poker.log', level=logging.DEBUG)
-
     messenger = XmppMessenger(opts.dealerjid, opts.dealerpassword)
-    messenger.listen(opts.domain, opts.port)
-    interpreter = XmppMessageInterpreter(messenger, opts.audiencejid)
-
-    startMessage = 'Game started, waiting for players'
-    messenger.sendMessage(opts.audiencejid, startMessage)
 
     try:
+        messenger.listen(opts.domain, opts.port)
+        interpreter = MessageInterpreter(messenger, opts.audiencejid)
+
+        startMessage = 'Game started, waiting for players'
+        messenger.sendMessage(opts.audiencejid, startMessage)
         frank = Doorman(opts.wait, interpreter, opts.chips)
         Thread(target=countdown, args=(opts.wait,)).start()
         players = frank.greetPlayers()

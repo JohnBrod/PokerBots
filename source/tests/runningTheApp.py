@@ -66,7 +66,7 @@ class FakeParticipant():
         print self.jid + ' ' + message
 
     def on_messageReceived(self, sender, msg):
-        self.q.put(msg['body'])
+        self.q.put(msg[1])
 
     def stop(self):
         self.messenger.finish()

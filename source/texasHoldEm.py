@@ -6,35 +6,28 @@ import random
 import logging
 
 
-def chat(msg):
-    return msg['type'] in ('normal', 'chat')
-
-
-def getName(x):
-    return str(x)[:str(x).find('/')]
-
-
-class XmppMessageInterpreter(object):
-    '''interprets XMPP messages between the dealer and the players'''
+class MessageInterpreter(object):
+    '''sends messages to and interprets messages from the players'''
     def __init__(self, messenger, audience):
         self.messenger = messenger
-        self.messenger.evt_messageReceived += self.__on_messageReceived
+        self.messenger.evt_messageReceived += self._on_messageReceived
         self.evt_playerResponse = Event()
         self.evt_playerJoin = Event()
         self.audience = audience
         self.players = []
 
-    def __on_messageReceived(self, sender, msg):
+    def _on_messageReceived(self, sender, msg):
 
-        if chat(msg) and msg['body'].startswith('player'):
-            name = msg['body']
+        name = msg[0]
+        content = msg[1]
+
+        if content.startswith('JOIN'):
             player = PlayerProxy(name, self.messenger)
             self.players.append(player)
             self.evt_playerJoin(self, player)
         else:
-            name = getName(msg['from'])
             player = [p for p in self.players if p.name == name][0]
-            self.evt_playerResponse(self, (player, msg['body']))
+            self.evt_playerResponse(self, (player, content))
 
     def sendMessage(self, jid, msg):
         self.messenger.sendMessage(jid, msg)
