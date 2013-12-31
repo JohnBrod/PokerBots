@@ -3,8 +3,7 @@ import time
 import sys
 
 
-class DumbPlayer(object):
-    """docstring for DumbPlayer"""
+class SamplePlayer(object):
     def __init__(self, jid, password):
         self.jid = jid
         self.password = password
@@ -66,6 +65,6 @@ class DumbPlayer(object):
 
         return bet
 
-player = DumbPlayer(sys.argv[1], sys.argv[2])
+player = SamplePlayer(sys.argv[1], sys.argv[2])
 
 time.sleep(999999)
