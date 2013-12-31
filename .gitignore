@@ -37,6 +37,4 @@ nosetests.xml
 *.log
 
 SingleTest.py
-
-DumbPlayer.py
 *.bat
