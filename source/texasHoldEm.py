@@ -6,15 +6,14 @@ import random
 import logging
 
 
-class MessageInterpreter(object):
-    '''sends messages to and interprets messages from the players'''
-    def __init__(self, messenger, audience):
+class InteractsWithPlayers(object):
+    def __init__(self, messenger, chips=1000):
         self.messenger = messenger
         self.messenger.evt_messageReceived += self._on_messageReceived
         self.evt_playerResponse = Event()
         self.evt_playerJoin = Event()
-        self.audience = audience
         self.players = []
+        self.chips = chips
 
     def _on_messageReceived(self, sender, msg):
 
@@ -24,35 +23,35 @@ class MessageInterpreter(object):
         if content.startswith('JOIN'):
             player = PlayerProxy(name, self.messenger)
             self.players.append(player)
+            player.chips = self.chips
+            self.messenger.sendMessage(player.name, 'CHIPS ' + str(self.chips))
+            self.messenger.addTarget(name)
             self.evt_playerJoin(self, player)
         else:
             player = [p for p in self.players if p.name == name][0]
             self.evt_playerResponse(self, (player, content))
 
-    def sendMessage(self, jid, msg):
-        self.messenger.sendMessage(jid, msg)
+    def sendMessage(self, player, msg):
+        self.messenger.sendMessage(player.name, msg)
 
     def broadcast(self, msg):
-        self.messenger.sendMessage(self.audience, msg)
-        for player in self.players:
-            self.messenger.sendMessage(player.name, msg)
+        self.messenger.broadcast(msg)
 
 
 class HostsGame(object):
-    def __init__(self, messenger):
-        self.messenger = messenger
+    def __init__(self, interacts):
+        self.interacts = interacts
         self.playing = True
 
-    def start(self, players):
-        self.takesBets = TakesBets(self.messenger)
-        self.players = players
+    def start(self):
+        self.takesBets = TakesBets(self.interacts)
         self.dealHand()
 
     def dealHand(self):
-        names = ' '.join([p.name for p in self.players])
-        self.messenger.broadcast('DEALING ' + names)
+        names = ' '.join([p.name for p in self.interacts.players])
+        self.interacts.broadcast('DEALING ' + names)
 
-        self.dealsCards = DealsCards(Deck(), self.players, self.messenger)
+        self.dealsCards = DealsCards(Deck(), self.interacts)
 
         self.dealsCards.evt_cardsDealt += self._setupFinish
         self.takesBets.evt_betsTaken += self._nextRound
@@ -76,28 +75,28 @@ class HostsGame(object):
 
     def _finishTournament(self):
         self.playing = False
-        winner = [p for p in self.players if p.chips > 0][0]
+        winner = [p for p in self.interacts.players if p.chips > 0][0]
         message = 'WINNER {0} {1}'.format(winner.name, winner.chips)
-        self.messenger.broadcast(message)
+        self.interacts.broadcast(message)
 
     def _nextRound(self, sender, args=None):
         self.dealsCards.go()
-        self.takesBets.fromPlayers(self.players)
+        self.takesBets.fromPlayers()
 
     def _gameOver(self):
-        hasChips = [p for p in self.players if p.chips > 0]
+        hasChips = [p for p in self.interacts.players if p.chips > 0]
         return len(hasChips) == 1
 
     def _rotateButton(self):
-        self.players = self.players[1:] + self.players[:1]
+        players = self.interacts.players
+        self.interacts.players = players[1:] + players[:1]
 
 
 class DealsCards(object):
-    def __init__(self, deck, players, messenger):
-        self.messenger = messenger
+    def __init__(self, deck, interacts):
+        self.interacts = interacts
         self.deck = deck
-        self.players = players
-        for player in players:
+        for player in self.interacts.players:
             player.dropCards()
         self.dealStages = deque([
             self._dealPrivateCards,
@@ -124,31 +123,31 @@ class DealsCards(object):
             self.evt_cardsDealt.fire(self)
 
     def _allInGame(self):
-        hasChips = [player for player in self.players if player.chips > 0]
+        hasChips = [p for p in self.interacts.players if p.chips > 0]
         return len(hasChips) <= 1
 
     def _onePlayerLeft(self):
-        playersWithCards = len([p for p in self.players if p.isPlaying()])
-        return playersWithCards == 1
+        hasCards = len([p for p in self.interacts.players if p.isPlaying()])
+        return hasCards == 1
 
     def _dealThreeCards(self):
         cards = [self.deck.take(), self.deck.take(), self.deck.take()]
         message = 'CARD ' + ' '.join([str(card) for card in cards])
-        self.messenger.broadcast(message)
-        for player in self.players:
+        self.interacts.broadcast(message)
+        for player in self.interacts.players:
             player.cards(cards)
 
     def _dealOneCard(self):
         card = self.deck.take()
-        self.messenger.broadcast('CARD ' + str(card))
-        for player in self.players:
+        self.interacts.broadcast('CARD ' + str(card))
+        for player in self.interacts.players:
             player.cards([card])
 
     def _dealPrivateCards(self):
-        for player in self.players:
+        for player in self.interacts.players:
             privateCards = [self.deck.take(), self.deck.take()]
             message = 'CARD ' + ' '.join([str(card) for card in privateCards])
-            self.messenger.sendMessage(player.name, message)
+            self.interacts.sendMessage(player, message)
             player.cards(privateCards)
 
     def _dealRemainingCards(self):
@@ -158,14 +157,13 @@ class DealsCards(object):
 
 class TakesBets(object):
 
-    def __init__(self, messenger):
-        self.messenger = messenger
+    def __init__(self, interact):
+        self.interact = interact
         self.evt_betsTaken = Event()
 
-    def fromPlayers(self, players):
-        self.players = players
-        self.messenger.evt_playerResponse += self._on_PlayerResponse
-        self.table = Table(players)
+    def fromPlayers(self):
+        self.interact.evt_playerResponse += self._on_PlayerResponse
+        self.table = Table(self.interact.players)
         self.lastToRaise = self.table.dealingTo()
 
         if self._noPlayerHasChips():
@@ -178,7 +176,7 @@ class TakesBets(object):
         self._logRanking()
         for rank in self._ranking():
             for player in rank:
-                otherRanks = [p for p in self.players if p not in rank]
+                otherRanks = [p for p in self.interact.players if p not in rank]
                 for opponent in otherRanks:
                     winnings = min(player.pot, opponent.pot / len(rank))
                     self.transfer(opponent, player, winnings)
@@ -198,7 +196,7 @@ class TakesBets(object):
         message = 'WON {0} {1} {2} {3}'.format(
             target.name, source.name, amount,
             target.hand().rank())
-        self.messenger.broadcast(message)
+        self.interact.broadcast(message)
         source.transferTo(target, amount)
 
     def getMinimumBet(self, player):
@@ -232,7 +230,7 @@ class TakesBets(object):
             self._go()
 
     def _finish(self):
-        self.messenger.evt_playerResponse -= self._on_PlayerResponse
+        self.interact.evt_playerResponse -= self._on_PlayerResponse
         self.evt_betsTaken.fire(self)
 
     def _done(self):
@@ -249,14 +247,14 @@ class TakesBets(object):
 
         if self.table.dealingTo().isPlaying():
             dealTo = self.table.dealingTo()
-            self.messenger.sendMessage(dealTo.name, 'GO')
+            self.interact.sendMessage(dealTo, 'GO')
         else:
             self.table.nextPlayer()
             self._go()
 
     def _onePlayerLeft(self):
-        playersWithCards = len([p for p in self.players if p.isPlaying()])
-        return playersWithCards == 1
+        hasCards = len([p for p in self.interact.players if p.isPlaying()])
+        return hasCards == 1
 
     def _ranking(self):
 
@@ -274,7 +272,7 @@ class TakesBets(object):
             self._kickOutOfGame(player, 'OVERDRAWN')
             amount = 0
 
-        self.messenger.broadcast('BET ' + player.name + ' ' + str(amount))
+        self.interact.broadcast('BET ' + player.name + ' ' + str(amount))
         if amount > self.getMinimumBet(player):
             self.lastToRaise = player
 
@@ -282,10 +280,10 @@ class TakesBets(object):
 
     def _fold(self, player):
         player.dropCards()
-        self.messenger.sendMessage(player.name, 'OUT FOLD')
+        self.interact.sendMessage(player, 'OUT FOLD')
 
     def _kickOutOfGame(self, player, reason):
-        self.messenger.sendMessage(player.name, "OUT " + reason)
+        self.interact.sendMessage(player, "OUT " + reason)
         player.chips = 0
         player.dropCards()
 

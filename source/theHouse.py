@@ -17,10 +17,7 @@ class Doorman(object):
         return self.players
 
     def on_playerJoin(self, sender, player):
-
         self.players.append(player)
-        player.chips = self.chips
-        self.messenger.sendMessage(player.name, 'CHIPS ' + str(self.chips))
 
 
 class PlayerProxy(object):

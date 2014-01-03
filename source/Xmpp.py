@@ -27,6 +27,7 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
     def __init__(self, jid, password):
         sleekxmpp.ClientXMPP.__init__(self, jid, password)
         self.evt_messageReceived = Event()
+        self.targets = []
 
     def on_start(self, event):
 
@@ -55,8 +56,15 @@ class XmppMessenger(sleekxmpp.ClientXMPP):
         else:
             logging.error('failed to connect to ' + domain + port)
 
+    def addTarget(self, jid):
+        self.targets.append(jid)
+
     def sendMessage(self, jid, message):
         self.send_message(mto=jid, mbody=str(message), mtype='chat')
+
+    def broadcast(self, msg):
+        for target in self.targets:
+            self.sendMessage(target, msg)
 
     def finish(self):
         self.disconnect(wait=True)

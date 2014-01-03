@@ -5,6 +5,7 @@ from collections import deque
 class StubMessenger(object):
     def __init__(self):
         self.evt_playerResponse = Event()
+        self.evt_messageReceived = Event()
         self.replies = deque()
         self.sentMessages = []
         self.broadcastMessages = []
@@ -23,6 +24,12 @@ class StubMessenger(object):
         self.replies.append((player, str(amount)))
         return self
 
+    def join(self, jid):
+        self.evt_messageReceived.fire(self, (jid, 'JOIN'))
+
+    def addTarget(self, jid):
+        pass
+        
     def sendMessage(self, jid, msg):
 
         if msg.startswith('CARD'):
@@ -45,6 +52,7 @@ class StubMessenger(object):
         if response == 'skip':
             return
 
+        self.evt_messageReceived.fire(self, response)
         self.evt_playerResponse.fire(self, response)
 
     def broadcast(self, msg):

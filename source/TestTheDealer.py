@@ -1,31 +1,22 @@
 import unittest
-from theHouse import PlayerProxy
 from texasHoldEm import HostsGame
+from texasHoldEm import InteractsWithPlayers
 from FakeMessaging import StubMessenger
 from mock import MagicMock
-
-
-def createPlayer(name, chips, cards=[]):
-    player = PlayerProxy(name, chips)
-    player.parse = lambda x: x
-    player.fromMe = lambda x: True
-    player.cards(cards)
-    return player
 
 
 class testA_StartingTheTournament(unittest.TestCase):
 
     def setUp(self):
         print 'Starting the tournament,', self.shortDescription()
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
-
         self.msngr = StubMessenger()
+        self.inter = InteractsWithPlayers(self.msngr)
+        self.dealer = HostsGame(self.inter)
+        self.msngr.join('p1')
+        self.msngr.join('p2')
+        self.dealer.start()
 
-        self.dealer = HostsGame(self.msngr)
-        self.dealer.start([p1, p2])
-
-    def testA_gameIsBeingPlayer(self):
+    def testA_gameIsBeingPlayed(self):
         '''a game is being played'''
         self.assertTrue(self.dealer.playing)
 
@@ -50,15 +41,17 @@ class testB_RoundOfBettingFinished(unittest.TestCase):
 
     def testA_dealsTheNextRoundAndMoreBetsAreTaken(self):
         '''the next round is dealt and more bets are taken'''
+        msngr = StubMessenger().bet('p1', 10).bet('p2', 10)
+        inter = InteractsWithPlayers(msngr)
+        dealer = HostsGame(inter)
 
-        p1 = createPlayer('p1', 100)
-        p2 = createPlayer('p2', 100)
+        msngr.join('p1')
+        msngr.join('p2')
+        dealer.start()
 
-        msngr = StubMessenger().bet(p1, 10).bet(p2, 10)
-
-        HostsGame(msngr).start([p1, p2])
-
-        self.assertEqual(msngr.allMessages, ['DEALING p1 p2',
+        self.assertEqual(msngr.allMessages, [('p1', 'CHIPS 1000'),
+                                             ('p2', 'CHIPS 1000'),
+                                             'DEALING p1 p2',
                                              ('p1', 'CARD'), ('p2', 'CARD'),
                                              ('p1', 'GO'), 'BET p1 10',
                                              ('p2', 'GO'), 'BET p2 10',
@@ -70,24 +63,27 @@ class testC_FinishingTheHand(unittest.TestCase):
 
     def setUp(self):
         print 'Finishing the hand,', self.shortDescription()
-        self.p1 = createPlayer('p1', 100)
-        self.p2 = createPlayer('p2', 100)
-
-        self.p1.deposit = MagicMock()
-        self.p2.deposit = MagicMock()
 
         self.msngr = StubMessenger()
-        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # private
-        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # flop
-        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # turn
-        self.msngr.bet(self.p1, 10).bet(self.p2, 10)  # river
+        self.msngr.bet('p1', 10).bet('p2', 10)  # private
+        self.msngr.bet('p1', 10).bet('p2', 10)  # flop
+        self.msngr.bet('p1', 10).bet('p2', 10)  # turn
+        self.msngr.bet('p1', 10).bet('p2', 10)  # river
 
-        HostsGame(self.msngr).start([self.p1, self.p2])
+        self.inter = InteractsWithPlayers(self.msngr)
+        self.msngr.join('p1')
+        self.msngr.join('p2')
+
+        dealer = HostsGame(self.inter)
+
+        for player in self.inter.players:
+            player.deposit = MagicMock()
+
+        dealer.start()
 
     def testA_distributeTheWinnings(self):
-        '''distribute the winnings'''
-        self.assertTrue(self.p1.deposit.called)
-        self.assertTrue(self.p2.deposit.called)
+        for player in self.inter.players:
+            self.assertTrue(player.deposit.called)
 
     def testB_announceTheWinner(self):
         '''announce the winner'''
@@ -104,19 +100,21 @@ class testD_FinishingTheTournament(unittest.TestCase):
     def setUp(self):
         description = 'Finishing the tournament (tests will fail on draw),'
         print description, self.shortDescription()
-        p1 = createPlayer('p1', 40)
-        p2 = createPlayer('p2', 40)
 
         self.msngr = StubMessenger()
-        self.msngr.bet(p1, 10).bet(p2, 10)  # private
-        self.msngr.bet(p1, 10).bet(p2, 10)  # flop
-        self.msngr.bet(p1, 10).bet(p2, 10)  # turn
-        self.msngr.bet(p1, 10).bet(p2, 10)  # river
+        self.msngr.bet('p1', 10).bet('p2', 10)  # private
+        self.msngr.bet('p1', 10).bet('p2', 10)  # flop
+        self.msngr.bet('p1', 10).bet('p2', 10)  # turn
+        self.msngr.bet('p1', 10).bet('p2', 10)  # river
 
-        self.dealer = HostsGame(self.msngr)
-        self.dealer.start([p1, p2])
+        self.inter = InteractsWithPlayers(self.msngr, chips=40)
+        self.msngr.join('p1')
+        self.msngr.join('p2')
 
-    def testA_finishedIfOnePlayerHasAllChips(self):
+        self.dealer = HostsGame(self.inter)
+        self.dealer.start()
+
+    def testA_theDealerIsNoLongerPlaying(self):
         '''finished if one player has all the chips'''
         self.assertEqual(False, self.dealer.playing)
 

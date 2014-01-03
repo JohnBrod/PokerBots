@@ -1,7 +1,7 @@
 from threading import Thread
 import logging
 from theHouse import Doorman
-from texasHoldEm import MessageInterpreter
+from texasHoldEm import InteractsWithPlayers
 from texasHoldEm import HostsGame
 from Xmpp import XmppMessenger
 import traceback
@@ -58,7 +58,8 @@ if __name__ == '__main__':
 
     try:
         messenger.listen(opts.domain, opts.port)
-        interpreter = MessageInterpreter(messenger, opts.audiencejid)
+        messenger.addTarget(opts.audiencejid)
+        interpreter = InteractsWithPlayers(messenger)
 
         startMessage = 'Game started, waiting for players'
         messenger.sendMessage(opts.audiencejid, startMessage)
@@ -80,7 +81,7 @@ if __name__ == '__main__':
 
         try:
             game = HostsGame(interpreter)
-            game.start(players)
+            game.start()
             while game.playing:
                 time.sleep(1)
 
