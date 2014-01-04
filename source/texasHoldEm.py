@@ -19,8 +19,9 @@ class InteractsWithPlayers(object):
 
         name = msg[0]
         content = msg[1]
+        playerNames = [p.name for p in self.players]
 
-        if content.startswith('JOIN'):
+        if content.startswith('JOIN') and name not in playerNames:
             player = PlayerProxy(name, self.messenger)
             self.players.append(player)
             player.chips = self.chips
@@ -167,7 +168,8 @@ class DistributesWinnings(object):
         self._logRanking()
         for rank in self._ranking():
             for player in rank:
-                otherRanks = [p for p in self.interact.players if p not in rank]
+                players = self.interact.players
+                otherRanks = [p for p in players if p not in rank]
                 for opponent in otherRanks:
                     winnings = min(player.pot, opponent.pot / len(rank))
                     self._transfer(opponent, player, winnings)
