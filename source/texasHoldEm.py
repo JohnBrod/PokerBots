@@ -44,7 +44,7 @@ class HostsGame(object):
         self.playing = True
 
     def start(self):
-        self.takesBets = TakesBets(self.interacts)
+        self.takeBets = TakesBets(self.interacts)
         self.dealHand()
 
     def dealHand(self):
@@ -54,18 +54,20 @@ class HostsGame(object):
         self.dealsCards = DealsCards(Deck(), self.interacts)
 
         self.dealsCards.evt_cardsDealt += self._setupFinish
-        self.takesBets.evt_betsTaken += self._nextRound
+        self.takeBets.evt_betsTaken += self._nextRound
 
         self._nextRound(self)
 
     def _setupFinish(self, sender, args=None):
         self.dealsCards.evt_cardsDealt -= self._setupFinish
-        self.takesBets.evt_betsTaken -= self._nextRound
-        self.takesBets.evt_betsTaken += self._finishHand
+        self.takeBets.evt_betsTaken -= self._nextRound
+        self.takeBets.evt_betsTaken += self._finishHand
 
     def _finishHand(self, sender, args=None):
-        self.takesBets.evt_betsTaken -= self._finishHand
-        self.takesBets.distributeWinnings()
+        self.takeBets.evt_betsTaken -= self._finishHand
+
+        distributeWinnings = DistributesWinnings(self.interacts)
+        distributeWinnings.toPlayers()
 
         if self._gameOver():
             self._finishTournament()
@@ -81,7 +83,7 @@ class HostsGame(object):
 
     def _nextRound(self, sender, args=None):
         self.dealsCards.go()
-        self.takesBets.fromPlayers()
+        self.takeBets.fromPlayers()
 
     def _gameOver(self):
         hasChips = [p for p in self.interacts.players if p.chips > 0]
@@ -155,6 +157,48 @@ class DealsCards(object):
             self.dealStages.popleft()()
 
 
+class DistributesWinnings(object):
+
+    def __init__(self, interact):
+        self.interact = interact
+
+    def toPlayers(self):
+
+        self._logRanking()
+        for rank in self._ranking():
+            for player in rank:
+                otherRanks = [p for p in self.interact.players if p not in rank]
+                for opponent in otherRanks:
+                    winnings = min(player.pot, opponent.pot / len(rank))
+                    self._transfer(opponent, player, winnings)
+
+                self._transfer(player, player, player.pot)
+
+    def _logRanking(self):
+        for rank in self._ranking():
+            info = ''
+            for player in rank:
+                cards = [str(c) for c in sorted(player._cards)]
+                info += '{0} {1} {2}|'.format(player.name, cards,
+                                              player.hand().rank())
+            logging.debug(info)
+
+    def _transfer(self, source, target, amount):
+        message = 'WON {0} {1} {2} {3}'.format(
+            target.name, source.name, amount,
+            target.hand().rank())
+        self.interact.broadcast(message)
+        source.transferTo(target, amount)
+
+    def _ranking(self):
+
+        playing = [p for p in self.interact.players if p.isPlaying()]
+        ranks = sorted(playing, key=lambda x: x.hand(), reverse=True)
+        ranks = reduce(ranks, lambda x: x.hand())
+
+        return ranks
+
+
 class TakesBets(object):
 
     def __init__(self, interact):
@@ -170,34 +214,6 @@ class TakesBets(object):
             self._finish()
         else:
             self._go()
-
-    def distributeWinnings(self):
-
-        self._logRanking()
-        for rank in self._ranking():
-            for player in rank:
-                otherRanks = [p for p in self.interact.players if p not in rank]
-                for opponent in otherRanks:
-                    winnings = min(player.pot, opponent.pot / len(rank))
-                    self.transfer(opponent, player, winnings)
-
-                self.transfer(player, player, player.pot)
-
-    def _logRanking(self):
-        for rank in self._ranking():
-            info = ''
-            for player in rank:
-                cards = [str(c) for c in sorted(player._cards)]
-                info += '{0} {1} {2}|'.format(player.name, cards,
-                                              player.hand().rank())
-            logging.debug(info)
-
-    def transfer(self, source, target, amount):
-        message = 'WON {0} {1} {2} {3}'.format(
-            target.name, source.name, amount,
-            target.hand().rank())
-        self.interact.broadcast(message)
-        source.transferTo(target, amount)
 
     def getMinimumBet(self, player):
         highestContribution = max([p.pot for p in self.table.playing()])
@@ -256,14 +272,6 @@ class TakesBets(object):
         hasCards = len([p for p in self.interact.players if p.isPlaying()])
         return hasCards == 1
 
-    def _ranking(self):
-
-        playing = self.table.playing()
-        ranks = sorted(playing, key=lambda x: x.hand(), reverse=True)
-        ranks = reduce(ranks, lambda x: x.hand())
-
-        return ranks
-
     def _add(self, player, amount):
 
         if amount < self.getMinimumBet(player):
@@ -276,7 +284,7 @@ class TakesBets(object):
         if amount > self.getMinimumBet(player):
             self.lastToRaise = player
 
-        player.withdraw(amount)
+        player.bet(amount)
 
     def _fold(self, player):
         player.dropCards()

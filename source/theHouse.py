@@ -3,8 +3,6 @@ from Hands import Hand
 
 
 class PlayerProxy(object):
-    """allows the game to interact with the player messages """
-    """as if they were from an object"""
     def __init__(self, name, chips=0):
         self._cards = []
         self.chips = chips
@@ -12,7 +10,7 @@ class PlayerProxy(object):
         self.name = name
         self.evt_response = Event()
 
-    def withdraw(self, amount):
+    def bet(self, amount):
         self.chips -= amount
         if self.chips < 0:
             raise Exception('Overdrawn chips')
