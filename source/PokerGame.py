@@ -1,6 +1,5 @@
 from threading import Thread
 import logging
-from theHouse import Doorman
 from texasHoldEm import InteractsWithPlayers
 from texasHoldEm import HostsGame
 from Xmpp import XmppMessenger
@@ -59,28 +58,26 @@ if __name__ == '__main__':
     try:
         messenger.listen(opts.domain, opts.port)
         messenger.addTarget(opts.audiencejid)
-        interpreter = InteractsWithPlayers(messenger)
-
+        doorman = InteractsWithPlayers(messenger, opts.chips)
         startMessage = 'Game started, waiting for players'
         messenger.sendMessage(opts.audiencejid, startMessage)
-        frank = Doorman(opts.wait, interpreter, opts.chips)
         Thread(target=countdown, args=(opts.wait,)).start()
-        players = frank.greetPlayers()
+        time.sleep(opts.wait)
     except:
         print traceback.format_exc()
 
-    if not players:
+    if not doorman.players:
         msg = 'No players joined so quitting'
         messenger.sendMessage(opts.audiencejid, msg)
         print msg
-    elif len(players) == 1:
+    elif len(doorman.players) == 1:
         msg = 'Not enough players for a game so quitting'
         messenger.sendMessage(opts.audiencejid, msg)
         print msg
     else:
 
         try:
-            game = HostsGame(interpreter)
+            game = HostsGame(doorman)
             game.start()
             while game.playing:
                 time.sleep(1)

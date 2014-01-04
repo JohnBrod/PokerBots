@@ -1,23 +1,5 @@
-import time
 from EventHandling import Event
 from Hands import Hand
-
-
-class Doorman(object):
-    """greets players and passes their details onto the its boss"""
-    def __init__(self, waitFor, messenger, chips):
-        self.players = []
-        self.chips = chips
-        self.waitFor = waitFor
-        self.messenger = messenger
-        self.messenger.evt_playerJoin += self.on_playerJoin
-
-    def greetPlayers(self):
-        time.sleep(self.waitFor)
-        return self.players
-
-    def on_playerJoin(self, sender, player):
-        self.players.append(player)
 
 
 class PlayerProxy(object):
