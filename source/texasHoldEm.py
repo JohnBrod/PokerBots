@@ -262,6 +262,7 @@ class TakesBets(object):
 
         if self._onePlayerLeft():
             self._finish()
+            return
 
         if self.table.dealingTo().isPlaying():
             dealTo = self.table.dealingTo()
