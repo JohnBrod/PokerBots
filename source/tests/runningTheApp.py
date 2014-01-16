@@ -45,9 +45,12 @@ class FakeParticipant():
         end = time.time() + self.pollPeriod
 
         message = None
-        while time.time() <= end and message != shouldHear:
+        while time.time() <= end:
             try:
                 message = self.q.get_nowait()
+
+                if message and message.startswith(shouldHear[:-3]):
+                    break
             except Queue.Empty:
                 pass
 
@@ -58,7 +61,7 @@ class FakeParticipant():
             self.testCase.assertFalse(True, self.jid + " did not hear '" + shouldHear + "'")
         elif shouldHear.endswith('...'):
             failMessage = self.jid + " expected '" + shouldHear + "' but heard '" + message + "'"
-            self.testCase.assertTrue(message.startswith(shouldHear[:-3]), )
+            self.testCase.assertTrue(message.startswith(shouldHear[:-3]), failMessage)
         else:
             failMessage = self.jid + " expected '" + shouldHear + "' but heard '" + message + "'"
             self.testCase.assertEqual(message, shouldHear, failMessage)

@@ -2,7 +2,6 @@ import unittest
 from texasHoldEm import DealsCards
 from texasHoldEm import InteractsWithPlayers
 from Hands import Hand
-from mock import MagicMock
 from FakeMessaging import StubMessenger
 from FakeMessaging import PredictableDeck
 
@@ -19,17 +18,19 @@ class testA_DealingCardsToPlayers(unittest.TestCase):
         self.p1 = self.inter.players[0]
         self.p2 = self.inter.players[1]
 
-        self.p1.cards = MagicMock()
-        self.p2.cards = MagicMock()
-
         self.dealer = DealsCards(PredictableDeck(), self.inter)
+        self.dealer.evt_cardsDealt += self._onCardsDealt
+        self._cardsDealt = False
+
+    def _onCardsDealt(self, sender, args):
+        self._cardsDealt = True
 
     def testA_dealEachPlayerPrivateCardsFirst(self):
         '''should deal each player private cards first'''
         self.dealer.go()
 
-        self.p1.cards.assert_called_with([1, 2])
-        self.p2.cards.assert_called_with([3, 4])
+        self.assertSequenceEqual([1, 2], self.p1._cards)
+        self.assertSequenceEqual([3, 4], self.p2._cards)
         self.assertTrue(('p1', 'CARD') in self.msngr.sentMessages)
         self.assertTrue(('p2', 'CARD') in self.msngr.sentMessages)
 
@@ -38,9 +39,8 @@ class testA_DealingCardsToPlayers(unittest.TestCase):
         self.dealer.go()
         self.dealer.go()
 
-        self.p1.cards.assert_called_with([5, 6, 7])
-        self.p2.cards.assert_called_with([5, 6, 7])
-
+        self.assertSequenceEqual([1, 2, 5, 6, 7], self.p1._cards)
+        self.assertSequenceEqual([3, 4, 5, 6, 7], self.p2._cards)
         self.assertEqual(['CARD'], self.msngr.broadcastMessages)
 
     def testC_dealsTheRiverCard(self):
@@ -49,8 +49,8 @@ class testA_DealingCardsToPlayers(unittest.TestCase):
         self.dealer.go()
         self.dealer.go()
 
-        self.p1.cards.assert_called_with([8])
-        self.p2.cards.assert_called_with([8])
+        self.assertSequenceEqual([1, 2, 5, 6, 7, 8], self.p1._cards)
+        self.assertSequenceEqual([3, 4, 5, 6, 7, 8], self.p2._cards)
 
         self.assertEqual(['CARD', 'CARD'], self.msngr.broadcastMessages)
 
@@ -61,20 +61,20 @@ class testA_DealingCardsToPlayers(unittest.TestCase):
         self.dealer.go()
         self.dealer.go()
 
-        self.p1.cards.assert_called_with([9])
-        self.p2.cards.assert_called_with([9])
+        self.assertSequenceEqual([1, 2, 5, 6, 7, 8, 9], self.p1._cards)
+        self.assertSequenceEqual([3, 4, 5, 6, 7, 8, 9], self.p2._cards)
 
         cardDeals = ['CARD', 'CARD', 'CARD']
         self.assertEqual(cardDeals, self.msngr.broadcastMessages)
 
-    def testE_notPossibleToDealNextWhenNoStagesAreLeft(self):
-        '''not possible to deal next when there no stages are left'''
+    def testE_shouldSayWhenAllCardsAreDealt(self):
+        '''should say when all cards are dealt'''
         self.dealer.go()
         self.dealer.go()
         self.dealer.go()
         self.dealer.go()
 
-        self.assertRaises(Exception, self.dealer.go)
+        self.assertTrue(self._cardsDealt)
 
     def testF_shouldTakeCardsFromPlayersBeforeDealing(self):
         '''should take any cards the player may have before dealing'''
@@ -119,33 +119,6 @@ class testB_WhenToDealTheRemainingCards(unittest.TestCase):
         self.assertEqual(allDealt, self.msngr.broadcastMessages)
 
 
-class testC_CardsAreDealt(unittest.TestCase):
-
-    def onCardsDealt(self, sender, args=None):
-        self.cardsDealt = True
-
-    def setUp(self):
-        print 'Cards are dealt,', self.shortDescription()
-        self.msngr = StubMessenger()
-        self.inter = InteractsWithPlayers(self.msngr)
-        self.msngr.join('p1')
-        self.msngr.join('p2')
-
-        self.dealer = DealsCards(PredictableDeck(), self.inter)
-        self.cardsDealt = False
-        self.dealer.evt_cardsDealt += self.onCardsDealt
-
-    def testA_whenThereAreNoMoreStages(self):
-        '''when there are no more stages'''
-
-        self.dealer.go()
-        self.dealer.go()
-        self.dealer.go()
-        self.dealer.go()
-
-        self.assertTrue(self.cardsDealt)
-
-
 class testD_WhenDownToOnePlayer(unittest.TestCase):
 
     def onCardsDealt(self, sender, args=None):
@@ -164,8 +137,8 @@ class testD_WhenDownToOnePlayer(unittest.TestCase):
         self.cardsDealt = False
         self.dealer.evt_cardsDealt += self.onCardsDealt
 
-    def testA_cardsHaveBeenDealt(self):
-        '''cards have been dealt'''
+    def testA_announceThatCardsAreDealt(self):
+        '''announce that cards are dealt'''
         self.dealer.go()
         self.p2.dropCards()
         self.dealer.go()

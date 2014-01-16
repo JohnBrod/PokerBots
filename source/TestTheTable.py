@@ -4,38 +4,41 @@ from theHouse import Table
 
 class testRotatingAroundTheTable(unittest.TestCase):
 
-    def testDealingToFirstAtTable(self):
+    def setUp(self):
+        print 'Rotating around the table,', self.shortDescription()
+        self.table = Table()
 
-        t = Table(['p1', 'p2', 'p3'])
+    def testA_DealingToFirstAtTable(self):
+        '''deal to the first person at the table'''
+        self.table.seat(['p1', 'p2', 'p3'])
 
-        self.assertEqual('p1', t.dealingTo())
+        self.assertEqual('p1', self.table.dealingTo())
 
-    def testMovingToTheNext(self):
+    def testB_MovingToTheNext(self):
+        '''move to the next'''
+        self.table.seat(['p1', 'p2', 'p3'])
+        self.table.nextPlayer()
 
-        t = Table(['p1', 'p2', 'p3'])
+        self.assertEqual('p2', self.table.dealingTo())
 
-        t.nextPlayer()
+    def testC_ThenTheLast(self):
+        '''all the way to the last'''
+        self.table.seat(['p1', 'p2', 'p3'])
 
-        self.assertEqual('p2', t.dealingTo())
+        self.table.nextPlayer()
+        self.table.nextPlayer()
 
-    def testThenTheLast(self):
+        self.assertEqual('p3', self.table.dealingTo())
 
-        t = Table(['p1', 'p2', 'p3'])
+    def testD_BackToFirst(self):
+        '''back to first after last'''
+        self.table.seat(['p1', 'p2', 'p3'])
 
-        t.nextPlayer()
-        t.nextPlayer()
+        self.table.nextPlayer()
+        self.table.nextPlayer()
+        self.table.nextPlayer()
 
-        self.assertEqual('p3', t.dealingTo())
-
-    def testBackToFirst(self):
-
-        t = Table(['p1', 'p2', 'p3'])
-
-        t.nextPlayer()
-        t.nextPlayer()
-        t.nextPlayer()
-
-        self.assertEqual('p1', t.dealingTo())
+        self.assertEqual('p1', self.table.dealingTo())
 
 
 if __name__ == "__main__":

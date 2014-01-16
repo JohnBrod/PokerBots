@@ -1,11 +1,54 @@
 from threading import Thread
 import logging
 from texasHoldEm import InteractsWithPlayers
-from texasHoldEm import HostsGame
+from texasHoldEm import PlaysTournament
 from Xmpp import XmppMessenger
 import traceback
 import time
 from optparse import OptionParser
+
+
+class RunsPokerGame(object):
+    def __init__(self, opts):
+        self.opts = opts
+        self.done = False
+        self.msngr = XmppMessenger(self.opts.dealerjid, self.opts.dealerpwd)
+
+    def onDone(self, sender=None, args=None):
+        self.msngr.sendMessage(self.opts.audiencejid, 'Game Over')
+        self.msngr.finish()
+        self.done = True
+
+    def start(self):
+        try:
+            self.msngr.listen(self.opts.domain, self.opts.port)
+            self.msngr.addTarget(self.opts.audiencejid)
+            interacts = InteractsWithPlayers(self.msngr, self.opts.chips)
+            startMessage = 'Game started, waiting for players'
+            self.msngr.sendMessage(self.opts.audiencejid, startMessage)
+            Thread(target=countdown, args=(self.opts.wait,)).start()
+            time.sleep(self.opts.wait)
+        except:
+            print traceback.format_exc()
+
+        if not interacts.players:
+            msg = 'No players joined so quitting'
+            self.msngr.sendMessage(self.opts.audiencejid, msg)
+            print msg
+        elif len(interacts.players) == 1:
+            msg = 'Not enough players for a game so quitting'
+            self.msngr.sendMessage(self.opts.audiencejid, msg)
+            print msg
+        else:
+
+            try:
+                game = PlaysTournament(interacts)
+                game.evt_done += self.onDone
+                game.start()
+                while not self.done:
+                    time.sleep(1)
+            except:
+                print traceback.format_exc()
 
 
 def countdown(duration):
@@ -14,7 +57,7 @@ def countdown(duration):
         print 'start in {0} seconds'.format(duration - i)
 
 
-if __name__ == '__main__':
+def getOptions():
 
     optp = OptionParser()
 
@@ -23,9 +66,9 @@ if __name__ == '__main__':
                     action="store", type="string", dest="dealerjid",
                     default='dealer@pokerchat')
 
-    optp.add_option('-p', '--dealerpassword',
+    optp.add_option('-p', '--dealerpwd',
                     help='password of account that deals and handles betting',
-                    action="store", type="string", dest="dealerpassword",
+                    action="store", type="string", dest="dealerpwd",
                     default='password')
 
     optp.add_option('-a', '--audiencejid',
@@ -52,38 +95,12 @@ if __name__ == '__main__':
 
     opts, args = optp.parse_args()
 
+    return opts
+
+
+if __name__ == '__main__':
+
     logging.basicConfig(filename='poker.log', level=logging.DEBUG)
-    messenger = XmppMessenger(opts.dealerjid, opts.dealerpassword)
 
-    try:
-        messenger.listen(opts.domain, opts.port)
-        messenger.addTarget(opts.audiencejid)
-        doorman = InteractsWithPlayers(messenger, opts.chips)
-        startMessage = 'Game started, waiting for players'
-        messenger.sendMessage(opts.audiencejid, startMessage)
-        Thread(target=countdown, args=(opts.wait,)).start()
-        time.sleep(opts.wait)
-    except:
-        print traceback.format_exc()
-
-    if not doorman.players:
-        msg = 'No players joined so quitting'
-        messenger.sendMessage(opts.audiencejid, msg)
-        print msg
-    elif len(doorman.players) == 1:
-        msg = 'Not enough players for a game so quitting'
-        messenger.sendMessage(opts.audiencejid, msg)
-        print msg
-    else:
-
-        try:
-            game = HostsGame(doorman)
-            game.start()
-            while game.playing:
-                time.sleep(1)
-
-            messenger.sendMessage(opts.audiencejid, 'Game Over')
-        except:
-            print traceback.format_exc()
-
-    messenger.finish()
+    game = RunsPokerGame(getOptions())
+    game.start()

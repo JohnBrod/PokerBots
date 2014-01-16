@@ -34,31 +34,6 @@ class testA_StartingTheTournament(unittest.TestCase):
         self.assertEqual(self.msngr.goMessages, [('p1', 'GO')])
 
 
-class testB_RoundOfBettingFinished(unittest.TestCase):
-
-    def setUp(self):
-        print 'When a round of betting is finished,', self.shortDescription()
-
-    def testA_dealsTheNextRoundAndMoreBetsAreTaken(self):
-        '''the next round is dealt and more bets are taken'''
-        msngr = StubMessenger().bet('p1', 10).bet('p2', 10)
-        inter = InteractsWithPlayers(msngr)
-        dealer = HostsGame(inter)
-
-        msngr.join('p1')
-        msngr.join('p2')
-        dealer.start()
-
-        self.assertEqual(msngr.allMessages, [('p1', 'CHIPS 1000'),
-                                             ('p2', 'CHIPS 1000'),
-                                             'DEALING p1 p2',
-                                             ('p1', 'CARD'), ('p2', 'CARD'),
-                                             ('p1', 'GO'), 'BET p1 10',
-                                             ('p2', 'GO'), 'BET p2 10',
-                                             'CARD',
-                                             ('p1', 'GO')])
-
-
 class testC_FinishingTheHand(unittest.TestCase):
 
     def setUp(self):

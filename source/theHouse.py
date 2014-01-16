@@ -38,7 +38,7 @@ class PlayerProxy(object):
 
 class Table(object):
     """players sit around this and get dealt to in order"""
-    def __init__(self, players):
+    def seat(self, players):
         self.players = players
         self.dealingToPosition = 0
 

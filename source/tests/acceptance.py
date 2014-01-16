@@ -28,17 +28,19 @@ class testPokerGame(unittest.TestCase):
 # have the signature (self, sender, args), even if args is not used
     @classmethod
     def setUpClass(cls):
-        logging.basicConfig(level=logging.ERROR, format='%(levelname)-8s %(message)s')
+        logMessageFormat = '%(levelname)-8s %(message)s'
+        logging.basicConfig(level=logging.ERROR, format=logMessageFormat)
         logging.disable(logging.ERROR)
 
     def setUp(self):
         pollDuration = 20
-        self.aPlayer = FakeParticipant('Player1@pokerchat', 'password', pollDuration,
-                                       'dealer@pokerchat', self)
-        self.anotherPlayer = FakeParticipant('Player2@pokerchat', 'password', pollDuration,
-                                             'dealer@pokerchat', self)
-        self.audience = FakeParticipant('audience@pokerchat', 'password', pollDuration,
-                                        'dealer@pokerchat', self)
+        self.aPlayer = FakeParticipant('Player1@pokerchat', 'password',
+                                       pollDuration, 'dealer@pokerchat', self)
+        self.anotherPlayer = FakeParticipant('Player2@pokerchat', 'password',
+                                             pollDuration, 'dealer@pokerchat',
+                                             self)
+        self.audience = FakeParticipant('audience@pokerchat', 'password',
+                                        pollDuration, 'dealer@pokerchat', self)
         self.handle = subprocess.Popen([sys.executable, "..\\PokerGame.py",
                                         "-ddealer@pokerchat", "-ppassword",
                                         "-aaudience@pokerchat",
@@ -122,6 +124,10 @@ class testPokerGame(unittest.TestCase):
         self.audience.hears('WON...')
         self.aPlayer.hears('WON...')
         self.anotherPlayer.hears('WON...')
+
+        self.audience.eventuallyHears('WINNER...')
+        self.aPlayer.eventuallyHears('WINNER...')
+        self.anotherPlayer.eventuallyHears('WINNER...')
 
         self.audience.eventuallyHears('Game Over')
 

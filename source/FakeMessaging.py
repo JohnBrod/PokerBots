@@ -29,9 +29,10 @@ class StubMessenger(object):
 
     def addTarget(self, jid):
         pass
-        
+
     def sendMessage(self, jid, msg):
 
+        # print 'sending', jid, msg
         if msg.startswith('CARD'):
             msg = 'CARD'
 
@@ -52,10 +53,13 @@ class StubMessenger(object):
         if response == 'skip':
             return
 
+        # print 'responding', response
         self.evt_messageReceived.fire(self, response)
         self.evt_playerResponse.fire(self, response)
 
     def broadcast(self, msg):
+        # print 'broadcasting', msg
+
         if msg.startswith('CARD'):
             self.cardMessages.append('CARD')
             msg = 'CARD'
@@ -75,14 +79,12 @@ class StubMessenger(object):
         self.lastMessage = msg
 
 
-class PredictableDeck():
-
-    def __init__(self):
-        self.card = 0
+class RiggedDeck(object):
+    def __init__(self, cards):
+        self.cards = deque(cards)
 
     def take(self):
-        self.card += 1
-        return self.card
+        return self.cards.popleft()
 
     def shuffle(self):
-        self.card = 0
+        pass
