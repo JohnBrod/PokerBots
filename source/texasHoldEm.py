@@ -76,17 +76,16 @@ class PlaysTournament(object):
 class DealsTexasHoldEm(object):
     def __init__(self, interacts):
         self._interacts = interacts
-        self.deck = Deck()
 
     def start(self):
+        self._deck = Deck()
         self._stages = deque([
             self._dealPrivateCards,
             self._dealThreeCards,
             self._dealOneCard,
             self._dealOneCard])
 
-        self.deck.shuffle()
-
+        self._deck.shuffle()
         self.next()
 
     def next(self):
@@ -99,21 +98,21 @@ class DealsTexasHoldEm(object):
         return len(self._stages) > 0
 
     def _dealThreeCards(self):
-        cards = [self.deck.take(), self.deck.take(), self.deck.take()]
+        cards = [self._deck.take(), self._deck.take(), self._deck.take()]
         message = 'CARD ' + ' '.join([str(card) for card in cards])
         self._interacts.broadcast(message)
         for player in self._interacts.players:
             player.cards(cards)
 
     def _dealOneCard(self):
-        card = self.deck.take()
+        card = self._deck.take()
         self._interacts.broadcast('CARD ' + str(card))
         for player in self._interacts.players:
             player.cards([card])
 
     def _dealPrivateCards(self):
         for player in self._interacts.players:
-            privateCards = [self.deck.take(), self.deck.take()]
+            privateCards = [self._deck.take(), self._deck.take()]
             message = 'CARD ' + ' '.join([str(card) for card in privateCards])
             self._interacts.sendMessage(player, message)
             player.cards(privateCards)
@@ -299,16 +298,16 @@ class DistributesWinnings(object):
 
 class Deck(object):
     def __init__(self):
-        self.cards = deque()
+        self._cards = deque()
         for suit in ['C', 'D', 'H', 'S']:
             for num in xrange(2, 15):
-                self.cards.append(Card(num, suit))
+                self._cards.append(Card(num, suit))
 
     def take(self):
-        return self.cards.popleft()
+        return self._cards.popleft()
 
     def shuffle(self):
-        random.shuffle(self.cards)
+        random.shuffle(self._cards)
 
 
 class Card(object):

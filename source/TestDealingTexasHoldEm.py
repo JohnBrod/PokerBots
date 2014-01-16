@@ -72,6 +72,18 @@ class testA_DealingCardsForTexasHoldEm(unittest.TestCase):
 
         self.assertFalse(self.txh.more())
 
+    def testF_shouldUseFreshDeckForEveryGame(self):
+        '''should use a fresh deck for every game'''
+        self.txh.start()
+
+        totalCards = 52
+        privateCardsForTwoPlayers = 4
+        cardsAfterStart = totalCards - privateCardsForTwoPlayers
+
+        self.txh.start()
+
+        self.assertEqual(cardsAfterStart, len(self.txh._deck._cards))
+
 
 class testC_DealingTheRemainingCards(unittest.TestCase):
 
